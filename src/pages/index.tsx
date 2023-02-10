@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { api } from "../utils/api";
 import SignInOut from "./components/signInOut"
-import PageButtoms from "./components/pageButtoms"
+import PageButtons from "./components/PageButtons"
 
 const Home: React.FC = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -31,15 +31,15 @@ const Home: React.FC = () => {
           <div className="pt-2 w-screen max-w-[600px] bg-zinc-500 bg-opacity-40 flex flex-1 flex-row justify-center flex-wrap items-center gap-2">
             {session && (
               <>
-                <PageButtoms page="/profile" label="PROFILE"/>
-                <PageButtoms page="/profile" label="CALENDAR"/>
-                <PageButtoms page="/profile" label="ALARM"/>
-                <PageButtoms page="/profile" label="BIDDING"/>
-                <PageButtoms page="/profile" label="GAMES"/>
-                <PageButtoms page="/profile" label="PROJECTS"/>
-                <PageButtoms page="/profile" label="..."/>
-                <PageButtoms page="/profile" label="..."/>
-                <PageButtoms page="/profile" label="..."/>
+                <PageButtons pagepath="/profile" label="PROFILE"/>
+                <PageButtons pagepath="/profile" label="CALENDAR"/>
+                <PageButtons pagepath="/profile" label="ALARM"/>
+                <PageButtons pagepath="/profile" label="BIDDING"/>
+                <PageButtons pagepath="/profile" label="GAMES"/>
+                <PageButtons pagepath="/profile" label="PROJECTS"/>
+                <PageButtons pagepath="/profile" label="..."/>
+                <PageButtons pagepath="/profile" label="..."/>
+                <PageButtons pagepath="/profile" label="..."/>
               </>
             )}
           </div>
