@@ -2,8 +2,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { api } from "../utils/api";
-import SignInOut from "./components/signInOut"
-import PageButtons from "./components/PageButtons"
+import SignInOut from "../components/signInOut"
+import PageButtons from "../components/PageButtons"
 
 const Home: React.FC = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
