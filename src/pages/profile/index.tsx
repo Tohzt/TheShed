@@ -1,7 +1,7 @@
 import * as React from "react"
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import ProfileIcon from "../components/ProfileIcon";
+import ProfileIcon from "../../components/ProfileIcon";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
