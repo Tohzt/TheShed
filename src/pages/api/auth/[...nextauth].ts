@@ -24,6 +24,7 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  debug: true,
   // Include user.id on session
   callbacks: {
     session({ session, user }) {
