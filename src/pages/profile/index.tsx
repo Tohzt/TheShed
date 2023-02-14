@@ -2,6 +2,7 @@ import * as React from "react"
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import ProfileIcon from "../../components/ProfileIcon";
+import GoBack from "../../components/goBack";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
@@ -25,10 +26,8 @@ const ProfilePage = () => {
         <span>{session?.user?.email}</span>
         <br />
 
-        <Link href="/">
-          Go Back
-        </Link>
       </div>
+      <GoBack />
     </>
   );
 };

@@ -6,12 +6,12 @@ const urlsToCache = [
 
 //Install Service Worker
 addEventListener("install", (event) => {
-  console.log("Hello from service worker!")
+  //console.log("Hello from service worker!")
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => {
-        console.log("Opened Cache");
+        //console.log("Opened Cache");
         return cache.addAll(urlsToCache);
       })
       .catch((err) => console.log("Didn't Add Cache", err))
@@ -19,11 +19,11 @@ addEventListener("install", (event) => {
 });
 //Listen for Requests
 addEventListener("fetch", (event) => {
-  console.log("fetching");
+  //console.log("fetching");
   event.respondWith(
     caches.match(event.request).then((cacheResponse) => {
-      console.log("event", event.request);
-      console.log("cacheRes", cacheResponse);
+      //console.log("event", event.request);
+      //console.log("cacheRes", cacheResponse);
       return (
         cacheResponse ||
         fetch(event.request).catch(() => caches.match("offline.html"))
@@ -52,8 +52,4 @@ addEventListener("activate", (event) => {
 
 addEventListener('activate', event => {
   clients.claim();
-  console.log('Ready!');
 });
-
-// console log something when this service worker is registered
-console.log('Service Worker Registered');
