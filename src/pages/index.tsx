@@ -18,10 +18,10 @@ const Home: React.FC = () => {
       </Head>
 
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="w-screen h-screen flex flex-col items-center justify-start gap-12 pt-10">
-          <div>
-            <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-              The <span className="text-[hsl(280,100%,70%)]">Shed</span>
+        <div className="w-screen h-screen flex flex-col justify-start gap-12 pt-10">
+          <div className="pl-4">
+            <h1 className="text-5xl font-extrabold tracking-tight ">
+              <span className="text-[hsl(280,100%,70%)]">Landing Page</span>
             </h1>
             <p className="text-2xl text-white">
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
@@ -44,9 +44,7 @@ const Home: React.FC = () => {
             )}
           </div>
 
-          <div className="pb-10">
             <SignInOut />
-          </div>
         </div>
       </main>
     </>
