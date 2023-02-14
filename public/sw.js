@@ -2,15 +2,10 @@ const CACHE_NAME = "shed-cache";
 const urlsToCache = [
   "index.html",
   "offline.html",
-  // "Kerwood40.glb",
-  // "Frank.glb",
-  // "Andrew.glb",
-  // "SceneBackground.glb",
-];
-const self = this;
+]; // @TODO: Update these pages
 
 //Install Service Worker
-self.addEventListener("install", (event) => {
+addEventListener("install", (event) => {
   console.log("Hello from service worker!")
   event.waitUntil(
     caches
@@ -23,7 +18,7 @@ self.addEventListener("install", (event) => {
   );
 });
 //Listen for Requests
-self.addEventListener("fetch", (event) => {
+addEventListener("fetch", (event) => {
   console.log("fetching");
   event.respondWith(
     caches.match(event.request).then((cacheResponse) => {
@@ -38,7 +33,7 @@ self.addEventListener("fetch", (event) => {
 });
 
 //Activate the Service Worker
-self.addEventListener("activate", (event) => {
+addEventListener("activate", (event) => {
   const cacheWhitelist = [];
   cacheWhitelist.push(CACHE_NAME);
 
@@ -55,7 +50,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-self.addEventListener('activate', event => {
+addEventListener('activate', event => {
   clients.claim();
   console.log('Ready!');
 });
