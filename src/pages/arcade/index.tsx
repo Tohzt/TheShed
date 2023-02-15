@@ -2,7 +2,6 @@ import * as React from "react"
 import { useSession } from "next-auth/react";
 import ProfileIcon from "../../components/ProfileIcon";
 import GoBack from "../../components/goBack";
-import iframe from "react-iframe";
 
 const ArcadePage = () => {
   const { data: session } = useSession();

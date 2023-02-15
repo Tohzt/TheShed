@@ -3,7 +3,6 @@ import { useSession } from "next-auth/react";
 import { api } from "../utils/api";
 import SignInOut from "../components/signInOut"
 import PageButtons from "../components/PageButtons"
-import GoBack from "../components/goBack"
 
 const Home: React.FC = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
