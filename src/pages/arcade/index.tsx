@@ -2,8 +2,9 @@ import * as React from "react"
 import { useSession } from "next-auth/react";
 import ProfileIcon from "../../components/ProfileIcon";
 import GoBack from "../../components/goBack";
+import iframe from "react-iframe";
 
-const ProfilePage = () => {
+const ArcadePage = () => {
   const { data: session } = useSession();
 
   return (session &&
@@ -11,25 +12,23 @@ const ProfilePage = () => {
       <div className="flex min-h-screen flex-col items-center justify-start bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="pt-10 text-white">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            The <span className="text-[hsl(280,100%,70%)]">Profile</span>
+            The <span className="text-[hsl(280,100%,70%)]">Arcade</span>
           </h1>
           <p className="text-2xl">
             Basic Profile Shit
           </p>
         </div>
         <ProfileIcon />
-        <span> User:    </span>
-        <span>{session?.user?.name}</span>
-        <br />
-        <span> Email:    </span>
-        <span>{session?.user?.email}</span>
         <br />
 
+        <div className="bg-zinc-900 w-[60vw] h-[80vw] border-4 border-zinc-400 flex items-center justify-center">
+          <iframe title='Mario Bros' src="../../../arcade/mario/index.html" width='240px' height='360px'></iframe>
+        </div>
       </div>
       <GoBack />
     </>
   );
 };
 
-export default ProfilePage
+export default ArcadePage
 
