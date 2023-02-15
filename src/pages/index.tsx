@@ -18,8 +18,8 @@ const Home: React.FC = () => {
         <link rel="manifest" href="/manifest.json" />
       </Head>
 
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="w-screen h-screen flex flex-col justify-start gap-12 pt-10">
+      <main className="flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+        <div className="max-w-[500px] h-screen flex flex-col justify-start gap-12 pt-10">
           <div className="pl-4">
             <h1 className="text-5xl font-extrabold tracking-tight ">
               <span className="text-[hsl(280,100%,70%)]">Landing Page</span>
@@ -29,14 +29,14 @@ const Home: React.FC = () => {
             </p>
           </div>
 
-          <div className="pt-2 w-screen max-w-[600px] bg-zinc-500 bg-opacity-40 flex flex-1 flex-row justify-center flex-wrap items-center gap-2">
+          <div className="pt-2 bg-zinc-500 bg-opacity-40 flex flex-1 flex-row justify-center flex-wrap items-center gap-2">
             {session && (
               <>
                 <PageButtons pagepath="/profile" label="PROFILE"/>
                 <PageButtons pagepath="/profile" label="CALENDAR"/>
                 <PageButtons pagepath="/profile" label="ALARM"/>
                 <PageButtons pagepath="/profile" label="BIDDING"/>
-                <PageButtons pagepath="/profile" label="GAMES"/>
+                <PageButtons style="bg-red-500" pagepath="/arcade" label="ARCADE"/>
                 <PageButtons pagepath="/profile" label="PROJECTS"/>
                 <PageButtons pagepath="/profile" label="..."/>
                 <PageButtons pagepath="/profile" label="..."/>
