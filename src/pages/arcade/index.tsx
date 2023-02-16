@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useSession } from "next-auth/react";
-import ProfileIcon from "../../components/ProfileIcon";
+import ProfileIcon from "../../components/profileIcon";
 import GoBack from "../../components/goBack";
 
 const ArcadePage = () => {
