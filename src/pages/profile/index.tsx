@@ -22,7 +22,7 @@ const ProfilePage = () => {
         <br />
       </div>
 
-      <Footer func={goBack} />
+      <Footer func={goBack} size="h-[4vh]"/>
     </>
   );
 };
