@@ -16,7 +16,7 @@ const Header: React.FC<{ title: string; description: string }> = (props) => {
           {session ? (
             <>
               <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-                The <span className="text-zinc-800">{props.title}</span>
+                <span className="text-zinc-800">{props.title}</span>
               </h1>
               <p className="text-2xl">
                 {props.description}

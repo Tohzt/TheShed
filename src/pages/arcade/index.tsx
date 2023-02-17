@@ -19,7 +19,7 @@ const ArcadePage = () => {
         </div>
       </div>
 
-      <Footer func={goBack} />
+      <Footer func={goBack} size="h-[4vh]"/>
     </>
   );
 };

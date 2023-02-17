@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import PageButtons from "../components/PageButtons";
@@ -5,13 +6,42 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 const Home: React.FC = () => {
   const { data: session } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
+  let size = "h-[4vh] ";
+  if (isOpen) {
+    size = "h-[20vh] ";
+  }
 
   const signInOut = (
-    <div className="flex items-center justify-center w-full h-full font-semibold text-slate-800">
-      <button onClick={session ? () => void signOut() : () => void signIn()}>
-        {session ? "sign out" : "sign in"}
-      </button>
-    </div>
+    <>
+      {session ? (
+        <>
+          <div className="flex flex-1 flex-col h-full w-full justify-center items-center font-semibold text-slate-800">
+            <button onClick={() => void signOut()}>
+              Log Out
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            className="h-[4vh] w-full flex justify-center font-semibold text-slate-800"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? "Pick One" : "Log In"}
+          </div>
+          {isOpen &&
+            <div className="flex flex-1 flex-col h-full w-full justify-center items-center">
+              <div className="flex items-center justify-center w-[25vw] h-[20vw] rounded-full font-semibold bg-blue-400 text-slate-300 border-4 border-slate-300">
+                <button onClick={() => void signIn()}>
+                  Discord
+                </button>
+              </div>
+            </div>
+          }
+        </>
+      )}
+    </>
   )
 
   return (
@@ -39,7 +69,7 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <Footer func={signInOut} />
+        <Footer func={signInOut} size={size} />
       </main>
     </>
   );
