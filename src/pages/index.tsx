@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import PageButtons from "../components/PageButtons";
@@ -7,9 +7,21 @@ import { signIn, signOut, useSession } from "next-auth/react";
 const Home: React.FC = () => {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  let size = "h-[4vh] ";
-  if (isOpen) {
-    size = "h-[20vh] ";
+  const [footerHeight, setFooterHeight] = useState("h-[4vh] ");
+
+  useEffect(() => {
+    console.log("change footer")
+    if (isOpen) 
+      setFooterHeight("h-[20vh] ")
+    else 
+      setFooterHeight("h-[4vh] ")
+  }, [isOpen]);
+
+  const bounce = () => {
+    setFooterHeight("h-[6vh] ")
+    setTimeout(() => {
+      setFooterHeight("h-[4vh] ")
+    }, 200);
   }
 
   const signInOut = (
@@ -51,7 +63,7 @@ const Home: React.FC = () => {
 
         <div className="h-screen flex items-center">
           <div className="max-h-[80vh] w-full flex flex-row justify-center flex-wrap gap-2">
-            {session && (
+            {session ? (
               <>
                 <PageButtons pagepath="/profile" label="PROFILE" style="" />
                 <PageButtons pagepath="/arcade" label="ARCADE" style="" />
@@ -65,11 +77,20 @@ const Home: React.FC = () => {
                 <PageButtons pagepath="/profile" label="..." style="" />
                 */}
               </>
+            ) : (
+              <>
+                <div
+                  className="w-[20vw] h-[20vw] rounded-lg bg-white"
+                  onClick={() => {bounce()}}
+                >
+                  test Bounce
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        <Footer func={signInOut} size={size} />
+        <Footer func={signInOut} size={footerHeight} />
       </main>
     </>
   );
