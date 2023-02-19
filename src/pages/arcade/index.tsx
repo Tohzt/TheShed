@@ -7,7 +7,8 @@ import goBack from "../../components/goBack";
 const ArcadePage = () => {
   const { data: session } = useSession();
 
-  return (session &&
+  // @TODO: Separate public and private games
+  return (true &&
     <>
       <Header title="Arcade" description="Touch My Buttons" />
 
@@ -19,7 +20,7 @@ const ArcadePage = () => {
         </div>
       </div>
 
-      <Footer func={goBack} size="h-[4vh]"/>
+      <Footer open="Games" closed="Games" />
     </>
   );
 };
