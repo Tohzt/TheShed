@@ -3,7 +3,7 @@ import { type AppProps } from "next/app";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 // @TODO: Try to get provider from here
-const LogInOut = ({ providers }: { providers: AppProps }) => {
+const LogInOut = ({ providers }: { providers?: AppProps }) => {
   const { data: session } = useSession();
 
   return (
