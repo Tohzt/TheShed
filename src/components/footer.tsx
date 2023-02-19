@@ -31,7 +31,15 @@ const Footer: React.FC<FooterProps> = (props) => {
         {isOpen &&
           // @TODO: Consider passing components in and mapping through props
           <div className="w-full h-full">
-            {props.open === "Nevermind" && <LogInOut providers={props?.providers} />}
+            {props.providers ? (
+              <>
+                {props.open === "Nevermind" && <LogInOut providers={props.providers} />}
+              </>
+            ) : (
+              <>
+                {props.open === "Nevermind" && <LogInOut />}
+              </>
+            )}
             {props.open === "Games" && <GoBack />}
             {props.open === "Back" && <GoBack />}
           </div>
