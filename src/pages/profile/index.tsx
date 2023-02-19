@@ -2,7 +2,6 @@ import * as React from "react"
 import { useSession } from "next-auth/react";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
-import goBack from "../../components/goBack";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
@@ -22,7 +21,7 @@ const ProfilePage = () => {
         <br />
       </div>
 
-      <Footer func={goBack} size="h-[4vh]"/>
+      <Footer open="Back" closed="Back" />
     </>
   );
 };
