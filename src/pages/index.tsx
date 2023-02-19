@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import Head from "next/head";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import PageButtons from "../components/PageButtons";
@@ -11,6 +12,9 @@ const Home = ({ providers }: { providers: AppProps }) => {
 
   return (
     <>
+      <Head>
+        <title>The Sled</title>
+      </Head>
       <main className="w-screen h-screen bg-gradient-to-b from-[#1632a4] to-[#0c1b58]">
         <Header title={session ? "Landing" : ""} description="Stick It" />
 
