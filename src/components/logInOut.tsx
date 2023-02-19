@@ -24,14 +24,14 @@ const LogInOut = ({ providers }: { providers?: AppProps }) => {
               <div className="flex items-center justify-center w-[25vw] h-[20vw] rounded-full font-semibold bg-blue-400 text-slate-300 border-4 border-slate-300">
                 {Object.values(providers).map((provider) => (
                   <button
-                    key={provider.id}
+                    key={provider?.id}
                     onClick={() =>
-                      void signIn(provider.id, {
+                      void signIn(provider?.id, {
                         callbackUrl: `${window.location.origin}`
                       })
                     }
                   >
-                    {provider.name}
+                    {provider?.name}
                   </button>
                 ))}
               </div>
