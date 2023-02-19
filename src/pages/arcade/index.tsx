@@ -1,11 +1,10 @@
 import * as React from "react"
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
-import goBack from "../../components/goBack";
 
 const ArcadePage = () => {
-  const { data: session } = useSession();
+  //const { data: session } = useSession();
 
   // @TODO: Separate public and private games
   return (true &&

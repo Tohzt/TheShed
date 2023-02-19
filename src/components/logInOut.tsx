@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { type AppProps } from "next/app";
 import { signIn, signOut, useSession } from "next-auth/react";
 
@@ -13,10 +13,7 @@ const LogInOut = ({ providers }: { providers?: AppProps }) => {
           <>
             <div className="flex items-center justify-center w-[25vw] h-[20vw] rounded-full font-semibold bg-slate-400 text-blue-300 border-4 border-slate-300">
               <button
-                onClick={() =>
-                  signOut()
-                }
-              >
+                onClick={() => void signOut() }>
                 Unlog yourself
               </button>
             </div>
@@ -29,7 +26,7 @@ const LogInOut = ({ providers }: { providers?: AppProps }) => {
                   <button
                     key={provider.id}
                     onClick={() =>
-                      signIn(provider.id, {
+                      void signIn(provider.id, {
                         callbackUrl: `${window.location.origin}`
                       })
                     }
