@@ -1,23 +1,22 @@
+import React from "react";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
-import { api } from "../utils/api";
-import SignInOut from "../components/signInOut"
-import PageButtons from "../components/PageButtons"
+import Header from "../components/header";
+import Footer from "../components/footer";
+import PageButtons from "../components/PageButtons";
+import { type GetServerSideProps } from "next";
+import { type AppProps } from "next/app";
+import { getProviders, useSession } from "next-auth/react";
 
 const Home: React.FC = () => {
-
   const hello = api.example.hello.useQuery({ text: "from the tRPC" });
   const { data: session } = useSession();
 
   return (
     <>
       <Head>
-        <title>The Shed</title>
-        <meta name="description" content="Burnt by Tohzt" />
-        <link rel="icon" href="/tohzt.ico" />
-        <link rel="manifest" href="/manifest.json" />
+        <title>The Sled</title>
       </Head>
-
+      
       <main className="flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="max-w-[500px] h-screen flex flex-col justify-start gap-12 pt-10">
           <div className="pl-4">
@@ -44,12 +43,19 @@ const Home: React.FC = () => {
             )
             }
           </div>
-
-          <SignInOut />
         </div>
+
+        <Footer providers={providers} open="Nevermind" closed={session ? "Log Out" : "Log In"} />
       </main>
     </>
   );
 };
 
 export default Home;
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const providers = await getProviders();
+  return {
+    props: { providers },
+  };
+}
