@@ -8,7 +8,7 @@ import { type AppProps } from "next/app";
 import { getProviders, useSession } from "next-auth/react";
 
 const Home: React.FC = () => {
-  const hello = api.example.hello.useQuery({ text: "from the tRPC" });
+  //const hello = api.example.hello.useQuery({ text: "from tRPC" });
   const { data: session } = useSession();
 
   return (
@@ -24,7 +24,10 @@ const Home: React.FC = () => {
               <span className="text-[hsl(280,100%,70%)]">Landing Page</span>
             </h1>
             <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
+              I'm lost
+              {/*
+                hello.data ? hello.data.greeting : "Loading tRPC query..."
+              */}
             </p>
           </div>
 
