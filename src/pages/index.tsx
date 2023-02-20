@@ -5,7 +5,7 @@ import SignInOut from "../components/signInOut"
 import PageButtons from "../components/PageButtons"
 
 const Home: React.FC = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const hello = api.example.hello.useQuery({ text: "from the tRPC" });
   const { data: session } = useSession();
 
   return (
@@ -39,7 +39,7 @@ const Home: React.FC = () => {
                 <PageButtons pagepath="/profile" label="PROJECTS" style="bg-red-500" />
               </>
             ) : (
-                <PageButtons pagepath="/arcade" label="ARCADE" style="bg-red-500" />
+              <PageButtons pagepath="/arcade" label="ARCADE" style="bg-red-500" />
             )
             }
           </div>
