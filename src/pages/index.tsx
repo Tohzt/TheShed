@@ -5,6 +5,7 @@ import SignInOut from "../components/signInOut"
 import PageButtons from "../components/PageButtons"
 
 const Home: React.FC = () => {
+
   const hello = api.example.hello.useQuery({ text: "from the tRPC" });
   const { data: session } = useSession();
 
