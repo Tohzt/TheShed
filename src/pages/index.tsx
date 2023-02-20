@@ -29,7 +29,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="pt-2 bg-zinc-500 bg-opacity-40 flex flex-1 flex-row justify-center flex-wrap items-center gap-2">
-            {session && (
+            {session ? (
               <>
                 <PageButtons pagepath="/profile" label="PROFILE" style="bg-red-500" />
                 <PageButtons pagepath="/profile" label="CALENDAR" style="bg-red-500" />
@@ -37,11 +37,11 @@ const Home: React.FC = () => {
                 <PageButtons pagepath="/profile" label="BIDDING" style="bg-red-500" />
                 <PageButtons pagepath="/arcade" label="ARCADE" style="bg-red-500" />
                 <PageButtons pagepath="/profile" label="PROJECTS" style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="..." style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="..." style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="..." style="bg-red-500" />
               </>
-            )}
+            ) : (
+                <PageButtons pagepath="/arcade" label="ARCADE" style="bg-red-500" />
+            )
+            }
           </div>
 
           <SignInOut />
