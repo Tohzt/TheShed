@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .abs-top {
+    position: absolute;
+    top: 0px;
+  }
+  .abs-bot {
+    position: absolute;
+    bottom: 0px;
+  }
+  .screen{
+    width: 100vw;
+    height: 100vh;
+  }
+  .flex-col{
+    display: flex;
+    flex-direction: column;
+  }
+  .flex-row{
+    display: flex;
+    flex-direction: row;
+  }
+  .flex-grid{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .-center{
+    justify-content: center;
+    align-items: center;
+  }
+}
+
