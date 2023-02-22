@@ -1,10 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
+interface Props {
+  style?: string;
+  pagePath?: string;
+  label?: string;
+}
 
-const PageButtons: React.FC<{style: string; pagepath: string; label: string;}> = (props) => {
-  const style = "w-[100px] h-[100px] flex justify-center items-center rounded-lg bg-blue-600 " + props?.style;
+const PageButtons: React.FC<Props> = (props) => {
+  const style = "page-button w-[80vw] h-[80px] flex justify-center items-center " + props?.style;
   return (
-    <Link href={props?.pagepath}>
+    <Link href={props?.pagePath}>
       <div className={style}>
         {props?.label}
       </div>
