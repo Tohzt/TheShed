@@ -1,17 +1,37 @@
 import Head from "next/head";
-import React, { useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { api } from "../utils/api";
+import React from "react";
 import PageButtons from "../components/PageButtons"
 import Header from "../components/header"
 import Footer from "../components/Footer"
-import { useStore } from "../../store/store"
+//import { useStore } from "../../store/store"
+
+// an object that holds multiple PageButtons componnents
+interface pagesType {
+  [key: string]: {
+    pagePath: string,
+    label: string,
+    style: string
+  }
+}
+const pages: pagesType = {
+  "home": { pagePath: "/", label: "HOME", style: "bg-primary" },
+  "about": { pagePath: "/", label: "ABOUT", style: "bg-primary" },
+  "arcade": { pagePath: "/arcade", label: "ARCADE", style: "" },
+  "profile": { pagePath: "/profile", label: "PROFILE", style: "" },
+  "calendar": { pagePath: "/", label: "CALENDAR", style: "bg-primary" },
+  "alarm": { pagePath: "/", label: "ALARM", style: "bg-primary" },
+}
+
+const displayPages = () => {
+  return Object.keys(pages).map((page, index) => {
+    const style = pages[page]?.style + (index%2 === 0 ? " offset-left" : " offset-right")
+    return <PageButtons key={index} pagePath={pages[page]?.pagePath} label={pages[page]?.label} style={style} />
+  })
+}
 
 const Home: React.FC = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const { data: session } = useSession();
-  const toggleDarkMode = useStore(state => state.toggle_dark_mode)
-  const darkMode = useStore(state => state.dark_mode)
+  //const toggleDarkMode = useStore(state => state.toggle_dark_mode)
+  //const darkMode = useStore(state => state.dark_mode)
 
   return (
     <>
@@ -26,32 +46,13 @@ const Home: React.FC = () => {
         <Header />
 
         <div className="screen flex-col -center">
-          <h1 className="bg-secondary">
-            <span className="">Landing Page</span>
-          </h1>
-          <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-          </p>
-
-          <div className="w-full pl-4 pr-4 overflow-y-auto flex-col gap-2">
-            {session && (
-              <>
-              <button onClick={() => {toggleDarkMode(!darkMode)}}>
-                hello
-                </button>
-                <PageButtons pagepath="/profile" label="PROFILE" style="bg-red-500" />
-                <PageButtons pagepath="/arcade" label="ARCADE" style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="CALENDAR" style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="ALARM" style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="BIDDING" style="bg-red-500" />
+          <div className="w-full overflow-y-auto flex-col gap-4">
                 {/*
-                  <PageButtons pagepath="/profile" label="PROJECTS" style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="..." style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="..." style="bg-red-500" />
-                <PageButtons pagepath="/profile" label="..." style="bg-red-500" />
+                  <button onClick={() => { toggleDarkMode(!darkMode) }}>
+                    hello
+                  </button>
                 */}
-              </>
-            )}
+              {displayPages()}
           </div>
         </div>
 

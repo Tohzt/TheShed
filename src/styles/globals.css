@@ -1,6 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+@utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
 
 @layer components {
   .abs-top {
@@ -34,5 +44,14 @@
     justify-content: center;
     align-items: center;
   }
-}
+  .page-button {
+    @apply border-white border-b-8;
+  }
+  .offset-left {
+    @apply ml-[20vw] pr-[20vw] bg-secondary-dark rounded-l-full border-l-4;
+  }
+  .offset-right {
+    @apply mr-[20vw] pl-[20vw] bg-secondary-light rounded-r-full border-r-4;
+  }
+};
 

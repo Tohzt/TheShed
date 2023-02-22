@@ -3,6 +3,10 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ["Poppins", "sans-serif"],
+        body: ["Hind", "sans-serif"],
+      },
       colors: {
         primary: { // Grayscale
           light: "#5d5b68",
@@ -19,8 +23,8 @@ module.exports = {
           DEFAULT: "#00b0ff",
           dark: "#0091ea",
         },
-      }
+      },
     },
   },
-  plugins: [],
+   plugins: [],
 };

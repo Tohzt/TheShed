@@ -1,12 +1,12 @@
 import * as React from "react"
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import ProfileIcon from "../../components/ProfileIcon";
 import GoBack from "../../components/goBack";
 
 const ProfilePage = () => {
-  const { data: session } = useSession();
+  //const { data: session } = useSession();
 
-  return (session &&
+  return (true &&
     <>
       <div className="flex min-h-screen flex-col items-center justify-start bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="pt-10 text-white">
@@ -19,10 +19,14 @@ const ProfilePage = () => {
         </div>
         <ProfileIcon />
         <span> User:    </span>
-        <span>{session?.user?.name}</span>
+        {/*
+        <span>{session ? session?.user?.name : "Not Logged In"}</span>
+        */}
         <br />
         <span> Email:    </span>
-        <span>{session?.user?.email}</span>
+        {/*
+        <span>{session ? session?.user?.email : "Not Logged In"}</span>
+        */}
         <br />
 
       </div>
