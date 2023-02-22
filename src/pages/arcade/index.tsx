@@ -1,12 +1,12 @@
 import * as React from "react"
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import ProfileIcon from "../../components/ProfileIcon";
 import GoBack from "../../components/goBack";
 
 const ArcadePage = () => {
-  const { data: session } = useSession();
+  //const { data: session } = useSession();
 
-  return (session &&
+  return (true &&
     <>
       <div className="flex min-h-screen flex-col items-center justify-start bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="pt-10 text-white">
