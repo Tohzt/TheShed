@@ -8,25 +8,33 @@ const Header = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
   return (
-    <div className="flex -center">
-      <div className="abs-top max-w-[90vw] w-full flex-col -center rounded-b-2xl bg-gradient-to-b from-secondary-light to-secondary-dark ">
-        <h1>My App</h1>
-        {user ? (
-          <div>
-            <span>{user.name}</span>
-            <br />
-            <span>{user.email}</span>
-          </div>
-        ) : (
-        <>
-          <h1 className="bg-secondary">
-            <span className="">Landing Page</span>
-          </h1>
-          <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-          </p>
-        </>
-        )}
+    <div className="abs-top w-screen max-h-[50vw] flex -center">
+      <div className="header-profile-container"></div>
+      <div className="header-profile-square"></div>
+      <div className="header-profile-gap"></div>
+      <div id="profile-icon" className="header-icon"></div>
+      <div id="profile-icon" className="header-icon-inner"></div>
+
+      <div className="header-profile-rectangle">
+
+      <div className=" header w-full">
+
+        <div className="flex -center h-[25vw] text-white text-lg font-heading">
+          {user ? (
+            <div>
+              <span>{user.name}</span>
+              <br />
+              <span>{user.email}</span>
+            </div>
+          ) : (
+              <div className="flex-col -center gap-1">
+                <span className="text-[3em] font-bold text-white">The</span>
+                <span className="-translate-x-2 text-[3em] font-bold text-white">Shed</span>
+                {/*hello.data ? hello.data.greeting : "Loading tRPC query..."}*/}
+              </div>
+          )}
+        </div>
+        </div>
       </div>
     </div>
   );

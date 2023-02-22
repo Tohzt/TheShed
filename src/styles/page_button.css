@@ -1,0 +1,13 @@
+.page-button {
+  @apply border-white border-b-8;
+}
+.offset-left {
+  @apply ml-[20vw] pr-[20vw] bg-secondary-dark rounded-l-full border-l-4;
+}
+.offset-right {
+  @apply mr-[20vw] pl-[20vw] bg-secondary-light rounded-r-full border-r-4;
+}
+
+.diagonal {
+  @apply bg-gradient-to-tr from-secondary-light to-tertiary-dark; ;
+}

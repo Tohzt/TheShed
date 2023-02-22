@@ -12,14 +12,32 @@
   }
 }
 
+@import './page_button.css';
+@import './header.css';
+
 @layer components {
+  .header {
+    z-index: 1;
+  }
   .abs-top {
     position: absolute;
     top: 0px;
+    z-index: 0;
   }
   .abs-bot {
     position: absolute;
     bottom: 0px;
+  }
+  .abs-br {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+  }
+  .abs-tl {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 0;
   }
   .screen{
     width: 100vw;
@@ -43,15 +61,6 @@
   .-center{
     justify-content: center;
     align-items: center;
-  }
-  .page-button {
-    @apply border-white border-b-8;
-  }
-  .offset-left {
-    @apply ml-[20vw] pr-[20vw] bg-secondary-dark rounded-l-full border-l-4;
-  }
-  .offset-right {
-    @apply mr-[20vw] pl-[20vw] bg-secondary-light rounded-r-full border-r-4;
   }
 };
 

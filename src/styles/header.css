@@ -1,0 +1,48 @@
+/**/
+.header-background {
+  @apply bg-secondary;
+}
+.header-profile-container {
+  @apply header-background
+    absolute top-0 left-0
+    w-[50vw] h-[50vw] rounded-full 
+    border-b-4 border-r-4 border-white
+  ;
+}
+  .header-icon {
+    @apply bg-primary-light 
+      absolute top-0 left-0 
+      w-[40vw] h-[40vw] 
+      ml-4 mt-4 
+      rounded-full
+    ;
+  }
+  .header-icon-inner {
+    @apply bg-white 
+      absolute top-0 left-0 
+      w-[38vw] h-[38vw] 
+      ml-5 mt-5 
+      rounded-full
+    ;
+  }
+
+.header-profile-square {
+  @apply header-background
+    absolute top-0 left-0
+    w-[25vw] h-[50vw] 
+    border-b-4 border-white
+  ;
+}
+.header-profile-rectangle {
+  @apply header-background
+    absolute top-0 right-0
+    w-[51vw] h-[25vw]
+    border-b-4 border-white
+  ;
+}
+.header-profile-gap {
+  @apply header-background
+    absolute top-0 left-0
+    w-[50vw] h-[25vw] 
+  ;
+}

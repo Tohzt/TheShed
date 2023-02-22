@@ -5,7 +5,7 @@ const SignInOut: React.FC = () => {
 
   return (
     <button
-      className="bg-secondary-light m-4 p-4 rounded-full"
+      className="w-[20vw] h-[20vw] bg-primary-light text-white rounded-2xl border-2 border-white"
       onClick={sessionData ? () => void signOut() : () => void signIn()}
     >
     {sessionData ? "Sign Out" : "Sign In"}
