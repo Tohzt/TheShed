@@ -42,7 +42,7 @@ const Home: React.FC = () => {
         <link rel="manifest" href="/manifest.json" />
       </Head>
 
-      <main className="fixed bg-gradient-to-b from-primary-light to-primary-dark">
+      <main className="fixed bg-gradient-to-t from-primary-light to-primary-dark">
         <Header />
 
         <div className="screen flex-col -center">
