@@ -19,12 +19,10 @@ const Header = () => {
 
       <div className=" header w-full">
 
-        <div className="flex -center h-[25vw] text-white text-lg font-heading">
+        <div className="overflow-hidden flex -center h-[25vw] text-white text-lg font-heading">
           {user ? (
             <div>
               <span>{user.name}</span>
-              <br />
-              <span>{user.email}</span>
             </div>
           ) : (
               <div className="flex-col -center gap-1">
