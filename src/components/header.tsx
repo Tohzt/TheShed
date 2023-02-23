@@ -16,11 +16,8 @@ const Header = () => {
       <div className="header-icon"></div>
       <div className="header-icon-inner"></div>
       <ProfileIcon />
-
       <div className="header-profile-rectangle">
-
       <div className=" header w-full">
-
         <div className="overflow-hidden flex -center h-[25vw] text-white text-lg font-heading">
           {user ? (
             <div>
