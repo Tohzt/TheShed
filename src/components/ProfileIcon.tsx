@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSession } from "next-auth/react";
-//import Link from 'next/link';
 import icon from '../../public/icon-192x192.png';
 
 const ProfileIcon: React.FC = () => {
