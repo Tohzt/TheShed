@@ -2,11 +2,10 @@ import Head from "next/head";
 import React from "react";
 import PageButtons from "../components/PageButtons"
 import Header from "../components/header"
-//import Footer from "../components/Footer"
-import SignInOut from "../components/signInOut"
+import Footer from "../components/Footer"
+//import SignInOut from "../components/signInOut"
 //import { useStore } from "../../store/store"
 
-// an object that holds multiple PageButtons componnents
 interface pagesType {
   [key: string]: {
     pagePath: string,
@@ -56,9 +55,7 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <div className="abs-br w-[25vw] h-[25vw] overflow-hidden flex -center bg-secondary-dark rounded-tl-2xl border-l-4 border-t-2 border-white">
-          <SignInOut />
-        </div>
+        <Footer />
       </main>
     </>
   );
