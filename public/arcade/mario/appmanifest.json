@@ -3,7 +3,7 @@
 	"short_name": "Mario-Platformer",
 	"description": "",
 	"start_url": "index.html",
-	"display": "standalone",
+	"display": "fullscreen",
 	"orientation": "landscape",
 	"background_color": "#ffffff",
 	"icons": [

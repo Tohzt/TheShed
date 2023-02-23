@@ -2,21 +2,10 @@
 import Link from "next/link";
 
 const GoBack: React.FC = () => {
-  const placement = "absolute -bottom-[20vw] items-center justify-center rounded-full left-[0vw] -bottom-[20vw] ";
   return (
-    <div className="">
-      <div className={`${placement}w-[42vw] h-[42vw] translate-y-2 translate-x-2 bg-zinc-900 bg-opacity-80 blur-sm `}></div>
-      <div className={`${placement}w-[40vw] h-[40vw] `}></div>
-      <div className={`${placement}w-[40vw] h-[40vw] bg-zinc-800 overflow-hidden`}>
-        <button className="rounded-full w-full h-full font-semibold text-white ">
-          <div className="w-full h-full text-[hsl(280,100%,70%)]">
-            <Link href="/">
-              <div className="pt-8 w-full h-full">
-                Go Back
-              </div>
-            </Link>
-          </div>
-        </button>
+    <div className="flex -center abs-bl w-[25vw] h-[25vw] overflow-hidden bg-secondary-dark rounded-tr-2xl border-r-4 border-t-2 border-white">
+      <div className="flex -center w-[20vw] h-[20vw] bg-primary-light text-white rounded-2xl border-2 border-white">
+        <Link href="/">Back</Link>
       </div>
     </div>
   );

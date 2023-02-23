@@ -1,12 +1,17 @@
 import React from 'react';
 import { useSession } from "next-auth/react";
 //import Link from 'next/link';
+import icon from '../../public/icon-192x192.png';
 
 const ProfileIcon: React.FC = () => {
   const { data: session } = useSession();
   return (
-    <div className="w-[60px] absolute top-0 right-0 m-4 overflow-hidden rounded-full">
+    <div className="header flex -center border-4 border-black abs-tl w-[32vw] h-[32vw] ml-8 mt-8 overflow-hidden rounded-full">
+      {session ? (
       <img src={session?.user?.image}></img>
+      ) : (
+      <img src={icon.src}></img>
+      )}
     </div>
   );
 };

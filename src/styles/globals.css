@@ -28,6 +28,11 @@
     position: absolute;
     bottom: 0px;
   }
+  .abs-bl {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+  }
   .abs-br {
     position: absolute;
     bottom: 0px;
