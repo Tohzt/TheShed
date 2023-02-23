@@ -1,4 +1,5 @@
 import React from 'react';
+import ProfileIcon from './ProfileIcon';
 import { useSession } from 'next-auth/react';
 import { api } from "../utils/api";
 
@@ -12,8 +13,9 @@ const Header = () => {
       <div className="header-profile-container"></div>
       <div className="header-profile-square"></div>
       <div className="header-profile-gap"></div>
-      <div id="profile-icon" className="header-icon"></div>
-      <div id="profile-icon" className="header-icon-inner"></div>
+      <div className="header-icon"></div>
+      <div className="header-icon-inner"></div>
+      <ProfileIcon />
 
       <div className="header-profile-rectangle">
 
