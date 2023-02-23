@@ -1,0 +1,8 @@
+/**/
+.nes-aspect-ratio {
+  @apply 
+    w-[100%] h-[100%]
+    pt-[33%] pb-[33%] 
+    flex -center
+  ;
+}
