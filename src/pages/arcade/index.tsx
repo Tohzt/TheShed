@@ -1,8 +1,7 @@
 import * as React from "react"
 //import { useSession } from "next-auth/react";
-import ProfileIcon from "../../components/ProfileIcon";
-import GoBack from "../../components/goBack";
 import Header from "../../components/header"
+import Footer from "../../components/Footer"
 import Link from 'next/link';
 
 const ArcadePage = () => {
@@ -18,7 +17,7 @@ const ArcadePage = () => {
           </ Link>
         </div>
       </div>
-      <GoBack />
+      <Footer goBack={true} signIn={false} signOut={false}/>
     </>
   );
 };
