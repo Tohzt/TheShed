@@ -3935,32 +3935,37 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Keyboard,
 		C3.Plugins.Touch,
 		C3.Plugins.System.Cnds.IsGroupActive,
-		C3.Plugins.Sprite.Cnds.IsOverlapping,
-		C3.Plugins.System.Acts.RestartLayout,
 		C3.Plugins.Sprite.Cnds.IsBoolInstanceVarSet,
 		C3.Behaviors.Platform.Acts.SetMaxSpeed,
 		C3.Behaviors.Platform.Cnds.IsOnFloor,
 		C3.Plugins.Sprite.Acts.SetBoolInstanceVar,
-		C3.Plugins.Keyboard.Cnds.IsKeyDown,
+		C3.Plugins.Sprite.Cnds.OnCollision,
+		C3.Plugins.System.Acts.SetBoolVar,
+		C3.Plugins.Sprite.Cnds.IsOverlapping,
+		C3.Plugins.Sprite.Acts.SetY,
+		C3.Plugins.Sprite.Exps.Y,
+		C3.Plugins.System.Cnds.CompareBoolVar,
+		C3.Plugins.Sprite.Cnds.IsOverlappingOffset,
+		C3.Behaviors.Platform.Acts.SetEnabled,
 		C3.Behaviors.Platform.Acts.SimulateControl,
+		C3.Plugins.Sprite.Cnds.IsOutsideLayout,
+		C3.Plugins.System.Acts.RestartLayout,
+		C3.Plugins.Sprite.Acts.SetAnim,
+		C3.Plugins.Keyboard.Cnds.IsKeyDown,
 		C3.Plugins.Sprite.Acts.SetMirrored,
 		C3.Plugins.Keyboard.Cnds.OnKey,
 		C3.Plugins.Keyboard.Cnds.OnKeyReleased,
-		C3.Plugins.Sprite.Cnds.IsOverlappingOffset,
 		C3.Behaviors.Platform.Cnds.IsJumping,
 		C3.Plugins.Sprite.Acts.Destroy,
 		C3.Behaviors.Platform.Acts.SetVectorY,
-		C3.Plugins.Sprite.Acts.SetAnim,
 		C3.Plugins.Sprite.Cnds.OnAnimFinished,
 		C3.Plugins.Sprite.Cnds.CompareInstanceVar,
 		C3.Plugins.Sprite.Acts.Spawn,
-		C3.Behaviors.Platform.Acts.SetEnabled,
 		C3.Behaviors.Platform.Acts.SetVectorX,
 		C3.Plugins.System.Exps.choose,
-		C3.Plugins.Sprite.Cnds.OnCollision,
 		C3.Behaviors.Platform.Cnds.CompareSpeed,
-		C3.Plugins.Sprite.Cnds.IsOutsideLayout,
-		C3.Plugins.Touch.Cnds.IsTouchingObject
+		C3.Plugins.Touch.Cnds.IsTouchingObject,
+		C3.Plugins.Sprite.Acts.ToggleBoolInstanceVar
 	];
 };
 self.C3_JsPropNameTable = [
@@ -3987,7 +3992,11 @@ self.C3_JsPropNameTable = [
 	{DPAD: 0},
 	{Touch: 0},
 	{input: 0},
-	{Button: 0}
+	{Button: 0},
+	{Flag: 0},
+	{move_right: 0},
+	{Goomba: 0},
+	{isFinished: 0}
 ];
 }
 
@@ -4091,10 +4100,20 @@ self.C3_ExpressionFuncs = [
 		() => "Mario",
 		() => 200,
 		() => 100,
-		() => "Controls",
-		() => "Brick",
+		p => {
+			const n0 = p._GetNode(0);
+			return () => (n0.ExpObject() - 8);
+		},
 		() => 0,
 		() => 2,
+		p => {
+			const n0 = p._GetNode(0);
+			return () => (n0.ExpObject() + 1);
+		},
+		() => "Big",
+		() => "Little",
+		() => "Controls",
+		() => "Brick",
 		() => -10,
 		() => "Item Block",
 		() => "Bounce",
@@ -4115,7 +4134,9 @@ self.C3_ExpressionFuncs = [
 		() => "pressed",
 		() => "unpressed",
 		() => "run",
-		() => "jump"
+		() => "jump",
+		() => "Goomba",
+		() => -500
 ];
 
 
