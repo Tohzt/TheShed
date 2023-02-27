@@ -31,7 +31,7 @@ const AboutPage = () => {
   The profile page is currently in development and will soon provide more functionality for users.
 </div>
 <div className="text-lg text-gray-700 mb-4">
-  In addition, the app features an "arcade" section where users can play my personal game development projects.
+  In addition, the app features an arcade section where users can play my personal game development projects.
   The first game uploaded is a clone of Super Mario Brothers for the NES, but I plan to add more games in the future.
 </div>
 <div className="text-lg text-gray-700 mb-4">
