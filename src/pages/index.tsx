@@ -18,7 +18,7 @@ const pages: pagesType = {
   "alarm": { pagePath: "/", label: "ALARM", style: "bg-primary" },
   "calendar": { pagePath: "/", label: "CALENDAR", style: "bg-primary" },
   "arcade": { pagePath: "/arcade", label: "ARCADE", style: "" },
-  "about": { pagePath: "/", label: "ABOUT", style: "bg-primary" },
+  "about": { pagePath: "/about", label: "ABOUT", style: "" },
 }
 
 const displayPages = () => {
