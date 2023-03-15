@@ -55,7 +55,7 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <Footer goBack={false} signIn={true} signOut={true}/>
+        <Footer goBack={false} signIn={true} signOut={true} />
       </main>
     </>
   );
