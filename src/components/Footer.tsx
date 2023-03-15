@@ -15,12 +15,12 @@ const Footer = (props: FooterProps) => {
 
   return (
     <div>
-      {props.signIn && !sessionData && 
+      {props.signIn && !sessionData &&
         <div className="abs-br w-[25vw] h-[25vw] overflow-hidden flex -center bg-secondary-dark rounded-tl-2xl border-l-4 border-t-2 border-white">
           <SignIn />
         </div>
       }
-      {props.signOut && sessionData && 
+      {props.signOut && sessionData &&
         <div className="abs-br w-[25vw] h-[25vw] overflow-hidden flex -center bg-secondary-dark rounded-tl-2xl border-l-4 border-t-2 border-white">
           <SignOut />
         </div>
