@@ -14,6 +14,7 @@
 
 @import './page_button.css';
 @import './header.css';
+@import './footer.css';
 @import './arcade.css';
 
 @layer components {

@@ -1,4 +1,8 @@
 /**/
+.header-margin {
+  @apply h-[53vw] w-full;
+}
+
 .header-background {
   @apply bg-secondary;
 }
