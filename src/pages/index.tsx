@@ -14,8 +14,8 @@ interface pagesType {
   }
 }
 const pages: pagesType = {
-  "profile": { pagePath: "/profile", label: "PROFILE", style: "" },
-  "alarm": { pagePath: "/", label: "ALARM", style: "bg-primary" },
+  "Personal": { pagePath: "https://www.instagram.com/im_just.a.me/", label: "", style: "" },
+  "Tattoo": { pagePath: "https://www.instagram.com/tat.tohzt", label: "ALARM", style: "" },
   "calendar": { pagePath: "/", label: "CALENDAR", style: "bg-primary" },
   "arcade": { pagePath: "/arcade", label: "ARCADE", style: "" },
   "about": { pagePath: "/about", label: "ABOUT", style: "" },
@@ -24,7 +24,13 @@ const pages: pagesType = {
 const displayPages = () => {
   return Object.keys(pages).map((page, index) => {
     const style = pages[page]?.style + (index % 2 === 0 ? " offset-left" : " offset-right")
-    return <PageButtons key={index} pagePath={pages[page]?.pagePath} label={pages[page]?.label} style={style} />
+    return (
+      <PageButtons 
+        key={index} 
+        pagePath={pages[page]?.pagePath} 
+        label={page} 
+        style={style} />
+    )
   })
 }
 
