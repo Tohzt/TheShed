@@ -9,16 +9,15 @@ import Footer from "../components/Footer"
 interface pagesType {
   [key: string]: {
     pagePath: string,
-    label: string,
     style: string
   }
 }
 const pages: pagesType = {
-  "Personal": { pagePath: "https://www.instagram.com/im_just.a.me/", label: "", style: "" },
-  "Tattoo": { pagePath: "https://www.instagram.com/tat.tohzt", label: "ALARM", style: "" },
-  "calendar": { pagePath: "/", label: "CALENDAR", style: "bg-primary" },
-  "arcade": { pagePath: "/arcade", label: "ARCADE", style: "" },
-  "about": { pagePath: "/about", label: "ABOUT", style: "" },
+  "Personal": { pagePath: "https://www.instagram.com/im_just.a.me", style: "" },
+  "Tattoo": { pagePath: "https://www.instagram.com/tat.tohzt", style: "" },
+  "calendar": { pagePath: "/", style: "bg-primary" },
+  "arcade": { pagePath: "/arcade", style: "" },
+  "about": { pagePath: "/about", style: "" },
 }
 
 const displayPages = () => {
