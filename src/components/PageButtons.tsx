@@ -13,7 +13,7 @@ const PageButtons: React.FC<Props> = (props) => {
   const [hoverStyle, setHoverStyle] = React.useState(" border-b-8");
   const divRef = React.useRef(null)
   const linkRef = React.useRef<HTMLAnchorElement>(null)
-  
+
   React.useEffect(() => {
     if (hover) {
       setHoverStyle(" border-t-4 border-b-4");
@@ -29,16 +29,16 @@ const PageButtons: React.FC<Props> = (props) => {
   };
 
   return (
-    <div 
-      ref={divRef} 
-      className={style + hoverStyle} 
+    <div
+      ref={divRef}
+      className={style + hoverStyle}
       onClick={handleClick}
-      onTouchStart={()=>{setHover(true)}}
-      onTouchEnd={()=>{setHover(false)}}
+      onTouchStart={() => { setHover(true) }}
+      onTouchEnd={() => { setHover(false) }}
     >
-    <Link ref={linkRef} className={"pointer-events-none"} href={props?.pagePath} >
+      <a ref={linkRef} className={"pointer-events-none"} href={props?.pagePath} >
         {props?.label}
-      </Link>
+      </a>
     </div>
   );
 };
