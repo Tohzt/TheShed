@@ -5,7 +5,7 @@ import icon from '../../public/icon-192x192.png';
 const ProfileIcon: React.FC = () => {
   const { data: session } = useSession();
   return (
-    <div className="header flex -center border-4 border-black abs-tl w-[32vw] h-[32vw] ml-8 mt-8 overflow-hidden rounded-full">
+    <div className="sm:hidden flex -center border-4 border-black abs-tl w-[32vw] h-[32vw] ml-8 mt-8 overflow-hidden rounded-full">
       {session ? (
       <img src={session?.user?.image}></img>
       ) : (

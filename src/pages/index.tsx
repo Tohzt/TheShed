@@ -9,26 +9,44 @@ import Footer from "../components/Footer"
 interface pagesType {
   [key: string]: {
     pagePath: string,
-    style: string
+    style: string,
+    social: boolean
   }
 }
 const pages: pagesType = {
-  "Personal": { pagePath: "https://www.instagram.com/im_just.a.me", style: "" },
-  "Tattoo": { pagePath: "https://www.instagram.com/tat.tohzt", style: "" },
-  "calendar": { pagePath: "/", style: "bg-primary" },
-  "arcade": { pagePath: "/arcade", style: "" },
-  "about": { pagePath: "/about", style: "" },
+  "Personal": { 
+    pagePath: "https://www.instagram.com/im_just.a.me", 
+    style: "", 
+    social: true },
+  "Tattoo": { 
+    pagePath: "https://www.instagram.com/tat.tohzt", 
+    style: "", 
+    social: true },
+  "calendar": { 
+    pagePath: "/", 
+    style: "bg-primary", 
+    social: false },
+  "arcade": {
+    pagePath: "/arcade", 
+    style: "", 
+    social: false },
+  "about": { 
+    pagePath: "/about", 
+    style: "", 
+    social: false },
 }
 
 const displayPages = () => {
   return Object.keys(pages).map((page, index) => {
     const style = pages[page]?.style + (index % 2 === 0 ? " offset-left" : " offset-right")
     return (
-      <PageButtons 
-        key={index} 
-        pagePath={pages[page]?.pagePath} 
-        label={page} 
-        style={style} />
+      <PageButtons
+        key={index}
+        pagePath={pages[page]?.pagePath}
+        label={page}
+        style={style} 
+        //social={pages[page]!.social} 
+        />
     )
   })
 }
@@ -50,7 +68,7 @@ const Home: React.FC = () => {
         <Header />
 
         <div className="screen flex-col -center justify-start">
-          <div className="pt-[55vw] w-full overflow-y-auto flex-col gap-4">
+        <div className="pt-[55vw] sm:pt-[15vh] w-full overflow-y-auto flex-col gap-4">
             {displayPages()}
             {/*
               <button onClick={() => { toggleDarkMode(!darkMode) }}>
