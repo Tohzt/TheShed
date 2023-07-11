@@ -4,7 +4,7 @@ import Link from "next/link";
 const GoBack: React.FC = () => {
   return (
     <Link
-      className="flex -center w-[20vw] h-[20vw] bg-primary-light text-white rounded-2xl border-2 border-white"
+      className="flex -center w-[20vw] h-[20vw] m-4 bg-primary-light text-white rounded-2xl border-2 border-white"
       href="/">
       Back
     </Link>
