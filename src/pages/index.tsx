@@ -14,12 +14,8 @@ interface pagesType {
   }
 }
 const pages: pagesType = {
-  "Personal": { 
-    pagePath: "https://www.instagram.com/im_just.a.me", 
-    style: "", 
-    social: true },
-  "Tattoo": { 
-    pagePath: "https://www.instagram.com/tat.tohzt", 
+  "Socials": { 
+    pagePath: "/socials", 
     style: "", 
     social: true },
   "calendar": { 
