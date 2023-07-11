@@ -39,7 +39,6 @@ const PageButtons: React.FC<Props> = (props) => {
       <Link 
         ref={linkRef} 
         className={"pointer-events-none"} 
-        target="blank"
         href={props?.pagePath} 
         >
         {props?.label}

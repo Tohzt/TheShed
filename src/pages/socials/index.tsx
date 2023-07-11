@@ -1,10 +1,10 @@
 import * as React from "react"
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import Header from "../../components/header"
 import Footer from "../../components/Footer"
 
 const SocialsPage = () => {
-  const { data: session } = useSession();
+  //const { data: session } = useSession();
 
   return (true &&
     <>
