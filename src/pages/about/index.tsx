@@ -1,10 +1,10 @@
 import * as React from "react"
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import Header from "../../components/header"
 import Footer from "../../components/Footer"
 
 const AboutPage = () => {
-  const { data: session } = useSession();
+  //const { data: session } = useSession();
 
   return (true &&
     <>
@@ -15,7 +15,7 @@ const AboutPage = () => {
         <div
           className="
           flex flex-1
-            overflow-hidden
+            h-[50vh]
             max-w-[96vw]
             p-4 mt-[25vh]
             bg-secondary-dark 

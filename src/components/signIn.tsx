@@ -1,23 +1,21 @@
 import React from 'react';
-import { getProviders, signIn, signOut, useSession } from "next-auth/react"
+import { getProviders } from "next-auth/react"
+//import { getProviders, signIn, signOut, useSession } from "next-auth/react"
 
 const signInWithProvider = async () => {
   const providers = await getProviders();
   const current = Object.values(providers)[0];
 
-  signIn(current.id)
-    .then(() => {/**/ })
-    .catch((error) => {
-      console.log(error);
-    });
 }
 
 const SignIn: React.FC = () => {
-  const { data: sessionData } = useSession();
-  const handleSignInOut = async () => {
+  //const { data: sessionData } = useSession();
+  const handleSignInOut = () => {
+    {/*
     if (!sessionData) {
       await signInWithProvider();
     }
+    */}
   }
 
   return (
@@ -32,3 +30,10 @@ const SignIn: React.FC = () => {
 
 export default SignIn;
 
+/*
+  signIn(current.id)
+    .then(() => )
+    .catch((error) => {
+      console.log(error);
+    });
+  */
