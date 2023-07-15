@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/public/arcade/tetris/(.*)",
+      "source": "/arcade/tetris/(.*)",
       "headers": [
         {
           "key": "Cross-Origin-Embedder-Policy",
@@ -18,10 +18,18 @@
         {
           "key": "Cross-Origin-Embedder-Policy-Report-Only",
           "value": "report-to=\"godot-game-cors\""
+        },
+        {
+          "key": "Cross-Origin-Isolation",
+          "value": "require-corp"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
         }
       ]
     }
   ],
-  "rewrites": [ ]
+  "rewrites": []
 }
 
