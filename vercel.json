@@ -17,8 +17,7 @@
         },
         {
           "key": "Cross-Origin-Embedder-Policy-Report-Only",
-          "value": "report-to=\"godot-game-cors\"",
-          "enabled": true
+          "value": "report-to=\"godot-game-cors\""
         }
       ]
     }
