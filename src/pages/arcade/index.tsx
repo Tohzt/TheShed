@@ -12,6 +12,11 @@ const ArcadePage = () => {
       <Header />
       <div className="screen bg-zinc-900 border-4 border-zinc-400 flex -center">
         <div className="flex -center -column bg-secondary w-[20vw] h-[20vw] rounded-2xl border-4 border-white">
+          <Link className="flex -center w-full h-full" href="/arcade/tetris">
+            TETRIS
+          </ Link>
+        </div>
+        <div className="flex -center -column bg-secondary w-[20vw] h-[20vw] rounded-2xl border-4 border-white">
           <Link className="flex -center w-full h-full" href="/arcade/godot">
             Godot
           </ Link>

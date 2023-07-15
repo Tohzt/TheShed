@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "baseUrl": "./src",
     "target": "ES2017",
     "lib": [
@@ -32,6 +33,7 @@
     }
   },
   "include": [
+    "src", "src/server/api/godot.js",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
