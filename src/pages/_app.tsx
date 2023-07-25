@@ -1,5 +1,5 @@
 import { type AppType } from "next/app";
-//import { type Session } from "next-auth";
+import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { useEffect } from "react";
 
@@ -7,27 +7,10 @@ import { api } from "../utils/api";
 
 import "../styles/globals.css";
 
-const MyApp = ({
-  Component,
-  pageProps: { ...pageProps },
-}) => {
-
-
-  return (
-      <Component {...pageProps} />
-  );
-};
-
-export default api.withTRPC(MyApp);
-
-/*
 const MyApp: AppType<{ session: Session | null }> = ({
-
-  return (
-    <SessionProvider session={session}>
-      <Component {...pageProps} />
-    </SessionProvider>
-  );
+  Component,
+  pageProps: { session, ...pageProps },
+}) => {
 
   useEffect(() => {
     function registerSW() {
@@ -47,4 +30,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
       return () => window.removeEventListener('load', registerSW);
     }
   }, []);
-  */
+
+  return (
+    <SessionProvider session={session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  );
+};
+
+export default api.withTRPC(MyApp);
