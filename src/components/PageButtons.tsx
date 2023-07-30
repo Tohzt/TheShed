@@ -24,7 +24,7 @@ const PageButtons: React.FC<Props> = (props) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(props?.pagePath);
+    void router.push(props?.pagePath);
   };
 
   return (
