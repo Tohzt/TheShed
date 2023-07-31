@@ -9,15 +9,15 @@ interface Props {
 }
 
 const PageButtons: React.FC<Props> = (props) => {
-  const style = "page-button w-[80vw] h-[10vh] flex justify-center items-center " + props?.style;
+  const style = "page-button " + props?.style;
   const [hover, setHover] = React.useState(false);
-  const [hoverStyle, setHoverStyle] = React.useState(" border-b-8");
+  const [hoverStyle, setHoverStyle] = React.useState("");
 
   React.useEffect(() => {
     if (hover) {
-      setHoverStyle(" border-t-4 border-b-4");
+      setHoverStyle(" border-t-[4px] border-b-[4px]");
     } else {
-      setHoverStyle(" border-b-8");
+      setHoverStyle(" border-b-[8px]");
     }
   }, [hover, hoverStyle]);
 
