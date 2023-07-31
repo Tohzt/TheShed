@@ -3,25 +3,24 @@ import { useRouter } from 'next/router';
 
 interface Props {
   style?: string;
-  pagePath?: string;
+  path?: string;
   label?: string;
 }
 
-const PageButtons: React.FC<Props> = (props) => {
-  const style = "page-button " + props?.style;
+const SocialButtons: React.FC<Props> = (props) => {
+  const style = "social-button " + props?.style;
   const [hover, setHover] = React.useState(false);
   const [hoverStyle, setHoverStyle] = React.useState("");
 
   React.useEffect(() => {
     if (hover) setHoverStyle(" button-pressed");
-    else 
-      setHoverStyle(" button-released");
+    else setHoverStyle(" button-released");
   }, [hover, hoverStyle]);
 
   const router = useRouter();
 
   const handleClick = () => {
-    void router.push(props?.pagePath);
+    void router.push(props?.path);
   };
 
   return (
@@ -36,6 +35,6 @@ const PageButtons: React.FC<Props> = (props) => {
   );
 };
 
-export default PageButtons;
+export default SocialButtons;
 
 
