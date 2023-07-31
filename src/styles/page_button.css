@@ -1,5 +1,9 @@
 .page-button {
-  @apply border-white border-b-8;
+  @apply 
+    border-white
+    w-[80vw] h-[10vh] 
+    flex justify-center items-center 
+  ;
 }
 .offset-left {
   @apply ml-[20vw] pr-[20vw] bg-secondary-dark rounded-l-full border-l-4;
