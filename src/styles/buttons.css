@@ -1,15 +1,32 @@
 .page-button {
   @apply 
-    border-white
     w-[80vw] h-[10vh] 
     flex justify-center items-center 
+    border-white
   ;
 }
+.social-button {
+  @apply 
+    bg-secondary-dark
+    w-[60vw] h-[10vh] 
+    flex justify-center items-center 
+    border-white
+    rounded-full
+  ;
+}
+
 .offset-left {
   @apply ml-[20vw] pr-[20vw] bg-secondary-dark rounded-l-full border-l-4;
 }
 .offset-right {
   @apply mr-[20vw] pl-[20vw] bg-secondary-light rounded-r-full border-r-4;
+}
+
+.button-pressed {
+  @apply border-t-[4px] border-b-[4px] ;
+}
+.button-released {
+  @apply border-b-[8px] ;
 }
 
 .diagonal {
