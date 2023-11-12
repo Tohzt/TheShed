@@ -30,7 +30,9 @@ const SocialButtons: React.FC<Props> = (props) => {
       onTouchStart={() => { setHover(true) }}
       onTouchEnd={() => { setHover(false) }}
     >
-      {props?.label}
+      <div className="w-[80%]">
+        {props?.label}
+      </div>
     </div>
   );
 };

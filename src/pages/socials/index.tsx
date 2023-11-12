@@ -16,7 +16,7 @@ const socials: socialType = {
   },
   "Tattoo Instagram": {
     path: "https://www.instagram.com/tat.tohzt",
-    style: "bg-primary"
+    style: ""
   },
   "Personal YouTube": {
     path: "https://www.youtube.com/c/godsautobiography",
