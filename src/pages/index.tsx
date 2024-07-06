@@ -1,51 +1,10 @@
-import Head from "next/head";
 import React from "react";
-import PageButtons from "../components/PageButtons"
+import Head from "next/head";
 import Header from "../components/header"
 import Footer from "../components/Footer"
+import DisplayPages from "../components/DisplayPages"
 //import SignInOut from "../components/signInOut"
 //import { useStore } from "../../store/store"
-
-interface pagesType {
-  [key: string]: {
-    pagePath: string,
-    style: string,
-    social: boolean
-  }
-}
-const pages: pagesType = {
-  "Socials": { 
-    pagePath: "/socials", 
-    style: "", 
-    social: true },
-  "calendar": { 
-    pagePath: "/", 
-    style: "bg-primary", 
-    social: false },
-  "arcade": {
-    pagePath: "/arcade", 
-    style: "", 
-    social: false },
-  "about": { 
-    pagePath: "/about", 
-    style: "", 
-    social: false },
-}
-
-const displayPages = () => {
-  return Object.keys(pages).map((page, index) => {
-    const style = pages[page]?.style + (index % 2 === 0 ? " offset-left" : " offset-right")
-    return (
-      <PageButtons
-        key={index}
-        pagePath={pages[page]?.pagePath}
-        label={page}
-        style={style} 
-        //social={pages[page]!.social} 
-        />
-    )
-  })
-}
 
 const Home: React.FC = () => {
   //const toggleDarkMode = useStore(state => state.toggle_dark_mode)
@@ -64,8 +23,8 @@ const Home: React.FC = () => {
         <Header />
 
         <div className="screen flex-col -center justify-start">
-        <div className="pt-[55vw] sm:pt-[15vh] w-full overflow-y-auto flex-col gap-4">
-            {displayPages()}
+          <div className="pt-[55vw] sm:pt-[15vh] w-full overflow-y-auto flex-col gap-4">
+            <DisplayPages />
             {/*
               <button onClick={() => { toggleDarkMode(!darkMode) }}>
                 hello

@@ -1,0 +1,64 @@
+/**/
+.tasks-page {
+  @applu 
+  flex 
+  screen 
+  flex-col 
+  items-center 
+  justify-between 
+  bg-gradient-to-b 
+  from-primary-dark 
+  to-primary-light
+  ;
+}
+.t-p-container{
+  width: fit-content;
+  margin: auto;
+  @apply
+  p-4 mt-[25vh]
+  bg-secondary-dark 
+  border-2 border-black 
+  rounded-2xl 
+  ;
+}
+.t-p-content {
+  @apply
+    h-full 
+    flex flex-1
+    flex-col
+    justify-center
+    items-center
+    w-[80vw]
+    max-w-[600px]
+    bg-secondary-light
+    overflow-auto 
+    rounded-lg 
+    p-2 
+    max-w-screen-sm
+  ;
+}
+
+.task-container {
+  @apply
+    flex-col
+    justify-center
+    items-center
+    w-[80%]
+    h-fit
+    p-8
+    bg-white
+    rounded-xl
+  ;
+}
+
+.task-item-container {
+  @apply
+    flex-row
+    justify-between
+    w-full 
+    h-fit
+    p-2
+    bg-gray-300
+    border-2 border-black
+    rounded-md
+}
