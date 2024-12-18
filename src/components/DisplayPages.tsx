@@ -37,17 +37,21 @@ const pages: pagesType = {
 }
 
 const DisplayPages = () => {
-  return Object.keys(pages).map((page, index) => {
-    const style = pages[page]?.style + (index % 2 === 0 ? " offset-left" : " offset-right")
-    return (
-      <PageButtons
-        key={index}
-        pagePath={pages[page]?.pagePath}
-        label={page}
-        style={style}
-      //social={pages[page]!.social} 
-      />
-    )
-  })
+  return (
+    <>{
+      Object.keys(pages).map((page, index) => {
+        const style = pages[page]?.style + (index % 2 === 0 ? " offset-left" : " offset-right")
+        return (
+          <PageButtons
+            key={index}
+            pagePath={pages[page]?.pagePath}
+            label={page}
+            style={style}
+          //social={pages[page]!.social} 
+          />
+        )
+      })
+    }</>
+  )
 }
 export default DisplayPages;
