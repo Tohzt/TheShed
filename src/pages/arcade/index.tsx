@@ -40,6 +40,12 @@ const ArcadePage = () => {
               Mario
             </ Link>
           </div>
+          
+          <div className="flex -center -column bg-secondary w-[20vw] h-[20vw] max-w-[120px] max-h-[120px] rounded-2xl border-4 border-white">
+            <Link className="flex -center w-full h-full" href="/arcade/huebound">
+              HueBound
+            </ Link>
+          </div>
         </div>
       </div>
       <Footer goBack={true} signIn={false} signOut={false} />

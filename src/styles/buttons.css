@@ -34,5 +34,10 @@
 }
 
 .diagonal {
-  @apply bg-gradient-to-tr from-secondary-light to-tertiary-dark; ;
+  @apply bg-gradient-to-tr from-secondary-light to-tertiary-dark; 
+}
+
+.btn-add-task{
+  @apply bg-red-500 p-4 rounded-lg border-2 border-black
+  ;
 }
