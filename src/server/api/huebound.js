@@ -5,8 +5,8 @@ import path from 'path';
 // Create an Express app
 const app = express();
 
-// Serve the Godot game files
-app.use(express.static(path.join(__dirname, '../../pages/arcade/huebound/index.tsx')));
+// Serve the Godot game files from the correct directory
+app.use(express.static(path.join(__dirname, '../../../public/arcade/huebound')));
 
 // Add the necessary headers
 app.use((req, res, next) => {
