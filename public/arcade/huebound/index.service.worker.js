@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1737171794|4195104632';
+const CACHE_VERSION = '1737790072|14020054700';
 /** @type {string} */
 const CACHE_PREFIX = 'HueBound-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
