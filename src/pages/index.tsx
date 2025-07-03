@@ -4,6 +4,7 @@ import Header from '../components/header'
 import Footer from '../components/Footer'
 import AnimatedButtonList from '../components/AnimatedButtonList'
 import {usePageTransition} from '../hooks/usePageTransition'
+import {getRubricColor} from '../utils/colorRubric'
 //import SignInOut from "../components/signInOut"
 //import { useStore } from "../../store/store"
 
@@ -48,6 +49,8 @@ const Home: React.FC = () => {
 		animationDuration: 400,
 	})
 
+	const [headerColor] = React.useState(getRubricColor('home').primary)
+
 	const handleButtonClick = (button: ButtonItem, index: number) => {
 		console.log(`Clicked ${button.label} at index ${index}`)
 	}
@@ -73,7 +76,7 @@ const Home: React.FC = () => {
 			</Head>
 
 			<main className='fixed overflow-x-hidden bg-gradient-to-t from-primary-light to-primary-dark'>
-				<Header />
+				<Header colorClass={headerColor} />
 
 				<div className='screen -center flex-col justify-start'>
 					<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>

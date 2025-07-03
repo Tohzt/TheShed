@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {useRouter} from 'next/router'
+import {getRubricColor} from '../utils/colorRubric'
 
 interface ButtonItem {
 	label: string
@@ -89,9 +90,52 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 		}
 	}
 
-	const getButtonStyle = (index: number, isVisible: boolean) => {
+	const getButtonColor = (button: ButtonItem) => {
+		// Special handling for specific buttons
+		if (button.label === 'Back') {
+			return getRubricColor('back')
+		}
+
+		if (button.label === 'Personal Instagram') {
+			return getRubricColor('personal-instagram')
+		}
+
+		if (button.label === 'Tattoo Instagram') {
+			return getRubricColor('tattoo-instagram')
+		}
+
+		if (button.label === 'Personal YouTube') {
+			return getRubricColor('personal-youtube')
+		}
+
+		if (button.label === 'LetsClone YouTube') {
+			return getRubricColor('letsclone-youtube')
+		}
+
+		if (button.type === 'external') {
+			// Other external links get a neutral color
+			return {
+				primary: 'bg-gray-600',
+				secondary: 'bg-gray-700',
+				text: 'text-white',
+			}
+		}
+
+		// Get color based on destination page
+		const destinationPage = button.path === '/' ? 'home' : button.path.slice(1)
+		return getRubricColor(destinationPage)
+	}
+
+	const getButtonStyle = (
+		button: ButtonItem,
+		index: number,
+		isVisible: boolean
+	) => {
 		const baseStyle = 'page-button'
 		const offsetStyle = index % 2 === 0 ? ' offset-left' : ' offset-right'
+		const buttonColors = getButtonColor(button)
+		const colorStyle =
+			index % 2 === 0 ? buttonColors.secondary : buttonColors.primary
 		const pressStyle =
 			pressedIndex === index ? ' button-pressed' : ' button-default'
 
@@ -103,7 +147,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			? ' -translate-x-full'
 			: ' translate-x-full'
 
-		return `${baseStyle}${offsetStyle}${pressStyle}${visibilityStyle} ${className}`
+		return `${baseStyle}${offsetStyle} ${colorStyle}${pressStyle}${visibilityStyle} ${className}`
 	}
 
 	return (
@@ -111,7 +155,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			{buttons.map((button, index) => (
 				<div
 					key={`${button.label}-${index}`}
-					className={getButtonStyle(index, buttonStates[index])}
+					className={getButtonStyle(button, index, buttonStates[index])}
 					style={{
 						transition: `all ${animationDuration}ms ease-out ${
 							buttonStates[index] ? index * 25 : 0
