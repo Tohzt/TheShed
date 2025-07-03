@@ -1,43 +1,80 @@
 .page-button {
-  @apply 
-    w-[80vw] h-[10vh] 
-    flex justify-center items-center 
-    text-white text-2xl
-    font-mono font-extrabold
-    border-white
-  ;
+	@apply flex h-[10vh] 
+    w-[80vw] items-center justify-center 
+    border-b-[8px] border-white
+    font-mono text-2xl
+    font-extrabold
+    text-white
+    transition-all duration-75 ease-out;
 }
+
 .social-button {
-  @apply 
-    bg-secondary-dark
-    w-[60vw] h-[10vh] 
-    flex justify-center items-center 
-    text-white text-2xl
-    font-mono font-extrabold
-    rounded-[20px]
-    border-white border-l-2 border-r-2
-  ;
+	@apply flex
+    h-[10vh] w-[60vw] 
+    items-center justify-center rounded-[20px] 
+    border-l-2 border-r-2
+    border-white bg-secondary-dark
+    font-mono
+    text-2xl font-extrabold text-white;
 }
 
 .offset-left {
-  @apply ml-[20vw] pr-[20vw] bg-secondary-dark rounded-l-[20px] border-l-4;
+	@apply ml-[20vw] rounded-l-[20px] border-l-4 bg-secondary-dark pr-[20vw];
 }
 .offset-right {
-  @apply mr-[20vw] pl-[20vw] bg-secondary-light rounded-r-[20px] border-r-4;
-}
-
-.button-pressed {
-  @apply border-t-[4px] border-b-[4px] ;
-}
-.button-released {
-  @apply border-b-[8px] ;
+	@apply mr-[20vw] rounded-r-[20px] border-r-4 bg-secondary-light pl-[20vw];
 }
 
 .diagonal {
-  @apply bg-gradient-to-tr from-secondary-light to-tertiary-dark; 
+	@apply bg-gradient-to-tr from-secondary-light to-tertiary-dark;
 }
 
-.btn-add-task{
-  @apply bg-red-500 p-4 rounded-lg border-2 border-black
-  ;
+.btn-add-task {
+	@apply rounded-lg border-2 border-black bg-red-500 p-4;
+}
+
+/* Animation classes */
+.scale-95 {
+	transform: scale(0.95);
+}
+
+.scale-90 {
+	transform: scale(0.9);
+}
+
+.translate-x-0 {
+	transform: translateX(0);
+}
+
+.translate-x-full {
+	transform: translateX(100%);
+}
+
+.-translate-x-full {
+	transform: translateX(-100%);
+}
+
+.translate-y-0 {
+	transform: translateY(0);
+}
+
+.translate-y-full {
+	transform: translateY(100%);
+}
+
+.opacity-100 {
+	opacity: 1;
+}
+
+.opacity-0 {
+	opacity: 0;
+}
+
+/* Button press animation classes */
+.button-pressed {
+	@apply border-b-[0px] border-t-[8px];
+}
+
+.button-default {
+	@apply border-b-[8px] border-t-[0px];
 }
