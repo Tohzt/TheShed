@@ -2,12 +2,17 @@ import React from 'react'
 import ProfileIcon from './ProfileIcon'
 //import { useSession } from 'next-auth/react';
 import {api} from '../utils/api'
+import {motion, useAnimation} from 'framer-motion'
 
 interface HeaderProps {
 	colorClass?: string
+	colorHex?: string
 }
 
-const Header: React.FC<HeaderProps> = ({colorClass = 'bg-secondary'}) => {
+const Header: React.FC<HeaderProps> = ({
+	colorClass = 'bg-secondary',
+	colorHex,
+}) => {
 	//const { data: session } = useSession();
 	//const user = session ? session.user : null
 	//const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -25,26 +30,50 @@ const Header: React.FC<HeaderProps> = ({colorClass = 'bg-secondary'}) => {
 
 	const isMobile = width <= 768
 
+	// Framer Motion animation for color
+	const color = colorHex || '#00b0ff'
+	const transition = {duration: 0.5}
+
 	return (
-		<div className=''>
-			<div className={`header-profile-container ${colorClass}`}></div>
-			<div className={`header-profile-square ${colorClass}`}></div>
-			<div className={`header-profile-gap ${colorClass}`}></div>
+		<div className='fixed left-0 top-0 z-50 w-full'>
+			<motion.div
+				className='header-profile-container'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			/>
+			<motion.div
+				className='header-profile-square'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			/>
+			<motion.div
+				className='header-profile-gap'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			/>
 			<div className='header-icon'></div>
 			<div className='header-icon-inner'></div>
 			<ProfileIcon />
-			<div className={`header-profile-rectangle ${colorClass}`}>
+			<motion.div
+				className='header-profile-rectangle'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			>
 				<div className='w-full'>
-					<div className={`header-text ${colorClass}`}>
+					<motion.div
+						className='header-text'
+						animate={{backgroundColor: color}}
+						transition={transition}
+					>
 						<div className='-center flex-col gap-1'>
 							<span className='text-[3em] font-bold text-white'>The</span>
 							<span className='-translate-x-2 text-[3em] font-bold text-white'>
 								Shed
 							</span>
 						</div>
-					</div>
+					</motion.div>
 				</div>
-			</div>
+			</motion.div>
 		</div>
 	)
 }

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import Header from '../../components/header'
+// import Header from '../../components/header'
 import Footer from '../../components/Footer'
 import AnimatedButtonList from '../../components/AnimatedButtonList'
 import {usePageTransition} from '../../hooks/usePageTransition'
@@ -10,6 +10,7 @@ interface ButtonItem {
 	path: string
 	style?: string
 	type?: 'internal' | 'external'
+	disabled?: boolean
 }
 
 const socialButtons: ButtonItem[] = [
@@ -45,7 +46,8 @@ const SocialsPage = () => {
 		animationDuration: 400,
 	})
 
-	const [headerColor] = React.useState(getRubricColor('socials').primary)
+	const [headerColorHex] = React.useState(getRubricColor('socials').primaryHex)
+	const backgroundClass = getRubricColor('socials').background
 
 	const handleButtonClick = (button: ButtonItem, index: number) => {
 		console.log(`Clicked ${button.label} at index ${index}`)
@@ -62,14 +64,11 @@ const SocialsPage = () => {
 	return (
 		true && (
 			<>
-				<main className='overflow-x-hidden bg-gradient-to-t from-primary-light to-primary-dark'>
-					<Header colorClass={headerColor} />
+				<main className={`overflow-x-hidden ${backgroundClass}`}>
+					{/* <Header colorHex={headerColorHex} /> */}
 
 					<div className='screen -center flex-col justify-start'>
 						<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>
-							<h1 className='mb-8 text-center font-mono text-2xl font-extrabold text-white'>
-								Socials
-							</h1>
 							<AnimatedButtonList
 								buttons={socialButtons}
 								onButtonClick={handleButtonClick}
