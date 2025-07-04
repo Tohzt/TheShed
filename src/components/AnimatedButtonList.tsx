@@ -8,6 +8,7 @@ interface ButtonItem {
 	style?: string
 	type?: 'internal' | 'external'
 	onClick?: () => void
+	disabled?: boolean
 }
 
 interface AnimatedButtonListProps {
@@ -26,8 +27,8 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 	onTransitionStart,
 	onTransitionEnd,
 	className = '',
-	staggerDelay = 100,
-	animationDuration = 300,
+	staggerDelay = 50,
+	animationDuration = 200,
 }) => {
 	const [pressedIndex, setPressedIndex] = useState<number | null>(null)
 	const [isTransitioning, setIsTransitioning] = useState(false)
@@ -45,7 +46,27 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 	}, [buttons.length])
 
 	const handleButtonClick = async (button: ButtonItem, index: number) => {
+		// Don't do anything if transitioning
 		if (isTransitioning) return
+
+		// Handle disabled buttons with shake animation
+		if (button.disabled) {
+			// Trigger shake animation by temporarily adding shake class
+			const buttonElement = document.querySelector(
+				`[data-button-index="${index}"]`
+			) as HTMLElement
+			if (buttonElement) {
+				const shakeDirection =
+					index % 2 === 0 ? 'button-shake-right' : 'button-shake-left'
+				buttonElement.classList.add(shakeDirection)
+
+				// Remove shake class after animation completes
+				setTimeout(() => {
+					buttonElement.classList.remove(shakeDirection)
+				}, 300)
+			}
+			return
+		}
 
 		setIsTransitioning(true)
 		setPressedIndex(index)
@@ -61,25 +82,39 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 		}
 
 		// Wait for button press effect (hold at bottom)
-		await new Promise((resolve) => setTimeout(resolve, 250))
+		await new Promise((resolve) => setTimeout(resolve, 100))
 
 		// Release button
 		setPressedIndex(null)
 
 		// Wait for button to return to default (wait for border animation to complete)
-		await new Promise((resolve) => setTimeout(resolve, 250))
+		await new Promise((resolve) => setTimeout(resolve, 100))
 
-		// Finally: Animate all buttons sliding out at the same time
-		setButtonStates(buttons.map(() => false))
+		// Check if this button should trigger a page transition animation
+		const buttonColors = getButtonColor(button)
+		const shouldAnimatePageTransition =
+			buttonColors.shouldAnimatePageTransition ?? true
 
-		// Wait for slide out animation
-		await new Promise((resolve) => setTimeout(resolve, animationDuration))
+		if (shouldAnimatePageTransition) {
+			// Animate all buttons sliding out at the same time
+			setButtonStates(buttons.map(() => false))
 
-		// Navigate to new page
-		if (button.type === 'external') {
-			window.open(button.path, '_blank')
+			// Wait for slide out animation
+			await new Promise((resolve) => setTimeout(resolve, animationDuration))
+
+			// Navigate to new page
+			if (button.type === 'external') {
+				window.open(button.path, '_blank')
+			} else {
+				await router.push(button.path)
+			}
 		} else {
-			await router.push(button.path)
+			// For external links that shouldn't animate page transition, just open the link
+			if (button.type === 'external') {
+				window.open(button.path, '_blank')
+			} else {
+				await router.push(button.path)
+			}
 		}
 
 		// Reset states
@@ -113,11 +148,12 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 		}
 
 		if (button.type === 'external') {
-			// Other external links get a neutral color
+			// Other external links get a neutral color with no page transition
 			return {
 				primary: 'bg-gray-600',
 				secondary: 'bg-gray-700',
 				text: 'text-white',
+				shouldAnimatePageTransition: false,
 			}
 		}
 
@@ -136,8 +172,13 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 		const buttonColors = getButtonColor(button)
 		const colorStyle =
 			index % 2 === 0 ? buttonColors.secondary : buttonColors.primary
-		const pressStyle =
-			pressedIndex === index ? ' button-pressed' : ' button-default'
+
+		// Handle disabled state - disabled buttons have equal borders and no press animation
+		const pressStyle = button.disabled
+			? ' button-disabled'
+			: pressedIndex === index
+			? ' button-pressed'
+			: ' button-default'
 
 		// Slide direction based on button orientation (flipped)
 		const slideDirection = index % 2 === 0 ? 'right' : 'left'
@@ -151,10 +192,11 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 	}
 
 	return (
-		<div className='flex flex-col gap-4'>
+		<div className='flex flex-col gap-4 overflow-x-hidden'>
 			{buttons.map((button, index) => (
 				<div
 					key={`${button.label}-${index}`}
+					data-button-index={index}
 					className={getButtonStyle(button, index, buttonStates[index])}
 					style={{
 						transition: `all ${animationDuration}ms ease-out ${
@@ -163,7 +205,9 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 					}}
 					onClick={() => handleButtonClick(button, index)}
 				>
-					<div className='w-[80%] text-center'>{button.label}</div>
+					<div className='pointer-events-none w-[80%] text-center'>
+						{button.label}
+					</div>
 				</div>
 			))}
 		</div>

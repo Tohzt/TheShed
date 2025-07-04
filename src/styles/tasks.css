@@ -1,64 +1,67 @@
 /**/
 .tasks-page {
-  @applu 
-  flex 
-  screen 
-  flex-col 
-  items-center 
-  justify-between 
-  bg-gradient-to-b 
-  from-primary-dark 
-  to-primary-light
-  ;
+	@apply screen relative
+		flex
+		flex-col
+		justify-between
+		bg-gradient-to-b
+		from-primary-dark
+		to-primary-light;
 }
-.t-p-container{
-  width: fit-content;
-  margin: auto;
-  @apply
-  p-4 mt-[25vh]
-  bg-secondary-dark 
-  border-2 border-black 
-  rounded-2xl 
-  ;
+.t-p-container {
+	@apply mx-auto
+    mt-[150px]
+		w-min
+		rounded-2xl
+		border-2
+		border-black bg-secondary-dark
+		p-4;
 }
 .t-p-content {
-  @apply
-    h-full 
-    flex flex-1
-    flex-col
-    justify-center
-    items-center
-    w-[80vw]
+	@apply flex 
+    h-full w-[80vw]
     max-w-[600px]
-    bg-secondary-light
+    max-w-screen-sm
+    flex-1
+    flex-col
+    items-center
+    justify-center
     overflow-auto 
     rounded-lg 
-    p-2 
-    max-w-screen-sm
-  ;
+    bg-secondary-light 
+    p-2;
 }
 
 .task-container {
-  @apply
-    flex-col
-    justify-center
-    items-center
+	@apply h-fit
     w-[80%]
-    h-fit
-    p-8
-    bg-white
+    flex-col
+    items-center
+    justify-center
     rounded-xl
-  ;
+    bg-white
+    p-8;
 }
 
 .task-item-container {
-  @apply
-    flex-row
+	@apply h-fit
+    w-full
+    flex-row 
     justify-between
-    w-full 
-    h-fit
-    p-2
-    bg-gray-300
-    border-2 border-black
     rounded-md
+    border-2
+    border-black bg-gray-300
+    p-2;
+}
+
+.back-btn {
+	@apply mx-auto
+    h-[6vh]
+    w-[40vw]
+    rounded-[20px]
+    border-l-[4px] border-r-[4px] border-white;
+}
+
+.back-btn-outer {
+	@apply absolute bottom-0 left-0 right-0 flex justify-center;
 }

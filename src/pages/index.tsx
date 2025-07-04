@@ -1,10 +1,9 @@
 import React from 'react'
 import Head from 'next/head'
-import Header from '../components/header'
+// import Header from '../components/header'
 import Footer from '../components/Footer'
 import AnimatedButtonList from '../components/AnimatedButtonList'
 import {usePageTransition} from '../hooks/usePageTransition'
-import {getRubricColor} from '../utils/colorRubric'
 //import SignInOut from "../components/signInOut"
 //import { useStore } from "../../store/store"
 
@@ -13,6 +12,7 @@ interface ButtonItem {
 	path: string
 	style?: string
 	type?: 'internal' | 'external'
+	disabled?: boolean
 }
 
 const homeButtons: ButtonItem[] = [
@@ -31,6 +31,7 @@ const homeButtons: ButtonItem[] = [
 		path: '/',
 		style: 'bg-primary',
 		type: 'internal',
+		disabled: true,
 	},
 	{
 		label: 'arcade',
@@ -48,8 +49,6 @@ const Home: React.FC = () => {
 	const {isTransitioning} = usePageTransition({
 		animationDuration: 400,
 	})
-
-	const [headerColor] = React.useState(getRubricColor('home').primary)
 
 	const handleButtonClick = (button: ButtonItem, index: number) => {
 		console.log(`Clicked ${button.label} at index ${index}`)
@@ -75,11 +74,11 @@ const Home: React.FC = () => {
 				<link rel='manifest' href='/manifest.json' />
 			</Head>
 
-			<main className='fixed overflow-x-hidden bg-gradient-to-t from-primary-light to-primary-dark'>
-				<Header colorClass={headerColor} />
+			<main className='overflow-x-hidden bg-gradient-to-t from-primary-light to-primary-dark'>
+				{/* <Header /> */}
 
 				<div className='screen -center flex-col justify-start'>
-					<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>
+					<div className='w-full flex-col gap-4 overflow-y-auto pt-[55vw] sm:pt-[15vh]'>
 						<AnimatedButtonList
 							buttons={homeButtons}
 							onButtonClick={handleButtonClick}
