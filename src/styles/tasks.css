@@ -53,15 +53,3 @@
     border-black bg-gray-300
     p-2;
 }
-
-.back-btn {
-	@apply mx-auto
-    h-[6vh]
-    w-[40vw]
-    rounded-[20px]
-    border-l-[4px] border-r-[4px] border-white;
-}
-
-.back-btn-outer {
-	@apply absolute bottom-0 left-0 right-0 flex justify-center;
-}
