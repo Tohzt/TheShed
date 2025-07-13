@@ -84,9 +84,10 @@ const Home: React.FC = () => {
 		void fetchTestData()
 	}, [])
 
-	const handleButtonClick = (button: ButtonItem, index: number) => {}
-	const handleTransitionStart = () => {}
-	const handleTransitionEnd = () => {}
+	// Remove unused empty functions
+	// const handleButtonClick = (button: ButtonItem, index: number) => {}
+	// const handleTransitionStart = () => {}
+	// const handleTransitionEnd = () => {}
 
 	//const toggleDarkMode = useStore(state => state.toggle_dark_mode)
 	//const darkMode = useStore(state => state.dark_mode)
@@ -110,9 +111,10 @@ const Home: React.FC = () => {
 						</h2>
 						<AnimatedButtonList
 							buttons={homeButtons}
-							onButtonClick={handleButtonClick}
-							onTransitionStart={handleTransitionStart}
-							onTransitionEnd={handleTransitionEnd}
+							// Remove or set to undefined if not required
+							// onButtonClick={undefined}
+							// onTransitionStart={undefined}
+							// onTransitionEnd={undefined}
 							staggerDelay={150}
 							animationDuration={400}
 						/>
