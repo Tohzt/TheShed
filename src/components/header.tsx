@@ -1,45 +1,80 @@
-import React from 'react';
-import ProfileIcon from './ProfileIcon';
+import React from 'react'
+import ProfileIcon from './ProfileIcon'
 //import { useSession } from 'next-auth/react';
-import { api } from "../utils/api";
+import {api} from '../utils/api'
+import {motion, useAnimation} from 'framer-motion'
 
-const Header = () => {
-  //const { data: session } = useSession();
-  //const user = session ? session.user : null
-  //const hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const [width, setWidth] = React.useState<number>(900);
+interface HeaderProps {
+	colorClass?: string
+	colorHex?: string
+}
 
-  function handleWindowSizeChange() {
-    setWidth(window.innerWidth);
-  }
-  React.useEffect(() => {
-    window.addEventListener('resize', handleWindowSizeChange);
-    return () => {
-      window.removeEventListener('resize', handleWindowSizeChange);
-    }
-  }, []);
+const Header: React.FC<HeaderProps> = ({
+	colorClass = 'bg-secondary',
+	colorHex,
+}) => {
+	//const { data: session } = useSession();
+	//const user = session ? session.user : null
+	//const hello = api.example.hello.useQuery({ text: "from tRPC" });
+	const [width, setWidth] = React.useState<number>(900)
 
-  const isMobile = width <= 768;
+	function handleWindowSizeChange() {
+		setWidth(window.innerWidth)
+	}
+	React.useEffect(() => {
+		window.addEventListener('resize', handleWindowSizeChange)
+		return () => {
+			window.removeEventListener('resize', handleWindowSizeChange)
+		}
+	}, [])
 
-  return (
-    <div className="">
-      <div className="header-profile-container"></div>
-      <div className="header-profile-square"></div>
-      <div className="header-profile-gap"></div>
-      <div className="header-icon"></div>
-      <div className="header-icon-inner"></div>
-      <ProfileIcon />
-      <div className="header-profile-rectangle">
-        <div className="w-full">
-          <div className="header-text">
-            <div className="flex-col -center gap-1">
-              <span className="text-[3em] font-bold text-white">The</span>
-              <span className="-translate-x-2 text-[3em] font-bold text-white">Shed</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-export default Header;
+	const isMobile = width <= 768
+
+	// Framer Motion animation for color
+	const color = colorHex || '#00b0ff'
+	const transition = {duration: 0.5}
+
+	return (
+		<div className='fixed left-0 top-0 z-50 w-full'>
+			<motion.div
+				className='header-profile-container'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			/>
+			<motion.div
+				className='header-profile-square'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			/>
+			<motion.div
+				className='header-profile-gap'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			/>
+			<div className='header-icon'></div>
+			<div className='header-icon-inner'></div>
+			<ProfileIcon />
+			<motion.div
+				className='header-profile-rectangle'
+				animate={{backgroundColor: color}}
+				transition={transition}
+			>
+				<div className='w-full'>
+					<motion.div
+						className='header-text'
+						animate={{backgroundColor: color}}
+						transition={transition}
+					>
+						<div className='-center flex-col gap-1'>
+							<span className='text-[3em] font-bold text-white'>The</span>
+							<span className='-translate-x-2 text-[3em] font-bold text-white'>
+								Shed
+							</span>
+						</div>
+					</motion.div>
+				</div>
+			</motion.div>
+		</div>
+	)
+}
+export default Header

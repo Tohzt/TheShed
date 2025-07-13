@@ -1,39 +1,25 @@
-import React from 'react';
-import { getProviders } from "next-auth/react"
-//import { getProviders, signIn, signOut, useSession } from "next-auth/react"
-
-const signInWithProvider = async () => {
-  const providers = await getProviders();
-  const current = Object.values(providers)[0];
-
-}
+import React from 'react'
+import {signIn, signOut, useSession} from 'next-auth/react'
 
 const SignIn: React.FC = () => {
-  //const { data: sessionData } = useSession();
-  const handleSignInOut = () => {
-    {/*
-    if (!sessionData) {
-      await signInWithProvider();
-    }
-    */}
-  }
+	const {data: sessionData} = useSession()
 
-  return (
-    <button
-      className="w-[5em] h-[5em] bg-primary-light text-white rounded-2xl border-2 border-white"
-      onClick={() => void handleSignInOut()}
-    >
-      Sign In
-    </button>
-  );
-};
+	const handleSignInOut = async () => {
+		if (!sessionData) {
+			await signIn('discord')
+		} else {
+			await signOut()
+		}
+	}
 
-export default SignIn;
+	return (
+		<button
+			className='h-[5em] w-[5em] rounded-2xl border-2 border-white bg-primary-light text-white'
+			onClick={() => void handleSignInOut()}
+		>
+			{sessionData ? 'Sign Out' : 'Sign In'}
+		</button>
+	)
+}
 
-/*
-  signIn(current.id)
-    .then(() => )
-    .catch((error) => {
-      console.log(error);
-    });
-  */
+export default SignIn
