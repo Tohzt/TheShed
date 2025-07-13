@@ -55,28 +55,12 @@ const Home: React.FC = () => {
 	useEffect(() => {
 		const fetchTestData = async () => {
 			try {
-				// First test the simple API
-				console.log('Testing simple API...')
-				const testResponse = await fetch('/api/test')
-				if (testResponse.ok) {
-					const testResult = (await testResponse.json()) as unknown as {
-						message: string
-					}
-					console.log('Simple API result:', testResult)
-				} else {
-					console.log('Simple API failed:', testResponse.status)
-				}
-
-				// Then test the database API
-				console.log('Testing database API...')
 				const response = await fetch('/api/test-database')
-				console.log('Database API response status:', response.status)
-
 				type TestDataResponse = {
 					data?: Array<{message: string}>
 					error?: string
 				}
-				const result = (await response.json()) as unknown as TestDataResponse
+				const result = (await response.json()) as TestDataResponse
 				if (response.ok) {
 					if (result.data && result.data[0]) {
 						setTestMessage(result.data[0].message)
@@ -89,7 +73,6 @@ const Home: React.FC = () => {
 					)
 				}
 			} catch (error) {
-				console.error('Error fetching test data:', error)
 				setTestMessage(
 					`Error: ${error instanceof Error ? error.message : 'Unknown error'}`
 				)
@@ -101,17 +84,9 @@ const Home: React.FC = () => {
 		void fetchTestData()
 	}, [])
 
-	const handleButtonClick = (button: ButtonItem, index: number) => {
-		console.log(`Clicked ${button.label} at index ${index}`)
-	}
-
-	const handleTransitionStart = () => {
-		console.log('Transition starting...')
-	}
-
-	const handleTransitionEnd = () => {
-		console.log('Transition ended')
-	}
+	const handleButtonClick = (button: ButtonItem, index: number) => {}
+	const handleTransitionStart = () => {}
+	const handleTransitionEnd = () => {}
 
 	//const toggleDarkMode = useStore(state => state.toggle_dark_mode)
 	//const darkMode = useStore(state => state.dark_mode)
