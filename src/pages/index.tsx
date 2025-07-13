@@ -66,11 +66,16 @@ const Home: React.FC = () => {
 						setTestMessage('No data found')
 					}
 				} else {
-					setTestMessage('Failed to fetch data')
+					const errorData = await response.json()
+					setTestMessage(
+						`Failed to fetch data: ${errorData.error || 'Unknown error'}`
+					)
 				}
 			} catch (error) {
 				console.error('Error fetching test data:', error)
-				setTestMessage('Error connecting to database')
+				setTestMessage(
+					`Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+				)
 			} finally {
 				setIsLoading(false)
 			}
