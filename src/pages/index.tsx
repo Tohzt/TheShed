@@ -66,7 +66,7 @@ const Home: React.FC = () => {
 						setTestMessage('No data found')
 					}
 				} else {
-					const errorData = await response.json()
+					const errorData = (await response.json()) as {error?: string}
 					setTestMessage(
 						`Failed to fetch data: ${errorData.error || 'Unknown error'}`
 					)
