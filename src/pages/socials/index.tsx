@@ -1,87 +1,90 @@
-import * as React from "react"
-import Header from "../../components/header"
-import Footer from "../../components/Footer"
-import SocialButtons from "../../components/SocialButtons"
+import * as React from 'react'
+// import Header from '../../components/header'
+import Footer from '../../components/Footer'
+import AnimatedButtonList from '../../components/AnimatedButtonList'
+import {usePageTransition} from '../../hooks/usePageTransition'
+import {getRubricColor} from '../../utils/colorRubric'
 
-interface socialType {
-  [key: string]: {
-    path: string,
-    style: string
-  }
-}
-const socials: socialType = {
-  "Personal Instagram": {
-    path: "https://www.instagram.com/im_just.a.me",
-    style: ""
-  },
-  "Tattoo Instagram": {
-    path: "https://www.instagram.com/tat.tohzt",
-    style: ""
-  },
-  "Personal YouTube": {
-    path: "https://www.youtube.com/c/godsautobiography",
-    style: ""
-  },
-  "LetsClone YouTube": {
-    path: "https://www.youtube.com/c/letsclone",
-    style: ""
-  },
+interface ButtonItem {
+	label: string
+	path: string
+	style?: string
+	type?: 'internal' | 'external'
+	disabled?: boolean
 }
 
-const displaySocials = () => {
-  return Object.keys(socials).map((page, index) => {
-    const style = socials[page]?.style
-    return (
-      <SocialButtons
-        key={index}
-        path={socials[page]?.path}
-        label={page}
-        style={style}
-      />
-    )
-  })
-}
+const socialButtons: ButtonItem[] = [
+	{
+		label: 'Personal Instagram',
+		path: 'https://www.instagram.com/im_just.a.me',
+		type: 'external',
+	},
+	{
+		label: 'Tattoo Instagram',
+		path: 'https://www.instagram.com/tat.tohzt',
+		type: 'external',
+	},
+	{
+		label: 'Personal YouTube',
+		path: 'https://www.youtube.com/c/godsautobiography',
+		type: 'external',
+	},
+	{
+		label: 'LetsClone YouTube',
+		path: 'https://www.youtube.com/c/letsclone',
+		type: 'external',
+	},
+	{
+		label: 'Back',
+		path: '/',
+		type: 'internal',
+	},
+]
 
 const SocialsPage = () => {
-  return (true &&
-    <>
-      <Header />
+	const {isTransitioning} = usePageTransition({
+		animationDuration: 400,
+	})
 
-      <div className="flex screen flex-col items-center justify-between bg-gradient-to-b from-primary-dark to-primary-light">
-        <div className="header-margin"></div>
-        <div
-          className="
-            flex 
-            overflow-hidden
-            max-h-[60vh]
-            w-[90vw]
-            p-4 mt-[25vh]
-            bg-secondary-dark 
-            border-4 border-white 
-            rounded-2xl 
-            text-white text-center
-          ">
-          <div 
-            className="
-              bg-secondary-light 
-              flex-col -center 
-              gap-2
-              h-full w-full 
-              overflow-auto 
-              rounded-lg p-2
-              pb-8
-            ">
-            <h1 className="mb-8">Socials</h1>
-            {displaySocials()}
-          </div>
-        </div>
-        <div className="footer-margin"></div>
-      </div>
+	const [headerColorHex] = React.useState(getRubricColor('socials').primaryHex)
+	const backgroundClass = getRubricColor('socials').background
 
-      <Footer goBack={true} signIn={false} signOut={false} />
-    </>
-  );
-};
+	const handleButtonClick = (button: ButtonItem, index: number) => {
+		console.log(`Clicked ${button.label} at index ${index}`)
+	}
+
+	const handleTransitionStart = () => {
+		console.log('Transition starting...')
+	}
+
+	const handleTransitionEnd = () => {
+		console.log('Transition ended')
+	}
+
+	return (
+		true && (
+			<>
+				<main className={`overflow-x-hidden ${backgroundClass}`}>
+					{/* <Header colorHex={headerColorHex} /> */}
+
+					<div className='screen -center flex-col justify-start'>
+						<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>
+							<AnimatedButtonList
+								buttons={socialButtons}
+								onButtonClick={handleButtonClick}
+								onTransitionStart={handleTransitionStart}
+								onTransitionEnd={handleTransitionEnd}
+								staggerDelay={150}
+								animationDuration={400}
+							/>
+						</div>
+					</div>
+
+					<Footer goBack={false} signIn={false} signOut={false} />
+				</main>
+			</>
+		)
+	)
+}
 
 export default SocialsPage
-
