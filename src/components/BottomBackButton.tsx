@@ -36,7 +36,9 @@ const BottomBackButton: React.FC = () => {
 		<div className='back-btn-outer'>
 			<div
 				className={`${backButtonStyle} back-btn-transition`}
-				onClick={handleClick}
+				onClick={() => {
+					void handleClick()
+				}}
 			>
 				<div className='pointer-events-none w-[80%] text-center'>Back</div>
 			</div>

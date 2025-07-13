@@ -1,18 +1,14 @@
 import React from 'react'
 import ProfileIcon from './ProfileIcon'
 //import { useSession } from 'next-auth/react';
-import {api} from '../utils/api'
-import {motion, useAnimation} from 'framer-motion'
+import {motion} from 'framer-motion'
 
 interface HeaderProps {
 	colorClass?: string
 	colorHex?: string
 }
 
-const Header: React.FC<HeaderProps> = ({
-	colorClass = 'bg-secondary',
-	colorHex,
-}) => {
+const Header: React.FC<HeaderProps> = ({colorHex}) => {
 	//const { data: session } = useSession();
 	//const user = session ? session.user : null
 	//const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -28,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({
 		}
 	}, [])
 
-	const isMobile = width <= 768
+	// const isMobile = width <= 768
 
 	// Framer Motion animation for color
 	const color = colorHex || '#00b0ff'

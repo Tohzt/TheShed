@@ -46,9 +46,9 @@ const homeButtons: ButtonItem[] = [
 ]
 
 const Home: React.FC = () => {
-	const {isTransitioning} = usePageTransition({
-		animationDuration: 400,
-	})
+	// const {isTransitioning} = usePageTransition({
+	// 	animationDuration: 400,
+	// })
 
 	const [testMessage, setTestMessage] = useState<string>('Loading...')
 	const [isLoading, setIsLoading] = useState(true)
@@ -58,7 +58,9 @@ const Home: React.FC = () => {
 			try {
 				const response = await fetch('/api/test-database')
 				if (response.ok) {
-					const result = await response.json()
+					const result = (await response.json()) as {
+						data?: Array<{message: string}>
+					}
 					if (result.data && result.data[0]) {
 						setTestMessage(result.data[0].message)
 					} else {
@@ -75,7 +77,7 @@ const Home: React.FC = () => {
 			}
 		}
 
-		fetchTestData()
+		void fetchTestData()
 	}, [])
 
 	const handleButtonClick = (button: ButtonItem, index: number) => {

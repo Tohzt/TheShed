@@ -1,21 +1,19 @@
-import React from 'react';
-import SignIn from "./signIn"
-import SignOut from "./signOut"
-import GoBack from "./goBack";
+import React from 'react'
+import GoBack from './goBack'
 //import { useSession } from "next-auth/react"
 
 interface FooterProps {
-  goBack: boolean;
-  signIn: boolean;
-  signOut: boolean;
+	goBack: boolean
+	signIn: boolean
+	signOut: boolean
 }
 
 const Footer = (props: FooterProps) => {
-  //const { data: sessionData } = useSession();
+	//const { data: sessionData } = useSession();
 
-  return (
-    <div>
-    {/*
+	return (
+		<div>
+			{/*
       {props.signIn && !sessionData &&
         <div className="abs-br w-[6em] h-[6em] overflow-hidden flex -center bg-secondary-dark rounded-tl-2xl border-l-4 border-t-2 border-white">
           <SignIn />
@@ -27,12 +25,12 @@ const Footer = (props: FooterProps) => {
         </div>
       }
       */}
-      {props.goBack &&
-        <div className="abs-bl w-[6em] h-[6em] overflow-hidden flex -center bg-secondary-dark rounded-tr-2xl border-r-4 border-t-2 border-white">
-          <GoBack />
-        </div>
-      }
-    </div>
-  );
-};
-export default Footer;
+			{props.goBack && (
+				<div className='abs-bl -center flex h-[6em] w-[6em] overflow-hidden rounded-tr-2xl border-r-4 border-t-2 border-white bg-secondary-dark'>
+					<GoBack />
+				</div>
+			)}
+		</div>
+	)
+}
+export default Footer
