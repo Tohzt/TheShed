@@ -2,7 +2,6 @@ import * as React from 'react'
 //import { useSession } from "next-auth/react";
 import Footer from '../../components/Footer'
 import {getRubricColor} from '../../utils/colorRubric'
-import {useRouter} from 'next/router'
 import BottomBackButton from '../../components/BottomBackButton'
 
 const Tasks = () => {
