@@ -43,7 +43,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			setButtonStates(buttons.map(() => true))
 		}, 100)
 		return () => clearTimeout(timer)
-	}, [buttons.length])
+	}, [buttons])
 
 	const handleButtonClick = async (button: ButtonItem, index: number) => {
 		// Don't do anything if transitioning
@@ -203,7 +203,9 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 							buttonStates[index] ? index * 25 : 0
 						}ms`,
 					}}
-					onClick={() => handleButtonClick(button, index)}
+					onClick={() => {
+						void handleButtonClick(button, index)
+					}}
 				>
 					<div className='pointer-events-none w-[80%] text-center'>
 						{button.label}

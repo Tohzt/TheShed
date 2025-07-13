@@ -42,11 +42,11 @@ const socialButtons: ButtonItem[] = [
 ]
 
 const SocialsPage = () => {
-	const {isTransitioning} = usePageTransition({
-		animationDuration: 400,
-	})
+	// const {isTransitioning} = usePageTransition({
+	// 	animationDuration: 400,
+	// })
 
-	const [headerColorHex] = React.useState(getRubricColor('socials').primaryHex)
+	// const [headerColorHex] = React.useState(getRubricColor('socials').primaryHex)
 	const backgroundClass = getRubricColor('socials').background
 
 	const handleButtonClick = (button: ButtonItem, index: number) => {

@@ -1,22 +1,23 @@
-import React from 'react';
+import React from 'react'
+import Image from 'next/image'
 //import { useSession } from "next-auth/react";
-import icon from '../../public/icon-192x192.png';
+import icon from '../../public/icon-192x192.png'
 
 const ProfileIcon: React.FC = () => {
-  //const { data: session } = useSession();
-  return (
-    <div className="sm:hidden flex -center border-4 border-black abs-tl w-[32vw] h-[32vw] ml-8 mt-8 overflow-hidden rounded-full">
-      <img src={icon.src}></img>
-    </div>
-  );
-};
+	//const { data: session } = useSession();
+	return (
+		<div className='-center abs-tl ml-8 mt-8 flex h-[32vw] w-[32vw] overflow-hidden rounded-full border-4 border-black sm:hidden'>
+			<Image src={icon} alt='Profile icon' width={128} height={128} />
+		</div>
+	)
+}
 
-export default ProfileIcon;
+export default ProfileIcon
 
 /*
       {session ? (
       <img src={session?.user?.image}></img>
       ) : (
-      <img src={icon.src}></img>
+			<Image src={icon} alt="Profile icon" width={128} height={128} />
       )}
   */

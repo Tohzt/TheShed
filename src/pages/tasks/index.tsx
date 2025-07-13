@@ -23,35 +23,35 @@ const Tasks = () => {
 		return () => clearTimeout(timer)
 	}, [])
 
-	const handleBackButtonClick = async () => {
-		if (isTransitioning) return
+	// const handleBackButtonClick = async () => {
+	// 	if (isTransitioning) return
 
-		setIsTransitioning(true)
-		setIsBackButtonPressed(true)
+	// 	setIsTransitioning(true)
+	// 	setIsBackButtonPressed(true)
 
-		// Wait for button press effect
-		await new Promise((resolve) => setTimeout(resolve, 100))
+	// 	// Wait for button press effect
+	// 	await new Promise((resolve) => setTimeout(resolve, 100))
 
-		// Release button
-		setIsBackButtonPressed(false)
+	// 	// Release button
+	// 	setIsBackButtonPressed(false)
 
-		// Wait for button to return to default
-		await new Promise((resolve) => setTimeout(resolve, 100))
+	// 	// Wait for button to return to default
+	// 	await new Promise((resolve) => setTimeout(resolve, 100))
 
-		// Animate button sliding out
-		setIsBackButtonVisible(false)
+	// 	// Animate button sliding out
+	// 	setIsBackButtonVisible(false)
 
-		// Wait for slide out animation
-		await new Promise((resolve) => setTimeout(resolve, 400))
+	// 	// Wait for slide out animation
+	// 	await new Promise((resolve) => setTimeout(resolve, 400))
 
-		// Navigate back
-		await router.push('/')
-	}
+	// 	// Navigate back
+	// 	await router.push('/')
+	// }
 
-	const backButtonColors = getRubricColor('back')
-	const backButtonStyle = `page-button ${backButtonColors.primary} ${
-		isBackButtonPressed ? 'button-pressed' : 'button-default'
-	} ${isBackButtonVisible ? 'translate-y-0' : 'translate-y-full'}`
+	// const backButtonColors = getRubricColor('back')
+	// const backButtonStyle = `page-button ${backButtonColors.primary} ${
+	// 	isBackButtonPressed ? 'button-pressed' : 'button-default'
+	// } ${isBackButtonVisible ? 'translate-y-0' : 'translate-y-full'}`
 
 	return (
 		true && (
