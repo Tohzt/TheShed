@@ -55,7 +55,21 @@ const Home: React.FC = () => {
 	useEffect(() => {
 		const fetchTestData = async () => {
 			try {
+				// First test the simple API
+				console.log('Testing simple API...')
+				const testResponse = await fetch('/api/test')
+				if (testResponse.ok) {
+					const testResult = await testResponse.json()
+					console.log('Simple API result:', testResult)
+				} else {
+					console.log('Simple API failed:', testResponse.status)
+				}
+
+				// Then test the database API
+				console.log('Testing database API...')
 				const response = await fetch('/api/test-database')
+				console.log('Database API response status:', response.status)
+
 				if (response.ok) {
 					const result = (await response.json()) as {
 						data?: Array<{message: string}>
