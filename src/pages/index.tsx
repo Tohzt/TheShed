@@ -3,7 +3,6 @@ import Head from 'next/head'
 // import Header from '../components/header'
 import Footer from '../components/Footer'
 import AnimatedButtonList from '../components/AnimatedButtonList'
-import {usePageTransition} from '../hooks/usePageTransition'
 //import SignInOut from "../components/signInOut"
 //import { useStore } from "../../store/store"
 

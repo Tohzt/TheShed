@@ -27,7 +27,6 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 	onTransitionStart,
 	onTransitionEnd,
 	className = '',
-	staggerDelay = 50,
 	animationDuration = 200,
 }) => {
 	const [pressedIndex, setPressedIndex] = useState<number | null>(null)
@@ -54,7 +53,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			// Trigger shake animation by temporarily adding shake class
 			const buttonElement = document.querySelector(
 				`[data-button-index="${index}"]`
-			) as HTMLElement
+			)
 			if (buttonElement) {
 				const shakeDirection =
 					index % 2 === 0 ? 'button-shake-right' : 'button-shake-left'
