@@ -59,7 +59,7 @@ const Home: React.FC = () => {
 				console.log('Testing simple API...')
 				const testResponse = await fetch('/api/test')
 				if (testResponse.ok) {
-					const testResult = await testResponse.json()
+					const testResult: {message: string} = await testResponse.json()
 					console.log('Simple API result:', testResult)
 				} else {
 					console.log('Simple API failed:', testResponse.status)
@@ -70,7 +70,10 @@ const Home: React.FC = () => {
 				const response = await fetch('/api/test-database')
 				console.log('Database API response status:', response.status)
 
-				type TestDataResponse = {data?: Array<{message: string}>}
+				type TestDataResponse = {
+					data?: Array<{message: string}>
+					error?: string
+				}
 				const result: TestDataResponse = await response.json()
 				if (response.ok) {
 					if (result.data && result.data[0]) {
@@ -80,7 +83,7 @@ const Home: React.FC = () => {
 					}
 				} else {
 					setTestMessage(
-						`Failed to fetch data: ${(result as any).error || 'Unknown error'}`
+						`Failed to fetch data: ${result.error || 'Unknown error'}`
 					)
 				}
 			} catch (error) {
