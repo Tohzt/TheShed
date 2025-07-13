@@ -70,19 +70,17 @@ const Home: React.FC = () => {
 				const response = await fetch('/api/test-database')
 				console.log('Database API response status:', response.status)
 
+				type TestDataResponse = {data?: Array<{message: string}>}
+				const result: TestDataResponse = await response.json()
 				if (response.ok) {
-					const result = (await response.json()) as {
-						data?: Array<{message: string}>
-					}
 					if (result.data && result.data[0]) {
 						setTestMessage(result.data[0].message)
 					} else {
 						setTestMessage('No data found')
 					}
 				} else {
-					const errorData = (await response.json()) as {error?: string}
 					setTestMessage(
-						`Failed to fetch data: ${errorData.error || 'Unknown error'}`
+						`Failed to fetch data: ${(result as any).error || 'Unknown error'}`
 					)
 				}
 			} catch (error) {
