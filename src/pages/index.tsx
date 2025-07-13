@@ -59,7 +59,9 @@ const Home: React.FC = () => {
 				console.log('Testing simple API...')
 				const testResponse = await fetch('/api/test')
 				if (testResponse.ok) {
-					const testResult: {message: string} = await testResponse.json()
+					const testResult = (await testResponse.json()) as unknown as {
+						message: string
+					}
 					console.log('Simple API result:', testResult)
 				} else {
 					console.log('Simple API failed:', testResponse.status)
@@ -74,7 +76,7 @@ const Home: React.FC = () => {
 					data?: Array<{message: string}>
 					error?: string
 				}
-				const result: TestDataResponse = await response.json()
+				const result = (await response.json()) as unknown as TestDataResponse
 				if (response.ok) {
 					if (result.data && result.data[0]) {
 						setTestMessage(result.data[0].message)
