@@ -8,20 +8,20 @@ import BottomBackButton from '../../components/BottomBackButton'
 const Tasks = () => {
 	//const { data: session } = useSession();
 	const backgroundClass = getRubricColor('tasks').background
-	const router = useRouter()
+	// const router = useRouter()
 
 	// State for back button animation
-	const [isBackButtonVisible, setIsBackButtonVisible] = React.useState(false)
-	const [isBackButtonPressed, setIsBackButtonPressed] = React.useState(false)
-	const [isTransitioning, setIsTransitioning] = React.useState(false)
+	// const [isBackButtonVisible, setIsBackButtonVisible] = React.useState(false)
+	// const [isBackButtonPressed, setIsBackButtonPressed] = React.useState(false)
+	// const [isTransitioning, setIsTransitioning] = React.useState(false)
 
 	// Initialize back button animation on mount
-	React.useEffect(() => {
-		const timer = setTimeout(() => {
-			setIsBackButtonVisible(true)
-		}, 100)
-		return () => clearTimeout(timer)
-	}, [])
+	// React.useEffect(() => {
+	// 	const timer = setTimeout(() => {
+	// 		setIsBackButtonVisible(true)
+	// 	}, 100)
+	// 	return () => clearTimeout(timer)
+	// }, [])
 
 	// const handleBackButtonClick = async () => {
 	// 	if (isTransitioning) return

@@ -12,17 +12,17 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 	//const { data: session } = useSession();
 	//const user = session ? session.user : null
 	//const hello = api.example.hello.useQuery({ text: "from tRPC" });
-	const [width, setWidth] = React.useState<number>(900)
+	// const [width, setWidth] = React.useState<number>(900)
 
-	function handleWindowSizeChange() {
-		setWidth(window.innerWidth)
-	}
-	React.useEffect(() => {
-		window.addEventListener('resize', handleWindowSizeChange)
-		return () => {
-			window.removeEventListener('resize', handleWindowSizeChange)
-		}
-	}, [])
+	// function handleWindowSizeChange() {
+	// 	setWidth(window.innerWidth)
+	// }
+	// React.useEffect(() => {
+	// 	window.addEventListener('resize', handleWindowSizeChange)
+	// 	return () => {
+	// 		window.removeEventListener('resize', handleWindowSizeChange)
+	// 	}
+	// }, [])
 
 	// const isMobile = width <= 768
 

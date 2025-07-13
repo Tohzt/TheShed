@@ -2,7 +2,6 @@ import * as React from 'react'
 // import Header from '../../components/header'
 import Footer from '../../components/Footer'
 import AnimatedButtonList from '../../components/AnimatedButtonList'
-import {usePageTransition} from '../../hooks/usePageTransition'
 import {getRubricColor} from '../../utils/colorRubric'
 
 interface ButtonItem {
