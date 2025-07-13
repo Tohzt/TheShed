@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import Head from 'next/head'
 // import Header from '../components/header'
 import Footer from '../components/Footer'
@@ -50,6 +50,34 @@ const Home: React.FC = () => {
 		animationDuration: 400,
 	})
 
+	const [testMessage, setTestMessage] = useState<string>('Loading...')
+	const [isLoading, setIsLoading] = useState(true)
+
+	useEffect(() => {
+		const fetchTestData = async () => {
+			try {
+				const response = await fetch('/api/test-database')
+				if (response.ok) {
+					const result = await response.json()
+					if (result.data && result.data[0]) {
+						setTestMessage(result.data[0].message)
+					} else {
+						setTestMessage('No data found')
+					}
+				} else {
+					setTestMessage('Failed to fetch data')
+				}
+			} catch (error) {
+				console.error('Error fetching test data:', error)
+				setTestMessage('Error connecting to database')
+			} finally {
+				setIsLoading(false)
+			}
+		}
+
+		fetchTestData()
+	}, [])
+
 	const handleButtonClick = (button: ButtonItem, index: number) => {
 		console.log(`Clicked ${button.label} at index ${index}`)
 	}
@@ -79,6 +107,9 @@ const Home: React.FC = () => {
 
 				<div className='screen -center flex-col justify-start'>
 					<div className='w-full flex-col gap-4 overflow-y-auto pt-[55vw] sm:pt-[15vh]'>
+						<h2 className='mb-4 text-center text-white'>
+							{isLoading ? 'Loading...' : testMessage}
+						</h2>
 						<AnimatedButtonList
 							buttons={homeButtons}
 							onButtonClick={handleButtonClick}
