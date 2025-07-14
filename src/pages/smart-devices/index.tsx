@@ -101,7 +101,7 @@ const SmartDevices = () => {
 				className={`overflow-x-hidden ${backgroundClass} h-screen pl-8 pr-8`}
 			>
 				<div className='smart-devices-page'>
-					<div className='sd-p-container mt-[100px]'>
+					<div className='sd-p-container mt-[120px]'>
 						<div className='sd-p-content'>
 							<h4 className='mb-6 text-2xl font-bold text-white'>
 								Smart Devices

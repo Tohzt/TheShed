@@ -31,7 +31,8 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 	const transition = {duration: 0.5}
 
 	return (
-		<div className='fixed left-0 top-0 z-50 w-full'>
+		<div className='fixed right-0 top-0 z-50 w-[100vw]'>
+			{/*
 			<motion.div
 				className='header-profile-container'
 				animate={{backgroundColor: color}}
@@ -50,8 +51,9 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 			<div className='header-icon'></div>
 			<div className='header-icon-inner'></div>
 			<ProfileIcon />
+			*/}
 			<motion.div
-				className='header-profile-rectangle'
+				className='header-profile-rectangle w-full'
 				animate={{backgroundColor: color}}
 				transition={transition}
 			>
