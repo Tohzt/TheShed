@@ -26,6 +26,11 @@ const homeButtons: ButtonItem[] = [
 		type: 'internal',
 	},
 	{
+		label: 'Smart Devices',
+		path: '/smart-devices',
+		type: 'internal',
+	},
+	{
 		label: 'calendar',
 		path: '/',
 		style: 'bg-primary',
