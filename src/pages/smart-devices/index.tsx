@@ -97,9 +97,11 @@ const SmartDevices = () => {
 				<link rel='icon' href='/tohzt.ico' />
 			</Head>
 
-			<main className={`overflow-x-hidden ${backgroundClass}`}>
-				<div className='smart-devices-page border-4 border-blue-500'>
-					<div className='sd-p-container mt-[150px] border-4 border-green-500'>
+			<main
+				className={`overflow-x-hidden ${backgroundClass} h-screen pl-8 pr-8`}
+			>
+				<div className='smart-devices-page'>
+					<div className='sd-p-container mt-[100px]'>
 						<div className='sd-p-content'>
 							<h4 className='mb-6 text-2xl font-bold text-white'>
 								Smart Devices
@@ -129,7 +131,8 @@ const SmartDevices = () => {
 							)}
 
 							{!loading && !error && devices.length > 0 && (
-								<div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+								<div className='flex flex-col gap-4'>
+									{/*<div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>*/}
 									{devices.map((device) => {
 										const latestReading = device.readings[0]
 										return (
@@ -210,26 +213,6 @@ const SmartDevices = () => {
 									})}
 								</div>
 							)}
-
-							<div className='mt-8 rounded-lg border border-blue-500/30 bg-blue-500/20 p-4'>
-								<h5 className='mb-2 text-lg font-semibold text-white'>
-									ESP32 Integration Guide
-								</h5>
-								<div className='space-y-2 text-sm text-gray-300'>
-									<p>
-										• Your ESP32 should send data to:{' '}
-										<code className='rounded bg-black/30 px-2 py-1'>
-											POST /api/sensors/esp32
-										</code>
-									</p>
-									<p>• Required fields: deviceName, deviceType, location</p>
-									<p>
-										• Optional fields: temperature, humidity, pressure, motion,
-										light
-									</p>
-									<p>• Data format: JSON</p>
-								</div>
-							</div>
 						</div>
 					</div>
 					<div className='flex-1' />
