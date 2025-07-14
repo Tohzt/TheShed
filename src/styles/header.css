@@ -1,71 +1,66 @@
 /**/
 
 .header-background {
-  @apply bg-secondary
-    max-h-[25vh]
-    sm:h-[10vh]
-  ;
+	@apply max-h-[25vh]
+    bg-secondary
+    sm:h-[10vh];
 }
+/*
 .header-profile-container {
-  @apply header-background
-    absolute top-0 left-0
-    w-[50vw] h-[50vw]
+	@apply header-background
+    absolute left-0 top-0
+    h-[50vw] w-[50vw]
     rounded-full 
-    border-b-4 border-r-4 border-white
-  ;
+    border-b-4 border-r-4 border-white;
 }
-
+*/
 .header-text {
-  @apply bg-secondary
-    w-[10em] h-[11vh]
+	@apply m-auto
+    h-[11vh] w-[10em]
+    overflow-hidden
+    rounded-b-lg bg-secondary
+    p-4
+    font-heading text-lg text-white
     sm:h-[13vh]
-    p-4 m-auto
-    sm:pl-8
-    text-white text-lg font-heading
-    rounded-b-lg
     sm:border-b-4 sm:border-white
-    overflow-hidden 
-  ;
+    sm:pl-8;
 }
 
 .header-icon {
-  @apply bg-primary-light 
-    absolute top-0 left-0 
-    w-[40vw] h-[40vw]
-    sm:w-[10vw] sm:h-[10vw]
-    ml-4 mt-4 
-    rounded-full
-    sm:hidden
-  ;
+	@apply absolute 
+    left-0 top-0 ml-4 
+    mt-4 h-[40vw]
+    w-[40vw] rounded-full
+    bg-primary-light sm:hidden 
+    sm:h-[10vw]
+    sm:w-[10vw];
 }
 .header-icon-inner {
-  @apply bg-white 
-    absolute top-0 left-0 
-    w-[38vw] h-[38vw]
-    ml-5 mt-5 
-    rounded-full
-    sm:hidden
-  ;
+	@apply absolute 
+    left-0 top-0 ml-5 
+    mt-5 h-[38vw]
+    w-[38vw] rounded-full 
+    bg-white
+    sm:hidden;
 }
 
+/*
 .header-profile-square {
-  @apply header-background
-    absolute top-0 left-0
-    w-[25vw] h-[50vw]
-    border-b-4 border-white
-  ;
-}
+	@apply header-background
+    absolute left-0 top-0
+    h-[50vw] w-[25vw]
+    border-b-4 border-white;
+} 
+*/
 .header-profile-rectangle {
-  @apply header-background
-    absolute top-0 right-0
+	@apply header-background
+    absolute right-0 top-0
     w-[51vw] 
-    sm:w-screen
-    border-b-4 border-white
-  ;
+    border-b-4
+    border-white sm:w-screen;
 }
 .header-profile-gap {
-  @apply header-background
-    absolute top-0 left-0
-    w-[50vw] h-[25vw]
-  ;
+	@apply header-background
+    absolute left-0 top-0
+    h-[25vw] w-[50vw];
 }
