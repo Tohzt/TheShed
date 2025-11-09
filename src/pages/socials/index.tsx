@@ -1,5 +1,4 @@
 import * as React from 'react'
-// import Header from '../../components/header'
 import Footer from '../../components/Footer'
 import AnimatedButtonList from '../../components/AnimatedButtonList'
 import {getRubricColor} from '../../utils/colorRubric'
@@ -41,48 +40,20 @@ const socialButtons: ButtonItem[] = [
 ]
 
 const SocialsPage = () => {
-	// const {isTransitioning} = usePageTransition({
-	// 	animationDuration: 400,
-	// })
-
-	// const [headerColorHex] = React.useState(getRubricColor('socials').primaryHex)
 	const backgroundClass = getRubricColor('socials').background
 
-	const handleButtonClick = (button: ButtonItem, index: number) => {
-		console.log(`Clicked ${button.label} at index ${index}`)
-	}
-
-	const handleTransitionStart = () => {
-		console.log('Transition starting...')
-	}
-
-	const handleTransitionEnd = () => {
-		console.log('Transition ended')
-	}
-
 	return (
-		true && (
-			<>
-				<main className={`overflow-x-hidden ${backgroundClass}`}>
-					{/* <Header colorHex={headerColorHex} /> */}
-
-					<div className='screen -center flex-col justify-start'>
-						<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>
-							<AnimatedButtonList
-								buttons={socialButtons}
-								onButtonClick={handleButtonClick}
-								onTransitionStart={handleTransitionStart}
-								onTransitionEnd={handleTransitionEnd}
-								staggerDelay={150}
-								animationDuration={400}
-							/>
-						</div>
-					</div>
-
-					<Footer goBack={false} signIn={false} signOut={false} />
-				</main>
-			</>
-		)
+		<main className={`overflow-x-hidden ${backgroundClass}`}>
+			<div className='screen -center flex-col justify-start'>
+				<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>
+					<AnimatedButtonList
+						buttons={socialButtons}
+						staggerDelay={150}
+						animationDuration={400}
+					/>
+				</div>
+			</div>
+		</main>
 	)
 }
 

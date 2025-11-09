@@ -9,6 +9,7 @@ interface ButtonItem {
 	type?: 'internal' | 'external'
 	onClick?: () => void
 	disabled?: boolean
+	skipNavigation?: boolean
 }
 
 interface AnimatedButtonListProps {
@@ -36,7 +37,6 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 	)
 	const router = useRouter()
 
-	// Initialize button states on mount
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setButtonStates(buttons.map(() => true))
@@ -45,12 +45,10 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 	}, [buttons])
 
 	const handleButtonClick = async (button: ButtonItem, index: number) => {
-		// Don't do anything if transitioning
 		if (isTransitioning) return
 
-		// Handle disabled buttons with shake animation
+		// Shake disabled buttons
 		if (button.disabled) {
-			// Trigger shake animation by temporarily adding shake class
 			const buttonElement = document.querySelector(
 				`[data-button-index="${index}"]`
 			)
@@ -59,7 +57,6 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 					index % 2 === 0 ? 'button-shake-right' : 'button-shake-left'
 				buttonElement.classList.add(shakeDirection)
 
-				// Remove shake class after animation completes
 				setTimeout(() => {
 					buttonElement.classList.remove(shakeDirection)
 				}, 300)
@@ -67,27 +64,29 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			return
 		}
 
-		setIsTransitioning(true)
 		setPressedIndex(index)
-
-		// Call custom onClick if provided
-		if (onButtonClick) {
-			onButtonClick(button, index)
-		}
-
-		// Trigger transition start callback
+		setIsTransitioning(true)
 		if (onTransitionStart) {
 			onTransitionStart()
 		}
 
-		// Wait for button press effect (hold at bottom)
-		await new Promise((resolve) => setTimeout(resolve, 100))
+		if (onButtonClick) {
+			onButtonClick(button, index)
+		}
 
-		// Release button
+		// Animate button press
+		await new Promise((resolve) => setTimeout(resolve, 100))
 		setPressedIndex(null)
-
-		// Wait for button to return to default (wait for border animation to complete)
 		await new Promise((resolve) => setTimeout(resolve, 100))
+
+		// Skip navigation if button has skipNavigation flag
+		if (button.skipNavigation) {
+			setIsTransitioning(false)
+			if (onTransitionEnd) {
+				onTransitionEnd()
+			}
+			return
+		}
 
 		// Check if this button should trigger a page transition animation
 		const buttonColors = getButtonColor(button)
@@ -95,20 +94,14 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			buttonColors.shouldAnimatePageTransition ?? true
 
 		if (shouldAnimatePageTransition) {
-			// Animate all buttons sliding out at the same time
 			setButtonStates(buttons.map(() => false))
-
-			// Wait for slide out animation
 			await new Promise((resolve) => setTimeout(resolve, animationDuration))
-
-			// Navigate to new page
 			if (button.type === 'external') {
 				window.open(button.path, '_blank')
 			} else {
 				await router.push(button.path)
 			}
 		} else {
-			// For external links that shouldn't animate page transition, just open the link
 			if (button.type === 'external') {
 				window.open(button.path, '_blank')
 			} else {
@@ -116,9 +109,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			}
 		}
 
-		// Reset states
 		setIsTransitioning(false)
-
 		if (onTransitionEnd) {
 			onTransitionEnd()
 		}

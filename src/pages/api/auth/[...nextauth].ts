@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
 		 * @see https://next-auth.js.org/providers/github
 		 */
 	],
-	debug: false,
+	debug: process.env.NODE_ENV === 'development',
 	callbacks: {
 		session({session, user}) {
 			if (session.user) {
@@ -30,6 +30,10 @@ export const authOptions: NextAuthOptions = {
 			}
 			return session
 		},
+	},
+	pages: {
+		signIn: '/',
+		error: '/',
 	},
 }
 
