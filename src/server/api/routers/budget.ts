@@ -207,4 +207,102 @@ export const budgetRouter = createTRPCRouter({
 				},
 			})
 		}),
+
+	// Get historical budget data for charts (last 6 months)
+	getHistoricalBudget: protectedProcedure
+		.input(
+			z.object({
+				months: z.number().min(1).max(12).default(6),
+			})
+		)
+		.query(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+			const now = new Date()
+			const currentMonth = now.getMonth() + 1
+			const currentYear = now.getFullYear()
+
+			// Calculate date range
+			const startDate = new Date(currentYear, currentMonth - input.months, 1)
+			const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59)
+
+			// Get all monthly budgets in range
+			const startYear = startDate.getFullYear()
+			const startMonth = startDate.getMonth() + 1
+			const endYear = endDate.getFullYear()
+			const endMonth = endDate.getMonth() + 1
+
+			const monthlyBudgets = await ctx.prisma.monthlybudget.findMany({
+				where: {
+					userId,
+					OR: [
+						{
+							year: {
+								gt: startYear,
+								lt: endYear,
+							},
+						},
+						{
+							year: startYear,
+							month: {gte: startMonth},
+						},
+						{
+							year: endYear,
+							month: {lte: endMonth},
+						},
+					],
+				},
+				orderBy: [{year: 'asc'}, {month: 'asc'}],
+			})
+
+			// Get all expenses in range
+			const expenses = await ctx.prisma.expense.findMany({
+				where: {
+					userId,
+					date: {
+						gte: startDate,
+						lte: endDate,
+					},
+				},
+			})
+
+			// Generate data for each month
+			const chartData = []
+			for (let i = input.months - 1; i >= 0; i--) {
+				const date = new Date(currentYear, currentMonth - i - 1, 1)
+				const month = date.getMonth() + 1
+				const year = date.getFullYear()
+				const monthName = date.toLocaleString('default', {month: 'short'})
+
+				// Get income for this month
+				const monthlyBudget = monthlyBudgets.find(
+					(mb) => mb.month === month && mb.year === year
+				)
+				const income = monthlyBudget?.income ?? 0
+
+				// Calculate total spent for this month
+				const monthStart = new Date(year, month - 1, 1)
+				const monthEnd = new Date(year, month, 0, 23, 59, 59)
+				const monthExpenses = expenses.filter(
+					(exp) => exp.date >= monthStart && exp.date <= monthEnd
+				)
+				const totalSpent = monthExpenses.reduce(
+					(sum, exp) => sum + exp.amount,
+					0
+				)
+
+				const remaining = income - totalSpent
+				const savingsRate =
+					income > 0 ? ((remaining / income) * 100).toFixed(1) : '0.0'
+
+				chartData.push({
+					month: monthName,
+					income,
+					totalSpent,
+					remaining,
+					savingsRate: parseFloat(savingsRate),
+				})
+			}
+
+			return chartData
+		}),
 })
