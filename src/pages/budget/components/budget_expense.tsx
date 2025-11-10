@@ -55,6 +55,43 @@ export default function BudgetExpenseComponent({
 		})
 	}
 
+	const getCategoryColor = (categoryName: string) => {
+		const category = categories.find((cat) => cat.name === categoryName)
+		return category?.color || '#10b981' // Default to emerald if not found
+	}
+
+	const darkenColor = (color: string): string => {
+		const hex = color.replace('#', '')
+		const r = parseInt(hex.slice(0, 2), 16)
+		const g = parseInt(hex.slice(2, 4), 16)
+		const b = parseInt(hex.slice(4, 6), 16)
+
+		// Darken by 40%
+		const darkR = Math.min(255, Math.floor(r + (255 - r) * 0.8))
+		const darkG = Math.min(255, Math.floor(g + (255 - g) * 0.8))
+		const darkB = Math.min(255, Math.floor(b + (255 - b) * 0.8))
+
+		return `#${darkR.toString(16).padStart(2, '0')}${darkG
+			.toString(16)
+			.padStart(2, '0')}${darkB.toString(16).padStart(2, '0')}`
+	}
+
+	const lightenColor = (color: string): string => {
+		const hex = color.replace('#', '')
+		const r = parseInt(hex.slice(0, 2), 16)
+		const g = parseInt(hex.slice(2, 4), 16)
+		const b = parseInt(hex.slice(4, 6), 16)
+
+		// Lighten by adding white (increase brightness by 80%)
+		const lightR = Math.max(0, Math.floor(r * 0.6))
+		const lightG = Math.max(0, Math.floor(g * 0.6))
+		const lightB = Math.max(0, Math.floor(b * 0.6))
+
+		return `#${lightR.toString(16).padStart(2, '0')}${lightG
+			.toString(16)
+			.padStart(2, '0')}${lightB.toString(16).padStart(2, '0')}`
+	}
+
 	return (
 		<div className='mb-12 w-full max-w-6xl'>
 			<div className='mb-6 flex items-center justify-between'>
@@ -177,7 +214,17 @@ export default function BudgetExpenseComponent({
 											})}
 										</td>
 										<td className='px-6 py-4'>
-											<span className='inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800'>
+											<span
+												className='inline-flex items-center rounded-full px-3 py-1 text-sm font-medium'
+												style={{
+													backgroundColor: lightenColor(
+														getCategoryColor(expense.category)
+													),
+													color: darkenColor(
+														getCategoryColor(expense.category)
+													),
+												}}
+											>
 												{expense.category}
 											</span>
 										</td>

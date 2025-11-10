@@ -110,6 +110,7 @@ export default function BudgetPage() {
 						totalSpent={totals.totalSpent}
 						remaining={totals.remaining}
 						savingsRate={totals.savingsRate}
+						onRefetch={() => void refetch()}
 					/>
 
 					{/* Divider */}
