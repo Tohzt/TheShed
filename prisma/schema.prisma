@@ -52,12 +52,6 @@ model devicereading {
   device      device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 }
 
-model roundtable {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-}
-
 model session {
   id           String   @id @default(cuid())
   sessionToken String   @unique(map: "Session_sessionToken_key")
@@ -74,6 +68,9 @@ model user {
   image         String?
   accounts      account[]
   sessions      session[]
+  budgetCategories budgetcategory[]
+  expenses      expense[]
+  monthlyBudgets monthlybudget[]
 }
 
 model verificationtoken {
@@ -82,4 +79,46 @@ model verificationtoken {
   expires    DateTime
 
   @@unique([identifier, token], map: "VerificationToken_identifier_token_key")
+}
+
+model budgetcategory {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  allocated   Float    @default(0)
+  icon        String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses    expense[]
+
+  @@unique([userId, name], map: "BudgetCategory_userId_name_key")
+}
+
+model expense {
+  id          String   @id @default(cuid())
+  userId      String
+  categoryId  String?
+  category    String
+  amount      Float
+  description String
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgetCategory budgetcategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+}
+
+model monthlybudget {
+  id          String   @id @default(cuid())
+  userId      String
+  month       Int
+  year        Int
+  income      Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year], map: "MonthlyBudget_userId_month_year_key")
 }
