@@ -42,6 +42,15 @@ const getHomeButtons = (isLoggedIn: boolean): ButtonItem[] => [
 		path: '/arcade',
 		type: 'internal',
 	},
+	...(isLoggedIn
+		? [
+				{
+					label: 'Finances',
+					path: '/budget',
+					type: 'internal',
+				} as ButtonItem,
+		  ]
+		: []),
 	{
 		label: 'about',
 		path: '/about',

@@ -97,6 +97,14 @@ export const colorRubric: Record<string, ColorRubricEntry> = {
 		background: 'bg-gradient-to-t from-primary-light to-primary-dark',
 		shouldAnimatePageTransition: true,
 	},
+	budget: {
+		primary: 'bg-emerald-600',
+		primaryHex: '#059669',
+		secondary: 'bg-emerald-700',
+		text: 'text-white',
+		background: 'bg-gradient-to-t from-primary-light to-primary-dark',
+		shouldAnimatePageTransition: true,
+	},
 }
 
 export const getRubricColor = (key: string): ColorRubricEntry => {
