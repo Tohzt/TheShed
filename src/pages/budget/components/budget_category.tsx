@@ -2,6 +2,7 @@ import {useState, useRef} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
+import {Button} from '@store/components/ui/button'
 
 export interface BudgetCategory {
 	id: string
@@ -127,13 +128,10 @@ export default function BudgetCategoryComponent({
 	return (
 		<div className='mb-8 w-full max-w-6xl'>
 			<div className='mb-6 flex items-center justify-between'>
-				<h2 className='text-2xl font-bold text-gray-800'>Categories</h2>
-				<button
-					onClick={() => setShowAddCategory(!showAddCategory)}
-					className='rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-blue-700'
-				>
+				<h2 className='text-2xl font-bold text-foreground'>Categories</h2>
+				<Button onClick={() => setShowAddCategory(!showAddCategory)}>
 					Add New
-				</button>
+				</Button>
 			</div>
 
 			{/* Add Category Popup */}
@@ -153,7 +151,7 @@ export default function BudgetCategoryComponent({
 						onChange={(e) =>
 							setNewCategory({...newCategory, name: e.target.value})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<input
 						type='number'
@@ -165,7 +163,7 @@ export default function BudgetCategoryComponent({
 								allocated: e.target.value,
 							})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<input
 						type='text'
@@ -174,7 +172,7 @@ export default function BudgetCategoryComponent({
 						onChange={(e) =>
 							setNewCategory({...newCategory, icon: e.target.value})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<div className='relative'>
 						<input
@@ -187,7 +185,7 @@ export default function BudgetCategoryComponent({
 							className='absolute h-10 w-10 cursor-pointer opacity-0'
 						/>
 						<div
-							className='h-10 w-10 cursor-pointer rounded-xl border border-gray-300'
+							className='h-10 w-10 cursor-pointer rounded-xl border border-input'
 							style={{
 								backgroundColor: newCategory.color || '#10b981',
 							}}
@@ -196,14 +194,14 @@ export default function BudgetCategoryComponent({
 					</div>
 				</div>
 				<div className='flex gap-3'>
-					<button
+					<Button
 						onClick={handleAddCategory}
 						disabled={!newCategory.name || !newCategory.allocated}
-						className='flex-1 rounded-lg bg-blue-600 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400'
+						className='flex-1'
 					>
 						Create
-					</button>
-					<button
+					</Button>
+					<Button
 						onClick={() => {
 							setShowAddCategory(false)
 							setNewCategory({
@@ -213,10 +211,11 @@ export default function BudgetCategoryComponent({
 								color: '',
 							})
 						}}
-						className='flex-1 rounded-lg bg-gray-300 py-2 font-medium text-gray-800 transition-colors hover:bg-gray-400'
+						variant='outline'
+						className='flex-1'
 					>
 						Cancel
-					</button>
+					</Button>
 				</div>
 			</BudgetPopup>
 
@@ -237,7 +236,7 @@ export default function BudgetCategoryComponent({
 						onChange={(e) =>
 							setEditCategory({...editCategory, name: e.target.value})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<input
 						type='number'
@@ -249,7 +248,7 @@ export default function BudgetCategoryComponent({
 								allocated: e.target.value,
 							})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<input
 						type='text'
@@ -258,7 +257,7 @@ export default function BudgetCategoryComponent({
 						onChange={(e) =>
 							setEditCategory({...editCategory, icon: e.target.value})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<div className='relative'>
 						<input
@@ -274,7 +273,7 @@ export default function BudgetCategoryComponent({
 							className='absolute h-10 w-10 cursor-pointer opacity-0'
 						/>
 						<div
-							className='h-10 w-10 cursor-pointer rounded-xl border border-gray-300'
+							className='h-10 w-10 cursor-pointer rounded-xl border border-input'
 							style={{
 								backgroundColor: editCategory.color || '#10b981',
 							}}
@@ -283,14 +282,14 @@ export default function BudgetCategoryComponent({
 					</div>
 				</div>
 				<div className='flex gap-3'>
-					<button
+					<Button
 						onClick={handleUpdateCategory}
 						disabled={!editCategory.name || !editCategory.allocated}
-						className='flex-1 rounded-lg bg-blue-600 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400'
+						className='flex-1'
 					>
 						Save Changes
-					</button>
-					<button
+					</Button>
+					<Button
 						onClick={() => {
 							setEditingCategory(null)
 							setEditCategory({
@@ -300,10 +299,11 @@ export default function BudgetCategoryComponent({
 								color: '',
 							})
 						}}
-						className='flex-1 rounded-lg bg-gray-300 py-2 font-medium text-gray-800 transition-colors hover:bg-gray-400'
+						variant='outline'
+						className='flex-1'
 					>
 						Cancel
-					</button>
+					</Button>
 				</div>
 			</BudgetPopup>
 
@@ -317,7 +317,7 @@ export default function BudgetCategoryComponent({
 						<div
 							key={category.id}
 							onClick={() => handleEditCategory(category)}
-							className='cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl'
+							className='cursor-pointer overflow-hidden rounded-xl border bg-card shadow transition-all hover:scale-[1.02] hover:shadow-lg'
 						>
 							<div
 								className='p-2 px-4 text-white'
@@ -337,10 +337,10 @@ export default function BudgetCategoryComponent({
 							<div className='p-6 pt-4'>
 								<div className='mb-3'>
 									<div className='mb-2 flex justify-between text-sm'>
-										<span className='text-gray-600'>Spent</span>
+										<span className='text-muted-foreground'>Spent</span>
 										<span
 											className={`font-bold ${
-												isOverBudget ? 'text-red-600' : 'text-gray-800'
+												isOverBudget ? 'text-destructive' : 'text-foreground'
 											}`}
 										>
 											${category.spent} / ${category.allocated}
@@ -348,7 +348,7 @@ export default function BudgetCategoryComponent({
 									</div>
 
 									{/* Progress Bar */}
-									<div className='h-3 w-full overflow-hidden rounded-full bg-gray-200'>
+									<div className='h-3 w-full overflow-hidden rounded-full bg-muted'>
 										<div
 											className={`h-full transition-all duration-500 ${
 												isOverBudget ? 'bg-red-500' : ''
@@ -364,12 +364,12 @@ export default function BudgetCategoryComponent({
 								</div>
 
 								<div className='flex items-center justify-between'>
-									<span className='text-sm text-gray-600'>
+									<span className='text-sm text-muted-foreground'>
 										{percentage.toFixed(0)}% used
 									</span>
 									<span
 										className={`text-sm font-bold ${
-											isOverBudget ? 'text-red-600' : ''
+											isOverBudget ? 'text-destructive' : ''
 										}`}
 										style={{
 											color: isOverBudget

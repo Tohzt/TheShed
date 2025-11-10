@@ -65,11 +65,13 @@ export default function BudgetPage() {
 	// Show loading state
 	if (loading) {
 		return (
-			<main className='min-h-screen overflow-x-hidden bg-gradient-to-t from-emerald-50 to-teal-100'>
+			<main className='min-h-screen overflow-x-hidden bg-background'>
 				<div className='screen -center flex-col justify-start'>
 					<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
 						<div className='flex h-64 items-center justify-center'>
-							<p className='text-lg text-gray-600'>Loading budget data...</p>
+							<p className='text-lg text-muted-foreground'>
+								Loading budget data...
+							</p>
 						</div>
 					</div>
 				</div>
@@ -81,23 +83,23 @@ export default function BudgetPage() {
 	const hasData = data.categories.length > 0 || data.expenses.length > 0
 
 	return (
-		<main className='min-h-screen overflow-x-hidden bg-gradient-to-t from-emerald-50 to-teal-100'>
+		<main className='min-h-screen overflow-x-hidden bg-background'>
 			<div className='screen -center flex-col justify-start'>
-				<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
+				<div className='w-full flex-col items-center gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
 					{/* Header */}
 					<div className='mb-8 w-full max-w-6xl'>
-						<h1 className='mb-2 text-4xl font-bold text-gray-800 sm:text-5xl'>
+						<h1 className='mb-2 text-4xl font-bold text-foreground sm:text-5xl'>
 							Budget Tracker
 						</h1>
-						<p className='text-lg text-gray-600'>
+						<p className='text-lg text-muted-foreground'>
 							{monthName} {year}
 						</p>
 					</div>
 
 					{/* Empty State */}
 					{!hasData && (
-						<div className='mb-8 w-full max-w-6xl rounded-2xl bg-white p-12 text-center shadow-lg'>
-							<p className='mb-4 text-xl text-gray-600'>
+						<div className='mb-8 w-full max-w-6xl rounded-xl border bg-card p-12 text-center shadow'>
+							<p className='mb-4 text-xl text-muted-foreground'>
 								No budget data yet. Get started by creating categories and
 								adding expenses!
 							</p>
@@ -114,7 +116,7 @@ export default function BudgetPage() {
 					/>
 
 					{/* Divider */}
-					<div className='my-8 w-full max-w-6xl border-t border-gray-300' />
+					<div className='my-8 w-full max-w-6xl border-t border-border' />
 
 					{/* Category Breakdown */}
 					<BudgetCategoryComponent
@@ -123,7 +125,7 @@ export default function BudgetPage() {
 					/>
 
 					{/* Divider */}
-					<div className='my-8 w-full max-w-6xl border-t border-gray-300' />
+					<div className='my-8 w-full max-w-6xl border-t border-border' />
 
 					{/* Expenses */}
 					<BudgetExpenseComponent

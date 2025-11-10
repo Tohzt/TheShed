@@ -1,6 +1,8 @@
 import {useState} from 'react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
+import {Card, CardContent} from '@store/components/ui/card'
+import {Button} from '@store/components/ui/button'
 
 interface BudgetSummaryProps {
 	income: number
@@ -56,59 +58,67 @@ export default function BudgetSummary({
 		<>
 			<div className='mb-8 grid w-full max-w-6xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4'>
 				{/* Income Card */}
-				<div
+				<Card
 					onClick={handleIncomeClick}
-					className='cursor-pointer rounded-2xl border-t-4 border-emerald-500 bg-white p-4 shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl sm:p-6'
+					className='cursor-pointer border-t-4 border-t-primary transition-all hover:scale-[1.02] hover:shadow-lg sm:p-6'
 				>
-					<div className='mb-2 flex items-center justify-between'>
-						<span className='text-xs font-medium text-gray-600 sm:text-sm'>
-							Monthly Income
-						</span>
-						<span className='text-xl sm:text-2xl'>💰</span>
-					</div>
-					<p className='text-2xl font-bold text-gray-800 sm:text-3xl'>
-						${income.toLocaleString()}
-					</p>
-				</div>
+					<CardContent className='p-4 sm:p-6'>
+						<div className='mb-2 flex items-center justify-between'>
+							<span className='text-xs font-medium text-muted-foreground sm:text-sm'>
+								Monthly Income
+							</span>
+							<span className='text-xl sm:text-2xl'>💰</span>
+						</div>
+						<p className='text-2xl font-bold text-foreground sm:text-3xl'>
+							${income.toLocaleString()}
+						</p>
+					</CardContent>
+				</Card>
 
 				{/* Total Spent Card */}
-				<div className='rounded-2xl border-t-4 border-red-500 bg-white p-4 shadow-lg sm:p-6'>
-					<div className='mb-2 flex items-center justify-between'>
-						<span className='text-xs font-medium text-gray-600 sm:text-sm'>
-							Total Spent
-						</span>
-						<span className='text-xl sm:text-2xl'>💸</span>
-					</div>
-					<p className='text-2xl font-bold text-gray-800 sm:text-3xl'>
-						${totalSpent.toLocaleString()}
-					</p>
-				</div>
+				<Card className='border-t-4 border-t-destructive sm:p-6'>
+					<CardContent className='p-4 sm:p-6'>
+						<div className='mb-2 flex items-center justify-between'>
+							<span className='text-xs font-medium text-muted-foreground sm:text-sm'>
+								Total Spent
+							</span>
+							<span className='text-xl sm:text-2xl'>💸</span>
+						</div>
+						<p className='text-2xl font-bold text-foreground sm:text-3xl'>
+							${totalSpent.toLocaleString()}
+						</p>
+					</CardContent>
+				</Card>
 
 				{/* Remaining Card */}
-				<div className='rounded-2xl border-t-4 border-blue-500 bg-white p-4 shadow-lg sm:p-6'>
-					<div className='mb-2 flex items-center justify-between'>
-						<span className='text-xs font-medium text-gray-600 sm:text-sm'>
-							Remaining
-						</span>
-						<span className='text-xl sm:text-2xl'>💵</span>
-					</div>
-					<p className='text-2xl font-bold text-gray-800 sm:text-3xl'>
-						${remaining.toLocaleString()}
-					</p>
-				</div>
+				<Card className='border-t-4 border-t-chart-1 sm:p-6'>
+					<CardContent className='p-4 sm:p-6'>
+						<div className='mb-2 flex items-center justify-between'>
+							<span className='text-xs font-medium text-muted-foreground sm:text-sm'>
+								Remaining
+							</span>
+							<span className='text-xl sm:text-2xl'>💵</span>
+						</div>
+						<p className='text-2xl font-bold text-foreground sm:text-3xl'>
+							${remaining.toLocaleString()}
+						</p>
+					</CardContent>
+				</Card>
 
 				{/* Savings Rate Card */}
-				<div className='rounded-2xl border-t-4 border-purple-500 bg-white p-4 shadow-lg sm:p-6'>
-					<div className='mb-2 flex items-center justify-between'>
-						<span className='text-xs font-medium text-gray-600 sm:text-sm'>
-							Savings Rate
-						</span>
-						<span className='text-xl sm:text-2xl'>📊</span>
-					</div>
-					<p className='text-2xl font-bold text-gray-800 sm:text-3xl'>
-						{savingsRate}%
-					</p>
-				</div>
+				<Card className='border-t-4 border-t-chart-4 sm:p-6'>
+					<CardContent className='p-4 sm:p-6'>
+						<div className='mb-2 flex items-center justify-between'>
+							<span className='text-xs font-medium text-muted-foreground sm:text-sm'>
+								Savings Rate
+							</span>
+							<span className='text-xl sm:text-2xl'>📊</span>
+						</div>
+						<p className='text-2xl font-bold text-foreground sm:text-3xl'>
+							{savingsRate}%
+						</p>
+					</CardContent>
+				</Card>
 			</div>
 
 			{/* Edit Income Popup */}
@@ -121,7 +131,7 @@ export default function BudgetSummary({
 				title='Set Monthly Income'
 			>
 				<div className='mb-4'>
-					<label className='mb-2 block text-sm font-medium text-gray-700'>
+					<label className='mb-2 block text-sm font-medium text-foreground'>
 						Monthly Income
 					</label>
 					<input
@@ -129,28 +139,29 @@ export default function BudgetSummary({
 						placeholder='Enter monthly income'
 						value={newIncome}
 						onChange={(e) => setNewIncome(e.target.value)}
-						className='w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 						min='0'
 						step='0.01'
 					/>
 				</div>
 				<div className='flex gap-3'>
-					<button
+					<Button
 						onClick={handleSetIncome}
 						disabled={!newIncome || parseFloat(newIncome) < 0}
-						className='flex-1 rounded-lg bg-emerald-600 py-2 font-medium text-white transition-colors hover:bg-emerald-700 disabled:bg-gray-400'
+						className='flex-1'
 					>
 						Save
-					</button>
-					<button
+					</Button>
+					<Button
 						onClick={() => {
 							setShowEditIncome(false)
 							setNewIncome('')
 						}}
-						className='flex-1 rounded-lg bg-gray-300 py-2 font-medium text-gray-800 transition-colors hover:bg-gray-400'
+						variant='outline'
+						className='flex-1'
 					>
 						Cancel
-					</button>
+					</Button>
 				</div>
 			</BudgetPopup>
 		</>

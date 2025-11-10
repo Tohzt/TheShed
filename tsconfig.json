@@ -1,46 +1,41 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "baseUrl": "./src",
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "checkJs": true,
-    "skipLibCheck": true,
-    "downlevelIteration": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@store/*": ["store/*"],
-      "@components/*": ["components/*"]
-    }
-  },
-  "include": [
-    "src", "src/server/api/godot.js",
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"baseUrl": "./src",
+		"target": "ES2017",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"allowJs": true,
+		"checkJs": true,
+		"skipLibCheck": true,
+		"downlevelIteration": true,
+		"strict": false,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"incremental": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"jsx": "preserve",
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"paths": {
+			"@store/*": ["store/*"],
+			"@root-store/*": ["../store/*"],
+			"@components/*": ["components/*"]
+		}
+	},
+	"include": [
+		"src",
+		"src/server/api/godot.js",
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.cjs",
+		"**/*.mjs"
+	],
+	"exclude": ["node_modules"]
 }

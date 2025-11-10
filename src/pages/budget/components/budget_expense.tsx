@@ -3,6 +3,8 @@ import {useSession} from 'next-auth/react'
 import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
 import BudgetPopup from './budget_popup'
+import {Button} from '@store/components/ui/button'
+import {Card} from '@store/components/ui/card'
 
 export interface Expense {
 	id: string
@@ -95,14 +97,14 @@ export default function BudgetExpenseComponent({
 	return (
 		<div className='mb-12 w-full max-w-6xl'>
 			<div className='mb-6 flex items-center justify-between'>
-				<h2 className='text-2xl font-bold text-gray-800'>Expenses</h2>
-				<button
+				<h2 className='text-2xl font-bold text-foreground'>Expenses</h2>
+				<Button
 					onClick={() => setShowAddExpense(!showAddExpense)}
-					className='rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-emerald-700 disabled:bg-gray-400'
+					size='sm'
 					disabled={categories.length === 0}
 				>
 					Add New
-				</button>
+				</Button>
 			</div>
 
 			{/* Add Expense Popup */}
@@ -120,7 +122,7 @@ export default function BudgetExpenseComponent({
 						onChange={(e) =>
 							setNewExpense({...newExpense, category: e.target.value})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 						disabled={categories.length === 0}
 					>
 						<option value=''>Select Category</option>
@@ -137,7 +139,7 @@ export default function BudgetExpenseComponent({
 						onChange={(e) =>
 							setNewExpense({...newExpense, amount: e.target.value})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 					<input
 						type='text'
@@ -149,54 +151,52 @@ export default function BudgetExpenseComponent({
 								description: e.target.value,
 							})
 						}
-						className='rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 					/>
 				</div>
 				<div className='flex gap-3'>
-					<button
-						onClick={handleAddExpense}
-						className='flex-1 rounded-lg bg-emerald-600 py-2 font-medium text-white transition-colors hover:bg-emerald-700'
-					>
+					<Button onClick={handleAddExpense} className='flex-1'>
 						Add
-					</button>
-					<button
+					</Button>
+					<Button
 						onClick={() => {
 							setShowAddExpense(false)
 							setNewExpense({category: '', amount: '', description: ''})
 						}}
-						className='flex-1 rounded-lg bg-gray-300 py-2 font-medium text-gray-800 transition-colors hover:bg-gray-400'
+						variant='outline'
+						className='flex-1'
 					>
 						Cancel
-					</button>
+					</Button>
 				</div>
 			</BudgetPopup>
 
 			{/* Recent Expenses Table */}
-			<div className='overflow-hidden rounded-2xl bg-white shadow-lg'>
+			<Card className='overflow-hidden'>
 				<div className='overflow-x-auto'>
 					<table className='w-full'>
-						<thead className='border-b border-gray-200 bg-gray-50'>
+						<thead className='border-b border-border bg-muted/50'>
 							<tr>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-gray-700'>
+								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
 									Date
 								</th>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-gray-700'>
+								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
 									Category
 								</th>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-gray-700'>
+								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
 									Description
 								</th>
-								<th className='px-6 py-4 text-right text-sm font-semibold text-gray-700'>
+								<th className='px-6 py-4 text-right text-sm font-semibold text-foreground'>
 									Amount
 								</th>
 							</tr>
 						</thead>
-						<tbody className='divide-y divide-gray-200'>
+						<tbody className='divide-y divide-border'>
 							{expenses.length === 0 ? (
 								<tr>
 									<td
 										colSpan={4}
-										className='px-6 py-8 text-center text-gray-500'
+										className='px-6 py-8 text-center text-muted-foreground'
 									>
 										No expenses yet
 									</td>
@@ -205,9 +205,9 @@ export default function BudgetExpenseComponent({
 								expenses.map((expense) => (
 									<tr
 										key={expense.id}
-										className='transition-colors hover:bg-gray-50'
+										className='transition-colors hover:bg-muted/50'
 									>
-										<td className='px-6 py-4 text-sm text-gray-600'>
+										<td className='px-6 py-4 text-sm text-muted-foreground'>
 											{new Date(expense.date).toLocaleDateString('en-US', {
 												month: 'short',
 												day: 'numeric',
@@ -228,10 +228,10 @@ export default function BudgetExpenseComponent({
 												{expense.category}
 											</span>
 										</td>
-										<td className='px-6 py-4 text-sm text-gray-800'>
+										<td className='px-6 py-4 text-sm text-foreground'>
 											{expense.description}
 										</td>
-										<td className='px-6 py-4 text-right text-sm font-semibold text-gray-800'>
+										<td className='px-6 py-4 text-right text-sm font-semibold text-foreground'>
 											${expense.amount.toFixed(2)}
 										</td>
 									</tr>
@@ -240,7 +240,7 @@ export default function BudgetExpenseComponent({
 						</tbody>
 					</table>
 				</div>
-			</div>
+			</Card>
 		</div>
 	)
 }
