@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
@@ -16,14 +16,12 @@ interface BudgetExpenseComponentProps {
 	expenses: Expense[]
 	categories: BudgetCategory[]
 	onRefetch: () => void
-	onRegisterButton?: (button: React.ReactNode) => void
 }
 
 export default function BudgetExpenseComponent({
 	expenses,
 	categories,
 	onRefetch,
-	onRegisterButton,
 }: BudgetExpenseComponentProps) {
 	const {data: sessionData} = useSession()
 	const [showAddExpense, setShowAddExpense] = useState(false)
@@ -57,28 +55,17 @@ export default function BudgetExpenseComponent({
 		})
 	}
 
-	// Register button with parent
-	useEffect(() => {
-		if (!onRegisterButton) return
-
-		const expenseButton = (
-			<button
-				key='expense-button'
-				onClick={() => setShowAddExpense(!showAddExpense)}
-				className='rounded-lg bg-emerald-600 px-6 py-2 font-medium text-white shadow-md transition-colors hover:bg-emerald-700'
-				disabled={categories.length === 0}
-			>
-				+ Add Expense
-			</button>
-		)
-
-		onRegisterButton(expenseButton)
-	}, [showAddExpense, categories.length, onRegisterButton])
-
 	return (
 		<div className='mb-12 w-full max-w-6xl'>
-			<div className='mb-6'>
-				<h2 className='text-2xl font-bold text-gray-800'>Recent Expenses</h2>
+			<div className='mb-6 flex items-center justify-between'>
+				<h2 className='text-2xl font-bold text-gray-800'>Expenses</h2>
+				<button
+					onClick={() => setShowAddExpense(!showAddExpense)}
+					className='rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-emerald-700 disabled:bg-gray-400'
+					disabled={categories.length === 0}
+				>
+					Add New
+				</button>
 			</div>
 
 			{/* Add Expense Popup */}

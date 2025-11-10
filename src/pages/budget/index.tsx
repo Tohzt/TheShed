@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useMemo} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../utils/api'
 import BudgetCategoryComponent, {
@@ -15,9 +15,6 @@ interface MonthlyData {
 
 export default function BudgetPage() {
 	const {data: sessionData} = useSession()
-	const [actionButtons, setActionButtons] = useState<
-		Map<string, React.ReactNode>
-	>(new Map())
 
 	// Fetch budget data from tRPC API
 	const {
@@ -89,22 +86,12 @@ export default function BudgetPage() {
 				<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
 					{/* Header */}
 					<div className='mb-8 w-full max-w-6xl'>
-						<div className='mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-							<div>
-								<h1 className='mb-2 text-4xl font-bold text-gray-800 sm:text-5xl'>
-									Budget Tracker
-								</h1>
-								<p className='text-lg text-gray-600'>
-									{monthName} {year}
-								</p>
-							</div>
-							{/* Action Buttons */}
-							{actionButtons.size > 0 && (
-								<div className='flex gap-3'>
-									{Array.from(actionButtons.values())}
-								</div>
-							)}
-						</div>
+						<h1 className='mb-2 text-4xl font-bold text-gray-800 sm:text-5xl'>
+							Budget Tracker
+						</h1>
+						<p className='text-lg text-gray-600'>
+							{monthName} {year}
+						</p>
 					</div>
 
 					{/* Empty State */}
@@ -125,31 +112,23 @@ export default function BudgetPage() {
 						savingsRate={totals.savingsRate}
 					/>
 
+					{/* Divider */}
+					<div className='my-8 w-full max-w-6xl border-t border-gray-300' />
+
 					{/* Category Breakdown */}
 					<BudgetCategoryComponent
 						categories={data.categories}
 						onRefetch={() => void refetch()}
-						onRegisterButton={(button) => {
-							setActionButtons((prev) => {
-								const newMap = new Map(prev)
-								newMap.set('category', button)
-								return newMap
-							})
-						}}
 					/>
+
+					{/* Divider */}
+					<div className='my-8 w-full max-w-6xl border-t border-gray-300' />
 
 					{/* Expenses */}
 					<BudgetExpenseComponent
 						expenses={data.expenses}
 						categories={data.categories}
 						onRefetch={() => void refetch()}
-						onRegisterButton={(button) => {
-							setActionButtons((prev) => {
-								const newMap = new Map(prev)
-								newMap.set('expense', button)
-								return newMap
-							})
-						}}
 					/>
 				</div>
 			</div>

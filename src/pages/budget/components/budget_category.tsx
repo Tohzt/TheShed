@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from 'react'
+import {useState, useRef} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
@@ -15,7 +15,6 @@ export interface BudgetCategory {
 interface BudgetCategoryComponentProps {
 	categories: BudgetCategory[]
 	onRefetch: () => void
-	onRegisterButton?: (button: React.ReactNode) => void
 }
 
 // Helper function to get color value (defaults to emerald if not provided)
@@ -44,7 +43,6 @@ const getTextColor = (color: string | null): string => {
 export default function BudgetCategoryComponent({
 	categories,
 	onRefetch,
-	onRegisterButton,
 }: BudgetCategoryComponentProps) {
 	const {data: sessionData} = useSession()
 	const [showAddCategory, setShowAddCategory] = useState(false)
@@ -126,27 +124,16 @@ export default function BudgetCategoryComponent({
 		})
 	}
 
-	// Register button with parent
-	useEffect(() => {
-		if (!onRegisterButton) return
-
-		const categoryButton = (
-			<button
-				key='category-button'
-				onClick={() => setShowAddCategory(!showAddCategory)}
-				className='rounded-lg bg-blue-600 px-6 py-2 font-medium text-white shadow-md transition-colors hover:bg-blue-700'
-			>
-				+ Create Category
-			</button>
-		)
-
-		onRegisterButton(categoryButton)
-	}, [showAddCategory, onRegisterButton])
-
 	return (
 		<div className='mb-8 w-full max-w-6xl'>
-			<div className='mb-6'>
+			<div className='mb-6 flex items-center justify-between'>
 				<h2 className='text-2xl font-bold text-gray-800'>Categories</h2>
+				<button
+					onClick={() => setShowAddCategory(!showAddCategory)}
+					className='rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-blue-700'
+				>
+					Add New
+				</button>
 			</div>
 
 			{/* Add Category Popup */}
