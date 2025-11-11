@@ -3,6 +3,7 @@ import {useSession} from 'next-auth/react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
 import ConfirmDeleteDialog from './delete_category_dialog'
+import EmojiPicker from './emoji_picker'
 import {Button} from '@store/components/ui/button'
 
 export interface BudgetCategory {
@@ -200,7 +201,7 @@ export default function BudgetCategoryComponent({
 						onChange={(e) =>
 							setNewCategory({...newCategory, name: e.target.value})
 						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+						className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 					/>
 					<input
 						type='number'
@@ -212,34 +213,43 @@ export default function BudgetCategoryComponent({
 								allocated: e.target.value,
 							})
 						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+						className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 					/>
-					<input
-						type='text'
-						placeholder='Icon (emoji)'
-						value={newCategory.icon}
-						onChange={(e) =>
-							setNewCategory({...newCategory, icon: e.target.value})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-					/>
-					<div className='relative'>
-						<input
-							ref={newCategoryColorRef}
-							type='color'
-							value={newCategory.color || '#10b981'}
-							onChange={(e) =>
-								setNewCategory({...newCategory, color: e.target.value})
+					<div className='flex justify-around gap-4'>
+						{/* Emoji Picker */}
+						<EmojiPicker
+							value={newCategory.icon}
+							onChange={(emoji) =>
+								setNewCategory({...newCategory, icon: emoji})
 							}
-							className='absolute h-10 w-10 cursor-pointer opacity-0'
+							trigger={
+								<button
+									type='button'
+									className='flex h-20 w-20 items-center justify-center rounded-xl border-2 border-input bg-muted/50 text-4xl transition-all hover:scale-105 hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+								>
+									{newCategory.icon || '😀'}
+								</button>
+							}
 						/>
-						<div
-							className='h-10 w-10 cursor-pointer rounded-xl border border-input'
-							style={{
-								backgroundColor: newCategory.color || '#10b981',
-							}}
-							onClick={() => newCategoryColorRef.current?.click()}
-						/>
+						{/* Color Picker */}
+						<div className='relative'>
+							<input
+								ref={newCategoryColorRef}
+								type='color'
+								value={newCategory.color || '#10b981'}
+								onChange={(e) =>
+									setNewCategory({...newCategory, color: e.target.value})
+								}
+								className='absolute h-20 w-20 cursor-pointer opacity-0'
+							/>
+							<div
+								className='flex h-20 w-20 cursor-pointer items-center justify-center rounded-xl border-2 border-input transition-all focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:scale-105 hover:border-primary'
+								style={{
+									backgroundColor: newCategory.color || '#10b981',
+								}}
+								onClick={() => newCategoryColorRef.current?.click()}
+							/>
+						</div>
 					</div>
 				</div>
 				<div className='flex gap-3'>
@@ -313,7 +323,7 @@ export default function BudgetCategoryComponent({
 								onChange={(e) =>
 									setEditCategory({...editCategory, name: e.target.value})
 								}
-								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 							/>
 							<input
 								type='number'
@@ -325,37 +335,46 @@ export default function BudgetCategoryComponent({
 										allocated: e.target.value,
 									})
 								}
-								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 							/>
-							<input
-								type='text'
-								placeholder='Icon (emoji)'
-								value={editCategory.icon}
-								onChange={(e) =>
-									setEditCategory({...editCategory, icon: e.target.value})
-								}
-								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-							/>
-							<div className='relative'>
-								<input
-									ref={editCategoryColorRef}
-									type='color'
-									value={editCategory.color || '#10b981'}
-									onChange={(e) =>
-										setEditCategory({
-											...editCategory,
-											color: e.target.value,
-										})
+							<div className='flex justify-around gap-4'>
+								{/* Emoji Picker */}
+								<EmojiPicker
+									value={editCategory.icon}
+									onChange={(emoji) =>
+										setEditCategory({...editCategory, icon: emoji})
 									}
-									className='absolute h-10 w-10 cursor-pointer opacity-0'
+									trigger={
+										<button
+											type='button'
+											className='flex h-20 w-20 items-center justify-center rounded-xl border-2 border-input bg-muted/50 text-4xl transition-all hover:scale-105 hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+										>
+											{editCategory.icon || '😀'}
+										</button>
+									}
 								/>
-								<div
-									className='h-10 w-10 cursor-pointer rounded-xl border border-input'
-									style={{
-										backgroundColor: editCategory.color || '#10b981',
-									}}
-									onClick={() => editCategoryColorRef.current?.click()}
-								/>
+								{/* Color Picker */}
+								<div className='relative'>
+									<input
+										ref={editCategoryColorRef}
+										type='color'
+										value={editCategory.color || '#10b981'}
+										onChange={(e) =>
+											setEditCategory({
+												...editCategory,
+												color: e.target.value,
+											})
+										}
+										className='absolute h-20 w-20 cursor-pointer opacity-0'
+									/>
+									<div
+										className='flex h-20 w-20 cursor-pointer items-center justify-center rounded-xl border-2 border-input transition-all focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:scale-105 hover:border-primary'
+										style={{
+											backgroundColor: editCategory.color || '#10b981',
+										}}
+										onClick={() => editCategoryColorRef.current?.click()}
+									/>
+								</div>
 							</div>
 						</div>
 						<div className='mb-4 flex flex-col gap-3'>
@@ -408,7 +427,7 @@ export default function BudgetCategoryComponent({
 								onChange={(e) =>
 									setNewExpense({...newExpense, amount: e.target.value})
 								}
-								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 							/>
 							<input
 								type='text'
@@ -420,7 +439,7 @@ export default function BudgetCategoryComponent({
 										description: e.target.value,
 									})
 								}
-								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 							/>
 						</div>
 						<div className='flex gap-3'>

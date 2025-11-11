@@ -45,18 +45,18 @@ export default function BudgetPopup({
 
 	return (
 		<div
-			className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4'
+			className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm dark:bg-black/70'
 			onClick={handleBackdropClick}
 		>
 			<div
 				ref={popupRef}
-				className='relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl'
+				className='relative w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl dark:border-border/50 dark:bg-[#1a1a1a]'
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Close Button */}
 				<button
 					onClick={onClose}
-					className='absolute right-4 top-4 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600'
+					className='absolute right-4 top-4 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
 					aria-label='Close'
 				>
 					<svg
@@ -75,7 +75,9 @@ export default function BudgetPopup({
 				</button>
 
 				{/* Title */}
-				<h3 className='mb-6 pr-8 text-2xl font-bold text-gray-800'>{title}</h3>
+				<h3 className='mb-6 pr-8 text-2xl font-bold text-foreground'>
+					{title}
+				</h3>
 
 				{/* Content */}
 				{children}

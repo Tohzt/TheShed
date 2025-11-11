@@ -1,3 +1,5 @@
+import {useState} from 'react'
+import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
 import {Card} from '@store/components/ui/card'
 
@@ -20,6 +22,23 @@ export default function BudgetExpenseComponent({
 	categories,
 	onRefetch,
 }: BudgetExpenseComponentProps) {
+	const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null)
+
+	// Mutation for updating expenses
+	const updateExpenseMutation = api.budget.updateExpense.useMutation({
+		onSuccess: () => {
+			onRefetch()
+			setEditingExpenseId(null)
+		},
+	})
+
+	// Handle category change
+	const handleCategoryChange = (expenseId: string, newCategory: string) => {
+		updateExpenseMutation.mutate({
+			expenseId,
+			category: newCategory,
+		})
+	}
 
 	const getCategoryColor = (categoryName: string) => {
 		const category = categories.find((cat) => cat.name === categoryName)
@@ -107,19 +126,55 @@ export default function BudgetExpenseComponent({
 											})}
 										</td>
 										<td className='px-6 py-4'>
-											<span
-												className='inline-flex items-center rounded-full px-3 py-1 text-sm font-medium'
-												style={{
-													backgroundColor: lightenColor(
-														getCategoryColor(expense.category)
-													),
-													color: darkenColor(
-														getCategoryColor(expense.category)
-													),
-												}}
-											>
-												{expense.category}
-											</span>
+											{editingExpenseId === expense.id ? (
+												<select
+													value={expense.category}
+													onChange={(e) => {
+														handleCategoryChange(expense.id, e.target.value)
+													}}
+													onBlur={() => setEditingExpenseId(null)}
+													autoFocus
+													className='cursor-pointer rounded-full border-0 px-3 py-1 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring dark:bg-[#2a2a2a]'
+													style={{
+														backgroundColor: lightenColor(
+															getCategoryColor(expense.category)
+														),
+														color: darkenColor(
+															getCategoryColor(expense.category)
+														),
+													}}
+												>
+													{categories.map((cat) => (
+														<option
+															key={cat.name}
+															value={cat.name}
+															style={{
+																backgroundColor: lightenColor(
+																	getCategoryColor(cat.name)
+																),
+																color: darkenColor(getCategoryColor(cat.name)),
+															}}
+														>
+															{cat.name}
+														</option>
+													))}
+												</select>
+											) : (
+												<button
+													onClick={() => setEditingExpenseId(expense.id)}
+													className='inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1'
+													style={{
+														backgroundColor: lightenColor(
+															getCategoryColor(expense.category)
+														),
+														color: darkenColor(
+															getCategoryColor(expense.category)
+														),
+													}}
+												>
+													{expense.category}
+												</button>
+											)}
 										</td>
 										<td className='px-6 py-4 text-sm text-foreground'>
 											{expense.description}

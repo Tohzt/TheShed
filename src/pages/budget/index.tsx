@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import {useMemo, useState} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../utils/api'
 import BudgetCategoryComponent, {
@@ -16,13 +16,24 @@ interface MonthlyData {
 export default function BudgetPage() {
 	const {data: sessionData} = useSession()
 
+	// State for selected month/year
+	const [selectedMonth, setSelectedMonth] = useState<number>(
+		new Date().getMonth() + 1
+	)
+	const [selectedYear, setSelectedYear] = useState<number>(
+		new Date().getFullYear()
+	)
+
 	// Fetch budget data from tRPC API
 	const {
 		data: budgetData,
 		isLoading: loading,
 		refetch,
 	} = api.budget.getMonthlyBudget.useQuery(
-		{},
+		{
+			month: selectedMonth,
+			year: selectedYear,
+		},
 		{
 			enabled: !!sessionData?.user?.id,
 		}
@@ -36,12 +47,22 @@ export default function BudgetPage() {
 				categories: [],
 			}
 		}
+
+		// Filter expenses to ensure they're within the selected month/year
+		const startOfMonth = new Date(selectedYear, selectedMonth - 1, 1)
+		const endOfMonth = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999)
+
+		const filteredExpenses = budgetData.expenses.filter((expense) => {
+			const expenseDate = new Date(expense.date)
+			return expenseDate >= startOfMonth && expenseDate <= endOfMonth
+		})
+
 		return {
 			income: budgetData.income,
-			expenses: budgetData.expenses,
+			expenses: filteredExpenses,
 			categories: budgetData.categories,
 		}
-	}, [budgetData])
+	}, [budgetData, selectedMonth, selectedYear])
 
 	// Calculate totals
 	const totals = useMemo(() => {
@@ -57,10 +78,23 @@ export default function BudgetPage() {
 		return {totalAllocated, totalSpent, remaining, savingsRate}
 	}, [data])
 
-	// Get current month/year for display
-	const currentDate = new Date()
-	const monthName = currentDate.toLocaleString('default', {month: 'long'})
-	const year = currentDate.getFullYear()
+	// Format selected month/year for display
+	const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleString(
+		'default',
+		{month: 'long'}
+	)
+
+	// Generate month and year options
+	const months = Array.from({length: 12}, (_, i) => {
+		const date = new Date(selectedYear, i, 1)
+		return {
+			value: i + 1,
+			label: date.toLocaleString('default', {month: 'long'}),
+		}
+	})
+
+	const currentYear = new Date().getFullYear()
+	const years = Array.from({length: 10}, (_, i) => currentYear - 5 + i)
 
 	// Show loading state
 	if (loading) {
@@ -88,12 +122,35 @@ export default function BudgetPage() {
 				<div className='w-full flex-col items-center gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
 					{/* Header */}
 					<div className='mb-8 w-full max-w-6xl'>
-						<h1 className='mb-2 text-4xl font-bold text-foreground sm:text-5xl'>
-							Budget Tracker
-						</h1>
-						<p className='text-lg text-muted-foreground'>
-							{monthName} {year}
-						</p>
+						<div className='mb-2 flex items-center justify-between gap-4'>
+							<h1 className='text-4xl font-bold text-foreground sm:text-5xl'>
+								Budget Tracker
+							</h1>
+							<div className='flex items-center gap-2'>
+								<select
+									value={selectedMonth}
+									onChange={(e) => setSelectedMonth(Number(e.target.value))}
+									className='flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+								>
+									{months.map((month) => (
+										<option key={month.value} value={month.value}>
+											{month.label}
+										</option>
+									))}
+								</select>
+								<select
+									value={selectedYear}
+									onChange={(e) => setSelectedYear(Number(e.target.value))}
+									className='flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+								>
+									{years.map((year) => (
+										<option key={year} value={year}>
+											{year}
+										</option>
+									))}
+								</select>
+							</div>
+						</div>
 					</div>
 
 					{/* Empty State */}

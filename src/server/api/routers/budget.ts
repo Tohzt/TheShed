@@ -34,18 +34,16 @@ export const budgetRouter = createTRPCRouter({
 			})
 
 			// Get expenses for this month
-			const startDate = new Date(year, month - 1, 1)
-			const endDate = new Date(year, month, 0, 23, 59, 59)
-
+			// month is 1-indexed (1-12), Date constructor uses 0-indexed months (0-11)
 			const expenses = await ctx.prisma.expense.findMany({
 				where: {
 					userId,
 					date: {
-						gte: startDate,
-						lte: endDate,
+						gte: new Date(year, month - 1, 1),
+						lte: new Date(year, month, 0, 23, 59, 59, 999),
 					},
 				},
-				orderBy: {date: 'desc'},
+				orderBy: {date: 'asc'},
 				take: 50, // Limit to 50 most recent
 			})
 
@@ -140,6 +138,59 @@ export const budgetRouter = createTRPCRouter({
 					amount: input.amount,
 					description: input.description,
 					date: new Date(input.date),
+				},
+			})
+		}),
+
+	// Update an existing expense
+	updateExpense: protectedProcedure
+		.input(
+			z.object({
+				expenseId: z.string(),
+				category: z.string().optional(),
+				amount: z.number().min(0.01).optional(),
+				description: z.string().min(1).optional(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+			const {expenseId, ...updateData} = input
+
+			// Verify the expense belongs to the user
+			const expense = await ctx.prisma.expense.findFirst({
+				where: {
+					id: expenseId,
+					userId,
+				},
+			})
+
+			if (!expense) {
+				throw new Error('Expense not found')
+			}
+
+			// If category is being updated, find the new category
+			let categoryId = expense.categoryId
+			if (updateData.category && updateData.category !== expense.category) {
+				const budgetCategory = await ctx.prisma.budgetcategory.findFirst({
+					where: {
+						userId,
+						name: updateData.category,
+					},
+				})
+				categoryId = budgetCategory?.id || null
+			}
+
+			return await ctx.prisma.expense.update({
+				where: {id: expenseId},
+				data: {
+					...(updateData.category && {
+						category: updateData.category,
+						categoryId,
+					}),
+					...(updateData.amount !== undefined && {
+						amount: updateData.amount,
+					}),
+					...(updateData.description && {description: updateData.description}),
 				},
 			})
 		}),
