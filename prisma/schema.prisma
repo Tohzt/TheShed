@@ -71,6 +71,7 @@ model user {
   budgetCategories budgetcategory[]
   expenses      expense[]
   monthlyBudgets monthlybudget[]
+  automatedItems automateditem[]
 }
 
 model verificationtoken {
@@ -121,4 +122,19 @@ model monthlybudget {
   user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, month, year], map: "MonthlyBudget_userId_month_year_key")
+}
+
+model automateditem {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String
+  amount      Float
+  type        String   // 'income' or 'expense'
+  month       Int
+  year        Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year, label], map: "AutomatedItem_userId_month_year_label_key")
 }

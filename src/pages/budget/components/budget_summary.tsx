@@ -1,7 +1,11 @@
-import {useId, useState} from 'react'
-import {Area, AreaChart} from 'recharts'
+import {useId, useState, useMemo, useRef, useEffect} from 'react'
+import {Area, AreaChart, PieChart, Pie, Cell} from 'recharts'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
+import AutomatedItemsList, {
+	type AutomatedItem,
+	type AutomatedItemsListHandle,
+} from './automated_items_list'
 import {Card, CardContent} from '@store/components/ui/card'
 import {Button} from '@store/components/ui/button'
 import {
@@ -13,54 +17,114 @@ import {
 
 interface BudgetSummaryProps {
 	income: number
+	baseIncome: number
+	automatedItems: AutomatedItem[]
 	totalSpent: number
 	remaining: number
 	savingsRate: string
+	month: number
+	year: number
 	onRefetch: () => void
 }
 
 export default function BudgetSummary({
 	income,
+	baseIncome,
+	automatedItems,
 	totalSpent,
 	remaining,
 	savingsRate,
+	month,
+	year,
 	onRefetch,
 }: BudgetSummaryProps) {
 	const [showEditIncome, setShowEditIncome] = useState(false)
 	const [newIncome, setNewIncome] = useState('')
+	const automatedListRef = useRef<AutomatedItemsListHandle | null>(null)
+	const [canAddAutomatedItem, setCanAddAutomatedItem] = useState(false)
+	const [hasActiveEdit, setHasActiveEdit] = useState(false)
+	const [hasValidEdit, setHasValidEdit] = useState(false)
+	const automatedListScrollRef = useRef<HTMLDivElement | null>(null)
+	const [pendingScrollToEnd, setPendingScrollToEnd] = useState(false)
+
+	// After an Add completes and items length changes, scroll to bottom once
+	useEffect(() => {
+		if (pendingScrollToEnd && automatedListScrollRef.current) {
+			const el = automatedListScrollRef.current
+			el.scrollTo({top: el.scrollHeight, behavior: 'smooth'})
+			setPendingScrollToEnd(false)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [automatedItems.length])
 
 	// Get unique IDs for gradients
-	const incomeGradientId = useId()
 	const spentGradientId = useId()
 	const remainingGradientId = useId()
 	const savingsGradientId = useId()
 
-	// Get current month/year
-	const currentDate = new Date()
-	const month = currentDate.getMonth() + 1
-	const year = currentDate.getFullYear()
+	// Prepare pie chart data
+	const pieData = useMemo(() => {
+		const data: Array<{name: string; value: number; color: string}> = []
+
+		// Add base income if > 0
+		if (baseIncome > 0) {
+			data.push({
+				name: 'Base Income',
+				value: baseIncome,
+				color: 'hsl(var(--primary))',
+			})
+		}
+
+		// Add income items
+		automatedItems
+			.filter((item) => item.type === 'income')
+			.forEach((item) => {
+				data.push({
+					name: item.label,
+					value: item.amount,
+					color: 'hsl(var(--chart-2))',
+				})
+			})
+
+		// Add expense items (as negative for visualization)
+		automatedItems
+			.filter((item) => item.type === 'expense')
+			.forEach((item) => {
+				data.push({
+					name: item.label,
+					value: item.amount,
+					color: 'hsl(var(--destructive))',
+				})
+			})
+
+		return data
+	}, [baseIncome, automatedItems])
+
+	// Chart configuration for pie chart
+	const pieChartConfig = useMemo(() => {
+		const config: ChartConfig = {}
+		pieData.forEach((item, index) => {
+			config[`item${index}`] = {
+				label: item.name,
+				color: item.color,
+			}
+		})
+		return config
+	}, [pieData])
 
 	// Fetch historical data for charts
 	const {data: historicalData = []} = api.budget.getHistoricalBudget.useQuery({
 		months: 6,
 	})
 
-	// Mutation for setting monthly income
+	// Mutation for setting monthly income (do not auto-close)
 	const setIncomeMutation = api.budget.setMonthlyIncome.useMutation({
 		onSuccess: () => {
 			onRefetch()
-			setShowEditIncome(false)
+			// Clear input so primary button can switch to "Close"
 			setNewIncome('')
 		},
 	})
-
-	// Chart configurations
-	const incomeChartConfig = {
-		value: {
-			label: 'Income',
-			color: 'hsl(var(--primary))',
-		},
-	} satisfies ChartConfig
 
 	const spentChartConfig = {
 		value: {
@@ -97,8 +161,46 @@ export default function BudgetSummary({
 
 	// Handle clicking on income card
 	const handleIncomeClick = () => {
-		setNewIncome(income.toString())
+		setNewIncome(baseIncome.toString())
 		setShowEditIncome(true)
+	}
+
+	// Long press handling for chart (mobile): tap opens popup, hold shows tooltip
+	const longPressTimerRef = useRef<number | null>(null)
+	const isLongPressRef = useRef(false)
+
+	const handleChartTouchStart: React.TouchEventHandler<HTMLDivElement> = (
+		e
+	) => {
+		isLongPressRef.current = false
+		if (longPressTimerRef.current) {
+			window.clearTimeout(longPressTimerRef.current)
+		}
+		longPressTimerRef.current = window.setTimeout(() => {
+			isLongPressRef.current = true
+			// When long-pressing, prevent the Card's click from firing
+			// We don't stop propagation here to allow the chart to receive touch events for tooltip
+		}, 350)
+	}
+
+	const handleChartTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
+		if (longPressTimerRef.current) {
+			window.clearTimeout(longPressTimerRef.current)
+			longPressTimerRef.current = null
+		}
+		// If it was a long press, prevent the Card's click (popup) from triggering
+		if (isLongPressRef.current) {
+			e.stopPropagation()
+		}
+	}
+
+	const handleChartClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+		// If a long press occurred, suppress click bubbling to the Card
+		if (isLongPressRef.current) {
+			e.stopPropagation()
+			// reset so subsequent taps behave normally
+			isLongPressRef.current = false
+		}
 	}
 
 	return (
@@ -107,61 +209,183 @@ export default function BudgetSummary({
 				{/* Income Card */}
 				<Card
 					onClick={handleIncomeClick}
-					className='relative min-h-[200px] cursor-pointer overflow-hidden border-t-4 border-t-primary transition-all hover:scale-[1.02] hover:shadow-lg'
+					className='relative h-[200px] cursor-pointer overflow-hidden border-t-4 border-t-primary transition-all hover:shadow-lg lg:col-span-2'
 				>
-					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
-						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
-							Monthly Income
-						</span>
-						<p className='flex justify-center text-2xl font-bold text-foreground sm:text-3xl'>
-							${income.toLocaleString()}
-						</p>
-						<ChartContainer
-							config={incomeChartConfig}
-							className='absolute bottom-0 left-0 right-0 top-[50%] h-[50%] w-full overflow-hidden [&>div]:!h-full [&>div]:!w-full'
-						>
-							<AreaChart
-								data={historicalData}
-								margin={{left: 0, right: 0, top: 0, bottom: 0}}
-							>
-								<defs>
-									<linearGradient
-										id={incomeGradientId}
-										x1='0'
-										y1='0'
-										x2='0'
-										y2='1'
+					<CardContent className='relative h-full p-4 '>
+						{/* Header */}
+						<div className='relative z-10 mb-2'>
+							<span className='text-xl font-medium text-muted-foreground'>
+								Monthly Income
+							</span>
+						</div>
+
+						{/* Chart and Ledger */}
+						{pieData.length > 0 ? (
+							<>
+								{/* Mobile Chart */}
+								<div
+									className='relative z-10 flex justify-center md:hidden'
+									onTouchStart={handleChartTouchStart}
+									onTouchEnd={handleChartTouchEnd}
+									onClick={handleChartClick}
+								>
+									<ChartContainer
+										config={pieChartConfig}
+										className='h-[140px] w-[140px] [&>div]:!h-full [&>div]:!w-full'
 									>
-										<stop
-											offset='5%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.8}
-										/>
-										<stop
-											offset='95%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.1}
-										/>
-									</linearGradient>
-								</defs>
-								<Area
-									dataKey='income'
-									type='natural'
-									fill={`url(#${incomeGradientId})`}
-									fillOpacity={0.4}
-									stroke='var(--color-value)'
-								/>
-								<ChartTooltip
-									cursor={false}
-									content={<ChartTooltipContent hideLabel />}
-								/>
-							</AreaChart>
-						</ChartContainer>
+										<PieChart>
+											<Pie
+												data={pieData}
+												cx='50%'
+												cy='50%'
+												innerRadius={35}
+												outerRadius={60}
+												paddingAngle={2}
+												dataKey='value'
+											>
+												{pieData.map((entry, index) => (
+													<Cell key={`cell-${index}`} fill={entry.color} />
+												))}
+											</Pie>
+											<ChartTooltip
+												cursor={false}
+												content={<ChartTooltipContent hideLabel />}
+											/>
+										</PieChart>
+									</ChartContainer>
+								</div>
+
+								{/* Desktop Chart and Ledger */}
+								<div className='relative z-10 hidden gap-4 md:flex'>
+									{/* Pie Chart */}
+									<div
+										className='flex-shrink-0'
+										onTouchStart={handleChartTouchStart}
+										onTouchEnd={handleChartTouchEnd}
+										onClick={handleChartClick}
+									>
+										<ChartContainer
+											config={pieChartConfig}
+											className='h-[140px] w-[140px] [&>div]:!h-full [&>div]:!w-full'
+										>
+											<PieChart>
+												<Pie
+													data={pieData}
+													cx='50%'
+													cy='50%'
+													innerRadius={35}
+													outerRadius={60}
+													paddingAngle={2}
+													dataKey='value'
+												>
+													{pieData.map((entry, index) => (
+														<Cell key={`cell-${index}`} fill={entry.color} />
+													))}
+												</Pie>
+												<ChartTooltip
+													cursor={false}
+													content={<ChartTooltipContent hideLabel />}
+												/>
+											</PieChart>
+										</ChartContainer>
+									</div>
+
+									{/* Ledger */}
+									<div className='max-h-[130px] flex-1 space-y-1.5 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+										{baseIncome > 0 && (
+											<div className='flex items-center justify-between px-2.5 py-0'>
+												<div className='flex min-w-0 items-center gap-2'>
+													<div
+														className='h-3 w-3 rounded-full'
+														style={{
+															backgroundColor: 'hsl(var(--primary))',
+														}}
+													/>
+													<span className='max-w-[220px] truncate text-sm font-medium leading-tight text-foreground'>
+														Base Income
+													</span>
+												</div>
+												<span className='ml-2 shrink-0 text-sm font-semibold text-foreground'>
+													${baseIncome.toLocaleString()}
+												</span>
+											</div>
+										)}
+										{automatedItems
+											.filter((item) => item.type === 'income')
+											.map((item) => {
+												const pieItem = pieData.find(
+													(p) => p.name === item.label
+												)
+												return (
+													<div
+														key={item.id}
+														className='flex items-center justify-between px-2.5 py-0'
+													>
+														<div className='flex min-w-0 items-center gap-2'>
+															<div
+																className='h-3 w-3 rounded-full'
+																style={{
+																	backgroundColor:
+																		pieItem?.color || 'hsl(var(--chart-2))',
+																}}
+															/>
+															<span className='max-w-[220px] truncate text-sm font-medium leading-tight text-foreground'>
+																{item.label}
+															</span>
+														</div>
+														<span className='ml-2 shrink-0 text-sm font-semibold text-green-600 dark:text-green-400'>
+															+${item.amount.toLocaleString()}
+														</span>
+													</div>
+												)
+											})}
+										{automatedItems
+											.filter((item) => item.type === 'expense')
+											.map((item) => {
+												const pieItem = pieData.find(
+													(p) => p.name === item.label
+												)
+												return (
+													<div
+														key={item.id}
+														className='flex items-center justify-between px-2.5 py-0'
+													>
+														<div className='flex min-w-0 items-center gap-2'>
+															<div
+																className='h-3 w-3 rounded-full'
+																style={{
+																	backgroundColor:
+																		pieItem?.color || 'hsl(var(--destructive))',
+																}}
+															/>
+															<span className='max-w-[220px] truncate text-sm font-medium leading-tight text-foreground'>
+																{item.label}
+															</span>
+														</div>
+														<span className='ml-2 shrink-0 text-sm font-semibold text-red-600 dark:text-red-400'>
+															-${item.amount.toLocaleString()}
+														</span>
+													</div>
+												)
+											})}
+										{pieData.length === 0 && (
+											<div className='text-center text-xs text-muted-foreground'>
+												No items configured
+											</div>
+										)}
+									</div>
+								</div>
+							</>
+						) : (
+							<div className='relative z-10 flex h-[140px] items-center justify-center text-sm text-muted-foreground'>
+								Click to configure income
+							</div>
+						)}
 					</CardContent>
 				</Card>
 
 				{/* Total Spent Card */}
-				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-destructive transition-all hover:scale-[1.02] hover:shadow-lg'>
+				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-destructive transition-all hover:shadow-lg'>
 					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
 						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
 							Total Spent
@@ -214,7 +438,7 @@ export default function BudgetSummary({
 				</Card>
 
 				{/* Remaining Card */}
-				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-1 transition-all hover:scale-[1.02] hover:shadow-lg'>
+				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-1 transition-all hover:shadow-lg'>
 					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
 						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
 							Remaining
@@ -267,7 +491,7 @@ export default function BudgetSummary({
 				</Card>
 
 				{/* Savings Rate Card */}
-				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-4 transition-all hover:scale-[1.02] hover:shadow-lg'>
+				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-4 transition-all hover:shadow-lg'>
 					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
 						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
 							Savings Rate
@@ -329,38 +553,136 @@ export default function BudgetSummary({
 				}}
 				title='Set Monthly Income'
 			>
-				<div className='mb-4'>
-					<label className='mb-2 block text-sm font-medium text-foreground'>
-						Monthly Income
-					</label>
-					<input
-						type='number'
-						placeholder='Enter monthly income'
-						value={newIncome}
-						onChange={(e) => setNewIncome(e.target.value)}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-						min='0'
-						step='0.01'
-					/>
-				</div>
-				<div className='flex gap-3'>
-					<Button
-						onClick={handleSetIncome}
-						disabled={!newIncome || parseFloat(newIncome) < 0}
-						className='flex-1'
-					>
-						Save
-					</Button>
-					<Button
-						onClick={() => {
-							setShowEditIncome(false)
-							setNewIncome('')
-						}}
-						variant='outline'
-						className='flex-1'
-					>
-						Cancel
-					</Button>
+				<div className='space-y-6'>
+					{/* Mobile-only chart preview at top of popup */}
+					{pieData.length > 0 && (
+						<div className='md:hidden'>
+							<div className='mb-2 text-sm text-muted-foreground'>
+								Income breakdown
+							</div>
+							<div className='flex justify-center'>
+								<ChartContainer
+									config={pieChartConfig}
+									className='h-[160px] w-[160px] [&>div]:!h-full [&>div]:!w-full'
+								>
+									<PieChart>
+										<Pie
+											data={pieData}
+											cx='50%'
+											cy='50%'
+											innerRadius={40}
+											outerRadius={70}
+											paddingAngle={2}
+											dataKey='value'
+										>
+											{pieData.map((entry, index) => (
+												<Cell key={`cell-popup-${index}`} fill={entry.color} />
+											))}
+										</Pie>
+										<ChartTooltip
+											cursor={false}
+											content={<ChartTooltipContent hideLabel />}
+										/>
+									</PieChart>
+								</ChartContainer>
+							</div>
+						</div>
+					)}
+
+					<div>
+						<label className='mb-2 block text-sm font-medium text-foreground'>
+							Base Monthly Income
+						</label>
+						<input
+							type='number'
+							placeholder='Enter base monthly income'
+							value={newIncome}
+							onChange={(e) => setNewIncome(e.target.value)}
+							className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+							min='0'
+							step='0.01'
+						/>
+					</div>
+
+					<div>
+						<label className='mb-2 block text-sm font-medium text-foreground'>
+							Automated Items
+						</label>
+						<div
+							ref={automatedListScrollRef}
+							className='max-h-[260px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] md:max-h-none [&::-webkit-scrollbar]:hidden'
+						>
+							{/* Scroll container for list */}
+							<AutomatedItemsList
+								ref={automatedListRef}
+								items={automatedItems}
+								month={month}
+								year={year}
+								onRefetch={onRefetch}
+								onNewItemValidityChange={setCanAddAutomatedItem}
+								onEditingStateChange={({active, valid}) => {
+									setHasActiveEdit(active)
+									setHasValidEdit(valid)
+								}}
+							/>
+						</div>
+					</div>
+
+					<div className='flex gap-3'>
+						<Button
+							onClick={async () => {
+								const incomeChanged =
+									newIncome !== '' && parseFloat(newIncome) !== baseIncome
+
+								// Track if we actually changed anything in this click
+								let didChange = false
+
+								// Add new automated item
+								if (canAddAutomatedItem) {
+									setPendingScrollToEnd(true)
+									automatedListRef.current?.addNewItem()
+									return
+								}
+
+								// Save active edit if valid
+								if (hasActiveEdit && hasValidEdit) {
+									await automatedListRef.current?.saveEdits?.()
+									didChange = true
+								}
+
+								// Save income if changed
+								if (incomeChanged) {
+									handleSetIncome()
+									didChange = true
+								}
+
+								// If nothing changed, this acts as Close
+								if (!didChange) {
+									setShowEditIncome(false)
+								}
+							}}
+							disabled={false}
+							className='flex-1'
+						>
+							{canAddAutomatedItem
+								? 'Add'
+								: newIncome !== '' && parseFloat(newIncome) !== baseIncome
+								? 'Save'
+								: hasActiveEdit && hasValidEdit
+								? 'Save'
+								: 'Close'}
+						</Button>
+						<Button
+							onClick={() => {
+								setShowEditIncome(false)
+								setNewIncome('')
+							}}
+							variant='outline'
+							className='flex-1'
+						>
+							Cancel
+						</Button>
+					</div>
 				</div>
 			</BudgetPopup>
 		</>

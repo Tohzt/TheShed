@@ -64,8 +64,35 @@ export const budgetRouter = createTRPCRouter({
 				color: cat.color,
 			}))
 
+			// Get automated items for this month
+			const automatedItems = await ctx.prisma.automateditem.findMany({
+				where: {
+					userId,
+					month,
+					year,
+				},
+				orderBy: {createdAt: 'asc'},
+			})
+
+			// Calculate net income: base income + income items - expense items
+			const baseIncome = monthlyBudget?.income ?? 0
+			const incomeItems = automatedItems
+				.filter((item) => item.type === 'income')
+				.reduce((sum, item) => sum + item.amount, 0)
+			const expenseItems = automatedItems
+				.filter((item) => item.type === 'expense')
+				.reduce((sum, item) => sum + item.amount, 0)
+			const netIncome = baseIncome + incomeItems - expenseItems
+
 			return {
-				income: monthlyBudget?.income ?? 0,
+				income: netIncome,
+				baseIncome,
+				automatedItems: automatedItems.map((item) => ({
+					id: item.id,
+					label: item.label,
+					amount: item.amount,
+					type: item.type,
+				})),
 				categories: categoriesWithSpent,
 				expenses: expenses.map((exp) => ({
 					id: exp.id,
@@ -382,5 +409,111 @@ export const budgetRouter = createTRPCRouter({
 			}
 
 			return chartData
+		}),
+
+	// Get automated items for a specific month/year
+	getAutomatedItems: protectedProcedure
+		.input(
+			z.object({
+				month: z.number().min(1).max(12),
+				year: z.number(),
+			})
+		)
+		.query(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			return await ctx.prisma.automateditem.findMany({
+				where: {
+					userId,
+					month: input.month,
+					year: input.year,
+				},
+				orderBy: {createdAt: 'asc'},
+			})
+		}),
+
+	// Create a new automated item
+	createAutomatedItem: protectedProcedure
+		.input(
+			z.object({
+				label: z.string().min(1),
+				amount: z.number().min(0),
+				type: z.enum(['income', 'expense']),
+				month: z.number().min(1).max(12),
+				year: z.number(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			return await ctx.prisma.automateditem.create({
+				data: {
+					userId,
+					label: input.label,
+					amount: input.amount,
+					type: input.type,
+					month: input.month,
+					year: input.year,
+				},
+			})
+		}),
+
+	// Update an existing automated item
+	updateAutomatedItem: protectedProcedure
+		.input(
+			z.object({
+				itemId: z.string(),
+				label: z.string().min(1).optional(),
+				amount: z.number().min(0).optional(),
+				type: z.enum(['income', 'expense']).optional(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+			const {itemId, ...updateData} = input
+
+			// Verify the item belongs to the user
+			const item = await ctx.prisma.automateditem.findFirst({
+				where: {
+					id: itemId,
+					userId,
+				},
+			})
+
+			if (!item) {
+				throw new Error('Automated item not found')
+			}
+
+			return await ctx.prisma.automateditem.update({
+				where: {id: itemId},
+				data: updateData,
+			})
+		}),
+
+	// Delete an automated item
+	deleteAutomatedItem: protectedProcedure
+		.input(
+			z.object({
+				itemId: z.string(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			// Verify the item belongs to the user
+			const item = await ctx.prisma.automateditem.findFirst({
+				where: {
+					id: input.itemId,
+					userId,
+				},
+			})
+
+			if (!item) {
+				throw new Error('Automated item not found')
+			}
+
+			return await ctx.prisma.automateditem.delete({
+				where: {id: input.itemId},
+			})
 		}),
 })

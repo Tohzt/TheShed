@@ -9,6 +9,13 @@ import BudgetSummary from './components/budget_summary'
 
 interface MonthlyData {
 	income: number
+	baseIncome: number
+	automatedItems: Array<{
+		id: string
+		label: string
+		amount: number
+		type: 'income' | 'expense'
+	}>
 	expenses: Expense[]
 	categories: BudgetCategory[]
 }
@@ -43,6 +50,8 @@ export default function BudgetPage() {
 		if (!budgetData) {
 			return {
 				income: 0,
+				baseIncome: 0,
+				automatedItems: [],
 				expenses: [],
 				categories: [],
 			}
@@ -59,6 +68,8 @@ export default function BudgetPage() {
 
 		return {
 			income: budgetData.income,
+			baseIncome: budgetData.baseIncome ?? 0,
+			automatedItems: budgetData.automatedItems ?? [],
 			expenses: filteredExpenses,
 			categories: budgetData.categories,
 		}
@@ -166,9 +177,13 @@ export default function BudgetPage() {
 					{/* Monthly Summary Cards */}
 					<BudgetSummary
 						income={data.income}
+						baseIncome={data.baseIncome}
+						automatedItems={data.automatedItems}
 						totalSpent={totals.totalSpent}
 						remaining={totals.remaining}
 						savingsRate={totals.savingsRate}
+						month={selectedMonth}
+						year={selectedYear}
 						onRefetch={() => void refetch()}
 					/>
 
