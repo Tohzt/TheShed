@@ -205,11 +205,11 @@ export default function BudgetSummary({
 
 	return (
 		<>
-			<div className='mb-8 grid w-full max-w-6xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4'>
+			<div className='mb-8 grid w-full max-w-6xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-4'>
 				{/* Income Card */}
 				<Card
 					onClick={handleIncomeClick}
-					className='relative h-[200px] cursor-pointer overflow-hidden border-t-4 border-t-primary transition-all hover:shadow-lg lg:col-span-2'
+					className='relative h-[200px] cursor-pointer overflow-hidden border-t-4 border-t-primary transition-all hover:shadow-lg'
 				>
 					<CardContent className='relative h-full p-4 '>
 						{/* Header */}
@@ -386,7 +386,7 @@ export default function BudgetSummary({
 
 				{/* Total Spent Card */}
 				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-destructive transition-all hover:shadow-lg'>
-					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
+					<CardContent className='relative h-full p-4'>
 						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
 							Total Spent
 						</span>
@@ -439,7 +439,7 @@ export default function BudgetSummary({
 
 				{/* Remaining Card */}
 				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-1 transition-all hover:shadow-lg'>
-					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
+					<CardContent className='relative h-full p-4'>
 						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
 							Remaining
 						</span>
@@ -492,7 +492,7 @@ export default function BudgetSummary({
 
 				{/* Savings Rate Card */}
 				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-4 transition-all hover:shadow-lg'>
-					<CardContent className='absolute inset-0 top-0 h-full w-full overflow-hidden pt-2'>
+					<CardContent className='relative h-full p-4'>
 						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
 							Savings Rate
 						</span>
