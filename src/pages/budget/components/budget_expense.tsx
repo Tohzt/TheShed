@@ -1,9 +1,4 @@
-import {useState} from 'react'
-import {useSession} from 'next-auth/react'
-import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
-import BudgetPopup from './budget_popup'
-import {Button} from '@store/components/ui/button'
 import {Card} from '@store/components/ui/card'
 
 export interface Expense {
@@ -25,37 +20,6 @@ export default function BudgetExpenseComponent({
 	categories,
 	onRefetch,
 }: BudgetExpenseComponentProps) {
-	const {data: sessionData} = useSession()
-	const [showAddExpense, setShowAddExpense] = useState(false)
-	const [newExpense, setNewExpense] = useState({
-		category: '',
-		amount: '',
-		description: '',
-	})
-
-	// Mutation for creating expenses
-	const createExpenseMutation = api.budget.createExpense.useMutation({
-		onSuccess: () => {
-			onRefetch()
-			setNewExpense({category: '', amount: '', description: ''})
-			setShowAddExpense(false)
-		},
-	})
-
-	// Handle adding expense
-	const handleAddExpense = () => {
-		if (!newExpense.amount || !newExpense.description || !newExpense.category)
-			return
-
-		if (!sessionData?.user?.id) return
-
-		createExpenseMutation.mutate({
-			category: newExpense.category,
-			amount: parseFloat(newExpense.amount),
-			description: newExpense.description,
-			date: new Date().toISOString().split('T')[0],
-		})
-	}
 
 	const getCategoryColor = (categoryName: string) => {
 		const category = categories.find((cat) => cat.name === categoryName)
@@ -96,80 +60,9 @@ export default function BudgetExpenseComponent({
 
 	return (
 		<div className='mb-12 w-full max-w-6xl'>
-			<div className='mb-6 flex items-center justify-between'>
+			<div className='mb-6'>
 				<h2 className='text-2xl font-bold text-foreground'>Expenses</h2>
-				<Button
-					onClick={() => setShowAddExpense(!showAddExpense)}
-					size='sm'
-					disabled={categories.length === 0}
-				>
-					Add New
-				</Button>
 			</div>
-
-			{/* Add Expense Popup */}
-			<BudgetPopup
-				isOpen={showAddExpense}
-				onClose={() => {
-					setShowAddExpense(false)
-					setNewExpense({category: '', amount: '', description: ''})
-				}}
-				title='New Expense'
-			>
-				<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3'>
-					<select
-						value={newExpense.category}
-						onChange={(e) =>
-							setNewExpense({...newExpense, category: e.target.value})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-						disabled={categories.length === 0}
-					>
-						<option value=''>Select Category</option>
-						{categories.map((cat) => (
-							<option key={cat.name} value={cat.name}>
-								{cat.name}
-							</option>
-						))}
-					</select>
-					<input
-						type='number'
-						placeholder='Amount'
-						value={newExpense.amount}
-						onChange={(e) =>
-							setNewExpense({...newExpense, amount: e.target.value})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-					/>
-					<input
-						type='text'
-						placeholder='Description'
-						value={newExpense.description}
-						onChange={(e) =>
-							setNewExpense({
-								...newExpense,
-								description: e.target.value,
-							})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-					/>
-				</div>
-				<div className='flex gap-3'>
-					<Button onClick={handleAddExpense} className='flex-1'>
-						Add
-					</Button>
-					<Button
-						onClick={() => {
-							setShowAddExpense(false)
-							setNewExpense({category: '', amount: '', description: ''})
-						}}
-						variant='outline'
-						className='flex-1'
-					>
-						Cancel
-					</Button>
-				</div>
-			</BudgetPopup>
 
 			{/* Recent Expenses Table */}
 			<Card className='overflow-hidden'>

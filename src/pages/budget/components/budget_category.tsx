@@ -2,6 +2,7 @@ import {useState, useRef} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
+import ConfirmDeleteDialog from './delete_category_dialog'
 import {Button} from '@store/components/ui/button'
 
 export interface BudgetCategory {
@@ -47,9 +48,10 @@ export default function BudgetCategoryComponent({
 }: BudgetCategoryComponentProps) {
 	const {data: sessionData} = useSession()
 	const [showAddCategory, setShowAddCategory] = useState(false)
-	const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(
-		null
-	)
+	const [selectedCategory, setSelectedCategory] =
+		useState<BudgetCategory | null>(null)
+	const [activeTab, setActiveTab] = useState<'edit' | 'expense'>('expense')
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const [newCategory, setNewCategory] = useState({
 		name: '',
 		allocated: '',
@@ -61,6 +63,10 @@ export default function BudgetCategoryComponent({
 		allocated: '',
 		icon: '',
 		color: '',
+	})
+	const [newExpense, setNewExpense] = useState({
+		amount: '',
+		description: '',
 	})
 	const newCategoryColorRef = useRef<HTMLInputElement>(null)
 	const editCategoryColorRef = useRef<HTMLInputElement>(null)
@@ -78,8 +84,25 @@ export default function BudgetCategoryComponent({
 	const updateCategoryMutation = api.budget.updateCategory.useMutation({
 		onSuccess: () => {
 			onRefetch()
-			setEditingCategory(null)
+			setSelectedCategory(null)
 			setEditCategory({name: '', allocated: '', icon: '', color: ''})
+		},
+	})
+
+	// Mutation for deleting categories
+	const deleteCategoryMutation = api.budget.deleteCategory.useMutation({
+		onSuccess: () => {
+			onRefetch()
+			setSelectedCategory(null)
+			setEditCategory({name: '', allocated: '', icon: '', color: ''})
+		},
+	})
+
+	// Mutation for creating expenses
+	const createExpenseMutation = api.budget.createExpense.useMutation({
+		onSuccess: () => {
+			onRefetch()
+			setNewExpense({amount: '', description: ''})
 		},
 	})
 
@@ -97,32 +120,58 @@ export default function BudgetCategoryComponent({
 		})
 	}
 
-	// Handle editing category - open edit form
-	const handleEditCategory = (category: BudgetCategory) => {
-		setEditingCategory(category)
+	// Handle clicking category card - open popup
+	const handleCategoryClick = (category: BudgetCategory) => {
+		setSelectedCategory(category)
 		setEditCategory({
 			name: category.name,
 			allocated: category.allocated.toString(),
 			icon: category.icon || '',
 			color: category.color || '',
 		})
-		setShowAddCategory(false)
+		setActiveTab('expense')
+		setNewExpense({amount: '', description: ''})
 	}
 
 	// Handle updating category
 	const handleUpdateCategory = () => {
-		if (!editingCategory || !editCategory.name || !editCategory.allocated)
+		if (!selectedCategory || !editCategory.name || !editCategory.allocated)
 			return
 
 		if (!sessionData?.user?.id) return
 
 		updateCategoryMutation.mutate({
-			categoryId: editingCategory.id,
+			categoryId: selectedCategory.id,
 			name: editCategory.name,
 			allocated: parseFloat(editCategory.allocated),
 			icon: editCategory.icon || null,
 			color: editCategory.color || null,
 		})
+	}
+
+	// Handle adding expense
+	const handleAddExpense = () => {
+		if (!selectedCategory || !newExpense.amount || !newExpense.description)
+			return
+
+		if (!sessionData?.user?.id) return
+
+		createExpenseMutation.mutate({
+			category: selectedCategory.name,
+			amount: parseFloat(newExpense.amount),
+			description: newExpense.description,
+			date: new Date().toISOString().split('T')[0],
+		})
+	}
+
+	// Handle deleting category
+	const handleDeleteCategory = () => {
+		if (!selectedCategory || !sessionData?.user?.id) return
+
+		deleteCategoryMutation.mutate({
+			categoryId: selectedCategory.id,
+		})
+		setShowDeleteDialog(false)
 	}
 
 	return (
@@ -219,93 +268,193 @@ export default function BudgetCategoryComponent({
 				</div>
 			</BudgetPopup>
 
-			{/* Edit Category Popup */}
+			{/* Category Popup */}
 			<BudgetPopup
-				isOpen={!!editingCategory}
+				isOpen={!!selectedCategory}
 				onClose={() => {
-					setEditingCategory(null)
+					setSelectedCategory(null)
 					setEditCategory({name: '', allocated: '', icon: '', color: ''})
+					setNewExpense({amount: '', description: ''})
 				}}
-				title='Edit Category'
+				title={selectedCategory?.name || 'Category'}
 			>
-				<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-					<input
-						type='text'
-						placeholder='Category Name'
-						value={editCategory.name}
-						onChange={(e) =>
-							setEditCategory({...editCategory, name: e.target.value})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-					/>
-					<input
-						type='number'
-						placeholder='Allocated Amount'
-						value={editCategory.allocated}
-						onChange={(e) =>
-							setEditCategory({
-								...editCategory,
-								allocated: e.target.value,
-							})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-					/>
-					<input
-						type='text'
-						placeholder='Icon (emoji)'
-						value={editCategory.icon}
-						onChange={(e) =>
-							setEditCategory({...editCategory, icon: e.target.value})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-					/>
-					<div className='relative'>
-						<input
-							ref={editCategoryColorRef}
-							type='color'
-							value={editCategory.color || '#10b981'}
-							onChange={(e) =>
-								setEditCategory({
-									...editCategory,
-									color: e.target.value,
-								})
-							}
-							className='absolute h-10 w-10 cursor-pointer opacity-0'
-						/>
-						<div
-							className='h-10 w-10 cursor-pointer rounded-xl border border-input'
-							style={{
-								backgroundColor: editCategory.color || '#10b981',
-							}}
-							onClick={() => editCategoryColorRef.current?.click()}
-						/>
-					</div>
-				</div>
-				<div className='flex gap-3'>
-					<Button
-						onClick={handleUpdateCategory}
-						disabled={!editCategory.name || !editCategory.allocated}
-						className='flex-1'
+				{/* Tabs */}
+				<div className='mb-6 flex gap-2 border-b border-border'>
+					<button
+						onClick={() => setActiveTab('edit')}
+						className={`px-4 py-2 font-medium transition-colors ${
+							activeTab === 'edit'
+								? 'border-b-2 border-primary text-primary'
+								: 'text-muted-foreground hover:text-foreground'
+						}`}
 					>
-						Save Changes
-					</Button>
-					<Button
-						onClick={() => {
-							setEditingCategory(null)
-							setEditCategory({
-								name: '',
-								allocated: '',
-								icon: '',
-								color: '',
-							})
-						}}
-						variant='outline'
-						className='flex-1'
+						Edit Category
+					</button>
+					<button
+						onClick={() => setActiveTab('expense')}
+						className={`px-4 py-2 font-medium transition-colors ${
+							activeTab === 'expense'
+								? 'border-b-2 border-primary text-primary'
+								: 'text-muted-foreground hover:text-foreground'
+						}`}
 					>
-						Cancel
-					</Button>
+						Add Expense
+					</button>
 				</div>
+
+				{/* Edit Category Tab */}
+				{activeTab === 'edit' && (
+					<>
+						<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+							<input
+								type='text'
+								placeholder='Category Name'
+								value={editCategory.name}
+								onChange={(e) =>
+									setEditCategory({...editCategory, name: e.target.value})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+							/>
+							<input
+								type='number'
+								placeholder='Allocated Amount'
+								value={editCategory.allocated}
+								onChange={(e) =>
+									setEditCategory({
+										...editCategory,
+										allocated: e.target.value,
+									})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+							/>
+							<input
+								type='text'
+								placeholder='Icon (emoji)'
+								value={editCategory.icon}
+								onChange={(e) =>
+									setEditCategory({...editCategory, icon: e.target.value})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+							/>
+							<div className='relative'>
+								<input
+									ref={editCategoryColorRef}
+									type='color'
+									value={editCategory.color || '#10b981'}
+									onChange={(e) =>
+										setEditCategory({
+											...editCategory,
+											color: e.target.value,
+										})
+									}
+									className='absolute h-10 w-10 cursor-pointer opacity-0'
+								/>
+								<div
+									className='h-10 w-10 cursor-pointer rounded-xl border border-input'
+									style={{
+										backgroundColor: editCategory.color || '#10b981',
+									}}
+									onClick={() => editCategoryColorRef.current?.click()}
+								/>
+							</div>
+						</div>
+						<div className='mb-4 flex flex-col gap-3'>
+							<div className='flex gap-3'>
+								<Button
+									onClick={handleUpdateCategory}
+									disabled={!editCategory.name || !editCategory.allocated}
+									className='flex-1'
+								>
+									Save Changes
+								</Button>
+								<Button
+									onClick={() => {
+										setSelectedCategory(null)
+										setEditCategory({
+											name: '',
+											allocated: '',
+											icon: '',
+											color: '',
+										})
+									}}
+									variant='outline'
+									className='flex-1'
+								>
+									Cancel
+								</Button>
+							</div>
+							<Button
+								onClick={() => setShowDeleteDialog(true)}
+								variant='destructive'
+								className='w-full'
+								disabled={deleteCategoryMutation.isPending}
+							>
+								{deleteCategoryMutation.isPending
+									? 'Deleting...'
+									: 'Delete Category'}
+							</Button>
+						</div>
+					</>
+				)}
+
+				{/* Add Expense Tab */}
+				{activeTab === 'expense' && (
+					<>
+						<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
+							<input
+								type='number'
+								placeholder='Amount'
+								value={newExpense.amount}
+								onChange={(e) =>
+									setNewExpense({...newExpense, amount: e.target.value})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+							/>
+							<input
+								type='text'
+								placeholder='Description'
+								value={newExpense.description}
+								onChange={(e) =>
+									setNewExpense({
+										...newExpense,
+										description: e.target.value,
+									})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+							/>
+						</div>
+						<div className='flex gap-3'>
+							<Button
+								onClick={handleAddExpense}
+								disabled={!newExpense.amount || !newExpense.description}
+								className='flex-1'
+							>
+								Add Expense
+							</Button>
+							<Button
+								onClick={() => {
+									setSelectedCategory(null)
+									setNewExpense({amount: '', description: ''})
+								}}
+								variant='outline'
+								className='flex-1'
+							>
+								Cancel
+							</Button>
+						</div>
+					</>
+				)}
 			</BudgetPopup>
+
+			{/* Delete Category Alert Dialog */}
+			<ConfirmDeleteDialog
+				open={showDeleteDialog}
+				onOpenChange={setShowDeleteDialog}
+				title='Delete Category'
+				itemName={selectedCategory?.name}
+				onConfirm={handleDeleteCategory}
+				isDeleting={deleteCategoryMutation.isPending}
+			/>
 
 			{/* Category Cards */}
 			<div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
@@ -316,11 +465,11 @@ export default function BudgetCategoryComponent({
 					return (
 						<div
 							key={category.id}
-							onClick={() => handleEditCategory(category)}
+							onClick={() => handleCategoryClick(category)}
 							className='cursor-pointer overflow-hidden rounded-xl border bg-card shadow transition-all hover:scale-[1.02] hover:shadow-lg'
 						>
 							<div
-								className='p-2 px-4 text-white'
+								className='relative p-2 px-4 text-white'
 								style={{
 									backgroundColor: isOverBudget
 										? '#ef4444' // red-500

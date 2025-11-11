@@ -208,6 +208,33 @@ export const budgetRouter = createTRPCRouter({
 			})
 		}),
 
+	// Delete a budget category
+	deleteCategory: protectedProcedure
+		.input(
+			z.object({
+				categoryId: z.string(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			// Verify the category belongs to the user
+			const category = await ctx.prisma.budgetcategory.findFirst({
+				where: {
+					id: input.categoryId,
+					userId,
+				},
+			})
+
+			if (!category) {
+				throw new Error('Category not found')
+			}
+
+			return await ctx.prisma.budgetcategory.delete({
+				where: {id: input.categoryId},
+			})
+		}),
+
 	// Get historical budget data for charts (last 6 months)
 	getHistoricalBudget: protectedProcedure
 		.input(
