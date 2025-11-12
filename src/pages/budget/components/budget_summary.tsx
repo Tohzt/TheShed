@@ -187,7 +187,7 @@ export default function BudgetSummary({
 								<div className='relative z-10 md:hidden'>
 									{/* Header */}
 									<span className='pb-2 text-xl font-medium text-muted-foreground'>
-										Monthly Income
+										Monthly Money
 									</span>
 									{/* Mobile Chart */}
 									<div
@@ -229,7 +229,7 @@ export default function BudgetSummary({
 									<div className='flex flex-shrink-0 flex-col'>
 										{/* Header */}
 										<span className='pb-1 text-xl font-medium text-muted-foreground'>
-											Monthly Income
+											Monthly Money
 										</span>
 										{/* Pie Chart */}
 										<div
