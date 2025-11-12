@@ -69,7 +69,10 @@ export default function BudgetPage() {
 		return {
 			income: budgetData.income,
 			baseIncome: budgetData.baseIncome ?? 0,
-			automatedItems: budgetData.automatedItems ?? [],
+			automatedItems: (budgetData.automatedItems ?? []).map((item) => ({
+				...item,
+				type: item.type as 'income' | 'expense',
+			})),
 			expenses: filteredExpenses,
 			categories: budgetData.categories,
 		}

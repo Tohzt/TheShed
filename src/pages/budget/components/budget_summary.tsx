@@ -211,71 +211,35 @@ export default function BudgetSummary({
 					onClick={handleIncomeClick}
 					className='relative h-[200px] cursor-pointer overflow-hidden border-t-4 border-t-primary transition-all hover:shadow-lg'
 				>
-					<CardContent className='relative h-full p-4 '>
-						{/* Header */}
-						<div className='relative z-10 mb-2'>
-							<span className='text-xl font-medium text-muted-foreground'>
-								Monthly Income
-							</span>
-						</div>
-
+					<CardContent className='relative h-full p-4 sm:pb-2 sm:pr-2'>
 						{/* Chart and Ledger */}
 						{pieData.length > 0 ? (
 							<>
-								{/* Mobile Chart */}
-								<div
-									className='relative z-10 flex justify-center md:hidden'
-									onTouchStart={handleChartTouchStart}
-									onTouchEnd={handleChartTouchEnd}
-									onClick={handleChartClick}
-								>
-									<ChartContainer
-										config={pieChartConfig}
-										className='h-[140px] w-[140px] [&>div]:!h-full [&>div]:!w-full'
-									>
-										<PieChart>
-											<Pie
-												data={pieData}
-												cx='50%'
-												cy='50%'
-												innerRadius={35}
-												outerRadius={60}
-												paddingAngle={2}
-												dataKey='value'
-											>
-												{pieData.map((entry, index) => (
-													<Cell key={`cell-${index}`} fill={entry.color} />
-												))}
-											</Pie>
-											<ChartTooltip
-												cursor={false}
-												content={<ChartTooltipContent hideLabel />}
-											/>
-										</PieChart>
-									</ChartContainer>
-								</div>
-
-								{/* Desktop Chart and Ledger */}
-								<div className='relative z-10 hidden gap-4 md:flex'>
-									{/* Pie Chart */}
+								{/* Mobile Layout */}
+								<div className='relative z-10 md:hidden'>
+									{/* Header */}
+									<span className='pb-2 text-xl font-medium text-muted-foreground'>
+										Monthly Income
+									</span>
+									{/* Mobile Chart */}
 									<div
-										className='flex-shrink-0'
+										className='flex justify-center'
 										onTouchStart={handleChartTouchStart}
 										onTouchEnd={handleChartTouchEnd}
 										onClick={handleChartClick}
 									>
 										<ChartContainer
 											config={pieChartConfig}
-											className='h-[140px] w-[140px] [&>div]:!h-full [&>div]:!w-full'
+											className='h-[160px] w-[160px] [&>div]:!h-full [&>div]:!w-full'
 										>
 											<PieChart>
 												<Pie
 													data={pieData}
 													cx='50%'
 													cy='50%'
-													innerRadius={35}
-													outerRadius={60}
-													paddingAngle={2}
+													innerRadius={30}
+													outerRadius={70}
+													paddingAngle={1}
 													dataKey='value'
 												>
 													{pieData.map((entry, index) => (
@@ -289,9 +253,52 @@ export default function BudgetSummary({
 											</PieChart>
 										</ChartContainer>
 									</div>
+								</div>
 
-									{/* Ledger */}
-									<div className='max-h-[130px] flex-1 space-y-1.5 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+								{/* Desktop Layout: Left (Header + Chart) | Right (Ledger) */}
+								<div className='relative z-10 hidden h-full gap-4 md:flex'>
+									{/* Left: Header + Pie Chart */}
+									<div className='flex flex-shrink-0 flex-col'>
+										{/* Header */}
+										<span className='pb-1 text-xl font-medium text-muted-foreground'>
+											Monthly Income
+										</span>
+										{/* Pie Chart */}
+										<div
+											className='flex-1'
+											onTouchStart={handleChartTouchStart}
+											onTouchEnd={handleChartTouchEnd}
+											onClick={handleChartClick}
+										>
+											<ChartContainer
+												config={pieChartConfig}
+												className='h-[140px] w-[140px] [&>div]:!h-full [&>div]:!w-full'
+											>
+												<PieChart>
+													<Pie
+														data={pieData}
+														cx='50%'
+														cy='50%'
+														innerRadius={35}
+														outerRadius={70}
+														paddingAngle={1}
+														dataKey='value'
+													>
+														{pieData.map((entry, index) => (
+															<Cell key={`cell-${index}`} fill={entry.color} />
+														))}
+													</Pie>
+													<ChartTooltip
+														cursor={false}
+														content={<ChartTooltipContent hideLabel />}
+													/>
+												</PieChart>
+											</ChartContainer>
+										</div>
+									</div>
+
+									{/* Right: Ledger (Full Height) */}
+									<div className='flex-1 space-y-1.5 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
 										{baseIncome > 0 && (
 											<div className='flex items-center justify-between px-2.5 py-0'>
 												<div className='flex min-w-0 items-center gap-2'>
@@ -563,7 +570,7 @@ export default function BudgetSummary({
 							<div className='flex justify-center'>
 								<ChartContainer
 									config={pieChartConfig}
-									className='h-[160px] w-[160px] [&>div]:!h-full [&>div]:!w-full'
+									className='h-[140px] w-[140px] [&>div]:!h-full [&>div]:!w-full'
 								>
 									<PieChart>
 										<Pie
@@ -572,7 +579,7 @@ export default function BudgetSummary({
 											cy='50%'
 											innerRadius={40}
 											outerRadius={70}
-											paddingAngle={2}
+											paddingAngle={1}
 											dataKey='value'
 										>
 											{pieData.map((entry, index) => (
@@ -610,7 +617,7 @@ export default function BudgetSummary({
 						</label>
 						<div
 							ref={automatedListScrollRef}
-							className='max-h-[260px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] md:max-h-none [&::-webkit-scrollbar]:hidden'
+							className='max-h-[260px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] md:max-h-[400px] [&::-webkit-scrollbar]:hidden'
 						>
 							{/* Scroll container for list */}
 							<AutomatedItemsList
