@@ -1,5 +1,6 @@
 import {useId, useState, useMemo, useRef, useEffect} from 'react'
 import {Area, AreaChart, PieChart, Pie, Cell} from 'recharts'
+import {Plus, Minus} from 'lucide-react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
 import AutomatedItemsList, {
@@ -17,7 +18,6 @@ import {
 
 interface BudgetSummaryProps {
 	income: number
-	baseIncome: number
 	automatedItems: AutomatedItem[]
 	totalSpent: number
 	remaining: number
@@ -29,7 +29,6 @@ interface BudgetSummaryProps {
 
 export default function BudgetSummary({
 	income,
-	baseIncome,
 	automatedItems,
 	totalSpent,
 	remaining,
@@ -39,13 +38,13 @@ export default function BudgetSummary({
 	onRefetch,
 }: BudgetSummaryProps) {
 	const [showEditIncome, setShowEditIncome] = useState(false)
-	const [newIncome, setNewIncome] = useState('')
 	const automatedListRef = useRef<AutomatedItemsListHandle | null>(null)
 	const [canAddAutomatedItem, setCanAddAutomatedItem] = useState(false)
 	const [hasActiveEdit, setHasActiveEdit] = useState(false)
 	const [hasValidEdit, setHasValidEdit] = useState(false)
 	const automatedListScrollRef = useRef<HTMLDivElement | null>(null)
 	const [pendingScrollToEnd, setPendingScrollToEnd] = useState(false)
+	const [activeTab, setActiveTab] = useState<'income' | 'expense'>('income')
 
 	// After an Add completes and items length changes, scroll to bottom once
 	useEffect(() => {
@@ -65,15 +64,6 @@ export default function BudgetSummary({
 	// Prepare pie chart data
 	const pieData = useMemo(() => {
 		const data: Array<{name: string; value: number; color: string}> = []
-
-		// Add base income if > 0
-		if (baseIncome > 0) {
-			data.push({
-				name: 'Base Income',
-				value: baseIncome,
-				color: 'hsl(var(--primary))',
-			})
-		}
 
 		// Add income items
 		automatedItems
@@ -98,7 +88,7 @@ export default function BudgetSummary({
 			})
 
 		return data
-	}, [baseIncome, automatedItems])
+	}, [automatedItems])
 
 	// Chart configuration for pie chart
 	const pieChartConfig = useMemo(() => {
@@ -115,15 +105,6 @@ export default function BudgetSummary({
 	// Fetch historical data for charts
 	const {data: historicalData = []} = api.budget.getHistoricalBudget.useQuery({
 		months: 6,
-	})
-
-	// Mutation for setting monthly income (do not auto-close)
-	const setIncomeMutation = api.budget.setMonthlyIncome.useMutation({
-		onSuccess: () => {
-			onRefetch()
-			// Clear input so primary button can switch to "Close"
-			setNewIncome('')
-		},
 	})
 
 	const spentChartConfig = {
@@ -147,21 +128,8 @@ export default function BudgetSummary({
 		},
 	} satisfies ChartConfig
 
-	// Handle setting income
-	const handleSetIncome = () => {
-		const incomeValue = parseFloat(newIncome)
-		if (isNaN(incomeValue) || incomeValue < 0) return
-
-		setIncomeMutation.mutate({
-			month,
-			year,
-			income: incomeValue,
-		})
-	}
-
 	// Handle clicking on income card
 	const handleIncomeClick = () => {
-		setNewIncome(baseIncome.toString())
 		setShowEditIncome(true)
 	}
 
@@ -299,24 +267,6 @@ export default function BudgetSummary({
 
 									{/* Right: Ledger (Full Height) */}
 									<div className='flex-1 space-y-1.5 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-										{baseIncome > 0 && (
-											<div className='flex items-center justify-between px-2.5 py-0'>
-												<div className='flex min-w-0 items-center gap-2'>
-													<div
-														className='h-3 w-3 rounded-full'
-														style={{
-															backgroundColor: 'hsl(var(--primary))',
-														}}
-													/>
-													<span className='max-w-[220px] truncate text-sm font-medium leading-tight text-foreground'>
-														Base Income
-													</span>
-												</div>
-												<span className='ml-2 shrink-0 text-sm font-semibold text-foreground'>
-													${baseIncome.toLocaleString()}
-												</span>
-											</div>
-										)}
 										{automatedItems
 											.filter((item) => item.type === 'income')
 											.map((item) => {
@@ -556,17 +506,20 @@ export default function BudgetSummary({
 				isOpen={showEditIncome}
 				onClose={() => {
 					setShowEditIncome(false)
-					setNewIncome('')
 				}}
-				title='Set Monthly Income'
+				title={
+					<>
+						<span>Monthly Money</span>
+						<span className='hidden text-lg font-normal text-muted-foreground md:ml-2 md:inline'>
+							- Automated Items
+						</span>
+					</>
+				}
 			>
-				<div className='space-y-6'>
+				<div>
 					{/* Mobile-only chart preview at top of popup */}
 					{pieData.length > 0 && (
 						<div className='md:hidden'>
-							<div className='mb-2 text-sm text-muted-foreground'>
-								Income breakdown
-							</div>
 							<div className='flex justify-center'>
 								<ChartContainer
 									config={pieChartConfig}
@@ -596,25 +549,46 @@ export default function BudgetSummary({
 						</div>
 					)}
 
+					{/* Mobile: Automated Items */}
 					<div>
-						<label className='mb-2 block text-sm font-medium text-foreground'>
-							Base Monthly Income
-						</label>
-						<input
-							type='number'
-							placeholder='Enter base monthly income'
-							value={newIncome}
-							onChange={(e) => setNewIncome(e.target.value)}
-							className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-							min='0'
-							step='0.01'
-						/>
-					</div>
-
-					<div>
-						<label className='mb-2 block text-sm font-medium text-foreground'>
-							Automated Items
-						</label>
+						<div className='mb-2 mt-2 flex items-center justify-between gap-2 md:hidden'>
+							<label className='text-sm font-medium text-foreground'>
+								Automated Items
+							</label>
+							{/* Mobile: Tabs next to label */}
+							<div className='flex gap-2 border-b border-border'>
+								<button
+									onClick={() => setActiveTab('income')}
+									className={`px-3 py-1 text-xs font-medium transition-colors ${
+										activeTab === 'income'
+											? 'border-b-2 border-primary text-primary'
+											: 'text-muted-foreground hover:text-foreground'
+									}`}
+								>
+									<div className='flex items-center gap-1.5'>
+										<span className='flex h-4 w-4 items-center justify-center rounded bg-green-500/20 text-green-600 dark:text-green-400'>
+											<Plus className='h-2.5 w-2.5' />
+										</span>
+										<span>Income</span>
+									</div>
+								</button>
+								<button
+									onClick={() => setActiveTab('expense')}
+									className={`px-3 py-1 text-xs font-medium transition-colors ${
+										activeTab === 'expense'
+											? 'border-b-2 border-primary text-primary'
+											: 'text-muted-foreground hover:text-foreground'
+									}`}
+								>
+									<div className='flex items-center gap-1.5'>
+										<span className='flex h-4 w-4 items-center justify-center rounded bg-red-500/20 text-red-600 dark:text-red-400'>
+											<Minus className='h-2.5 w-2.5' />
+										</span>
+										<span>Expenses</span>
+									</div>
+								</button>
+							</div>
+						</div>
 						<div
 							ref={automatedListScrollRef}
 							className='max-h-[260px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] md:max-h-[400px] [&::-webkit-scrollbar]:hidden'
@@ -626,6 +600,8 @@ export default function BudgetSummary({
 								month={month}
 								year={year}
 								onRefetch={onRefetch}
+								activeTab={activeTab}
+								onActiveTabChange={setActiveTab}
 								onNewItemValidityChange={setCanAddAutomatedItem}
 								onEditingStateChange={({active, valid}) => {
 									setHasActiveEdit(active)
@@ -635,12 +611,9 @@ export default function BudgetSummary({
 						</div>
 					</div>
 
-					<div className='flex gap-3'>
+					<div className='mt-6 flex gap-3'>
 						<Button
 							onClick={async () => {
-								const incomeChanged =
-									newIncome !== '' && parseFloat(newIncome) !== baseIncome
-
 								// Track if we actually changed anything in this click
 								let didChange = false
 
@@ -657,12 +630,6 @@ export default function BudgetSummary({
 									didChange = true
 								}
 
-								// Save income if changed
-								if (incomeChanged) {
-									handleSetIncome()
-									didChange = true
-								}
-
 								// If nothing changed, this acts as Close
 								if (!didChange) {
 									setShowEditIncome(false)
@@ -673,8 +640,6 @@ export default function BudgetSummary({
 						>
 							{canAddAutomatedItem
 								? 'Add'
-								: newIncome !== '' && parseFloat(newIncome) !== baseIncome
-								? 'Save'
 								: hasActiveEdit && hasValidEdit
 								? 'Save'
 								: 'Close'}
@@ -682,7 +647,6 @@ export default function BudgetSummary({
 						<Button
 							onClick={() => {
 								setShowEditIncome(false)
-								setNewIncome('')
 							}}
 							variant='outline'
 							className='flex-1'

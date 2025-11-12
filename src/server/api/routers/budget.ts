@@ -1,4 +1,5 @@
 import {z} from 'zod'
+import {Prisma} from '@prisma/client'
 import {createTRPCRouter, protectedProcedure} from '../trpc'
 
 export const budgetRouter = createTRPCRouter({
@@ -64,35 +65,77 @@ export const budgetRouter = createTRPCRouter({
 				color: cat.color,
 			}))
 
-			// Get automated items for this month
-			const automatedItems = await ctx.prisma.automateditem.findMany({
+			// Get all automated items for this user (we'll filter by dates)
+			const allAutomatedItems = (await ctx.prisma.automateditem.findMany({
 				where: {
 					userId,
-					month,
-					year,
 				},
 				orderBy: {createdAt: 'asc'},
+			})) as Array<{
+				id: string
+				userId: string
+				label: string
+				amount: number
+				type: string
+				month: number
+				year: number
+				dates: string[]
+				createdAt: Date
+				updatedAt: Date
+			}>
+
+			// Helper function to parse YYYY-MM-DD string as local date (not UTC)
+			const parseDateLocal = (dateStr: string): Date => {
+				const [y, m, d] = dateStr.split('-').map(Number)
+				return new Date(y, m - 1, d)
+			}
+
+			// Filter items where at least one date falls within the selected month/year
+			const monthStart = new Date(year, month - 1, 1)
+			const monthEnd = new Date(year, month, 0, 23, 59, 59, 999)
+
+			const automatedItems = allAutomatedItems.filter((item) => {
+				// Parse dates array from JSON
+				const dates = Array.isArray(item.dates)
+					? item.dates
+					: typeof item.dates === 'string'
+					? JSON.parse(item.dates)
+					: []
+
+				// Check if any date falls within the month
+				return dates.some((dateStr: string) => {
+					const date = parseDateLocal(dateStr)
+					return date >= monthStart && date <= monthEnd
+				})
 			})
 
-			// Calculate net income: base income + income items - expense items
-			const baseIncome = monthlyBudget?.income ?? 0
+			// Calculate net income: income items - expense items (no base income)
 			const incomeItems = automatedItems
 				.filter((item) => item.type === 'income')
 				.reduce((sum, item) => sum + item.amount, 0)
 			const expenseItems = automatedItems
 				.filter((item) => item.type === 'expense')
 				.reduce((sum, item) => sum + item.amount, 0)
-			const netIncome = baseIncome + incomeItems - expenseItems
+			const netIncome = incomeItems - expenseItems
 
 			return {
 				income: netIncome,
-				baseIncome,
-				automatedItems: automatedItems.map((item) => ({
-					id: item.id,
-					label: item.label,
-					amount: item.amount,
-					type: item.type,
-				})),
+				automatedItems: automatedItems.map((item) => {
+					// Parse dates array
+					const dates = Array.isArray(item.dates)
+						? item.dates
+						: typeof item.dates === 'string'
+						? JSON.parse(item.dates)
+						: []
+
+					return {
+						id: item.id,
+						label: item.label,
+						amount: item.amount,
+						type: item.type,
+						dates: dates,
+					}
+				}),
 				categories: categoriesWithSpent,
 				expenses: expenses.map((exp) => ({
 					id: exp.id,
@@ -441,6 +484,7 @@ export const budgetRouter = createTRPCRouter({
 				type: z.enum(['income', 'expense']),
 				month: z.number().min(1).max(12),
 				year: z.number(),
+				dates: z.array(z.string()).min(1, 'At least one date is required'),
 			})
 		)
 		.mutation(async ({ctx, input}) => {
@@ -454,7 +498,8 @@ export const budgetRouter = createTRPCRouter({
 					type: input.type,
 					month: input.month,
 					year: input.year,
-				},
+					dates: input.dates as Prisma.InputJsonValue,
+				} as Prisma.automateditemUncheckedCreateInput,
 			})
 		}),
 
@@ -466,6 +511,10 @@ export const budgetRouter = createTRPCRouter({
 				label: z.string().min(1).optional(),
 				amount: z.number().min(0).optional(),
 				type: z.enum(['income', 'expense']).optional(),
+				dates: z
+					.array(z.string())
+					.min(1, 'At least one date is required')
+					.optional(),
 			})
 		)
 		.mutation(async ({ctx, input}) => {

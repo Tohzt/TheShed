@@ -1,9 +1,9 @@
-import {useEffect, useRef} from 'react'
+import React, {useEffect, useRef} from 'react'
 
 interface BudgetPopupProps {
 	isOpen: boolean
 	onClose: () => void
-	title: string
+	title: string | React.ReactNode
 	children: React.ReactNode
 }
 
@@ -75,7 +75,7 @@ export default function BudgetPopup({
 				</button>
 
 				{/* Title */}
-				<h3 className='mb-6 pr-8 text-2xl font-bold text-foreground'>
+				<h3 className='mb-2 pr-8 text-2xl font-bold text-foreground'>
 					{title}
 				</h3>
 
