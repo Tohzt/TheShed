@@ -547,3 +547,10 @@ const AutomatedItemsList = forwardRef<
 })
 
 export default AutomatedItemsList
+
+// Prevent Next.js from treating this as a page
+export async function getServerSideProps() {
+	return {
+		notFound: true,
+	}
+}

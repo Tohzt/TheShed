@@ -150,3 +150,10 @@ export function MultiDatePicker({
 }
 
 export default MultiDatePicker
+
+// Prevent Next.js from treating this as a page
+export async function getServerSideProps() {
+	return {
+		notFound: true,
+	}
+}

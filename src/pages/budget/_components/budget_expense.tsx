@@ -192,3 +192,10 @@ export default function BudgetExpenseComponent({
 		</div>
 	)
 }
+
+// Prevent Next.js from treating this as a page
+export async function getServerSideProps() {
+	return {
+		notFound: true,
+	}
+}
