@@ -1,4 +1,4 @@
-import {useId, useState, useMemo, useRef, useEffect} from 'react'
+import {useId, useState, useMemo, useRef, useEffect, useCallback} from 'react'
 import {Area, AreaChart, PieChart, Pie, Cell} from 'recharts'
 import {Plus, Minus} from 'lucide-react'
 import {api} from '../../../utils/api'
@@ -132,6 +132,15 @@ export default function BudgetSummary({
 	const handleIncomeClick = () => {
 		setShowEditIncome(true)
 	}
+
+	// Memoize callbacks to prevent infinite loops
+	const handleEditingStateChange = useCallback(
+		({active, valid}: {active: boolean; valid: boolean}) => {
+			setHasActiveEdit(active)
+			setHasValidEdit(valid)
+		},
+		[]
+	)
 
 	// Long press handling for chart (mobile): tap opens popup, hold shows tooltip
 	const longPressTimerRef = useRef<number | null>(null)
@@ -603,10 +612,7 @@ export default function BudgetSummary({
 								activeTab={activeTab}
 								onActiveTabChange={setActiveTab}
 								onNewItemValidityChange={setCanAddAutomatedItem}
-								onEditingStateChange={({active, valid}) => {
-									setHasActiveEdit(active)
-									setHasValidEdit(valid)
-								}}
+								onEditingStateChange={handleEditingStateChange}
 							/>
 						</div>
 					</div>

@@ -1,4 +1,10 @@
-import {useImperativeHandle, useState, forwardRef, useMemo} from 'react'
+import {
+	useImperativeHandle,
+	useState,
+	forwardRef,
+	useMemo,
+	useEffect,
+} from 'react'
 import {Trash2, X, Plus, Minus} from 'lucide-react'
 import {api} from '../../../utils/api'
 import {Button} from '../../../store/components/ui/button'
@@ -272,16 +278,23 @@ const AutomatedItemsList = forwardRef<
 		// Return true if either form is valid (on desktop both are visible)
 		return incomeValid || expenseValid
 	}, [newIncomeItem, newExpenseItem])
-	onNewItemValidityChange?.(isNewValid)
-	onEditingStateChange?.({
-		active: Boolean(editingId),
-		valid: Boolean(
-			editingId &&
-				editingItem.label &&
-				editingItem.amount &&
-				editingItem.dates.length > 0
-		),
-	})
+
+	// Notify parent of validity changes (wrapped in useEffect to prevent infinite loops)
+	useEffect(() => {
+		onNewItemValidityChange?.(isNewValid)
+	}, [isNewValid, onNewItemValidityChange])
+
+	useEffect(() => {
+		onEditingStateChange?.({
+			active: Boolean(editingId),
+			valid: Boolean(
+				editingId &&
+					editingItem.label &&
+					editingItem.amount &&
+					editingItem.dates.length > 0
+			),
+		})
+	}, [editingId, editingItem, onEditingStateChange])
 
 	// Render a single item
 	const renderItem = (item: AutomatedItem, isEditing: boolean) => {
