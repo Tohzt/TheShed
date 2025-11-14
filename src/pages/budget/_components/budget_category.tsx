@@ -4,7 +4,7 @@ import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
 import ConfirmDeleteDialog from './delete_category_dialog'
 import EmojiPicker from './emoji_picker'
-import {Button} from '@store/components/ui/button'
+import {Button} from '../../../store/components/ui/button'
 
 export interface BudgetCategory {
 	id: string

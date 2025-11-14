@@ -4,7 +4,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@store/components/ui/dropdown-menu'
+} from '../../../store/components/ui/dropdown-menu'
 
 interface BudgetDropdownProps {
 	items: {

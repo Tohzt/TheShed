@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
-import {Card} from '@store/components/ui/card'
+import {Card} from '../../../store/components/ui/card'
 
 export interface Expense {
 	id: string

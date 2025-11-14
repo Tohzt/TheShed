@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react'
 import {Smile, X} from 'lucide-react'
-import {Button} from '@store/components/ui/button'
+import {Button} from '../../../store/components/ui/button'
 
 interface EmojiPickerProps {
 	value: string

@@ -1,7 +1,7 @@
 import {useImperativeHandle, useState, forwardRef, useMemo} from 'react'
 import {Trash2, X, Plus, Minus} from 'lucide-react'
 import {api} from '../../../utils/api'
-import {Button} from '@store/components/ui/button'
+import {Button} from '../../../store/components/ui/button'
 import {MultiDatePicker} from './multi_date_picker'
 
 export interface AutomatedItem {

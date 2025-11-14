@@ -7,14 +7,14 @@ import AutomatedItemsList, {
 	type AutomatedItem,
 	type AutomatedItemsListHandle,
 } from './automated_items_list'
-import {Card, CardContent} from '@store/components/ui/card'
-import {Button} from '@store/components/ui/button'
+import {Card, CardContent} from '../../../store/components/ui/card'
+import {Button} from '../../../store/components/ui/button'
 import {
 	ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
-} from '@store/components/ui/chart'
+} from '../../../store/components/ui/chart'
 
 interface BudgetSummaryProps {
 	income: number
