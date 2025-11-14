@@ -3,9 +3,11 @@ import {useSession} from 'next-auth/react'
 import {api} from '../../utils/api'
 import BudgetCategoryComponent, {
 	type BudgetCategory,
-} from './components/budget_category'
-import BudgetExpenseComponent, {type Expense} from './components/budget_expense'
-import BudgetSummary from './components/budget_summary'
+} from './_components/budget_category'
+import BudgetExpenseComponent, {
+	type Expense,
+} from './_components/budget_expense'
+import BudgetSummary from './_components/budget_summary'
 
 interface MonthlyData {
 	income: number

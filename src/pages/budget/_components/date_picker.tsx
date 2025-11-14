@@ -62,5 +62,3 @@ export function DatePicker({
 		</Popover>
 	)
 }
-
-export default DatePicker

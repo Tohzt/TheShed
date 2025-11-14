@@ -148,5 +148,3 @@ export function MultiDatePicker({
 		</Popover>
 	)
 }
-
-export default MultiDatePicker
