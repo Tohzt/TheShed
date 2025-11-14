@@ -34,7 +34,7 @@ export default function BudgetDropdown({items = []}: BudgetDropdownProps) {
 }
 
 // Prevent Next.js from treating this as a page
-export async function getServerSideProps() {
+export function getServerSideProps() {
 	return {
 		notFound: true,
 	}
