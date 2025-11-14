@@ -406,9 +406,9 @@ export default function BudgetCategoryComponent({
 								onClick={() => setShowDeleteDialog(true)}
 								variant='destructive'
 								className='w-full'
-								disabled={deleteCategoryMutation.isPending}
+								disabled={deleteCategoryMutation.status === 'loading'}
 							>
-								{deleteCategoryMutation.isPending
+								{deleteCategoryMutation.status === 'loading'
 									? 'Deleting...'
 									: 'Delete Category'}
 							</Button>
@@ -472,7 +472,7 @@ export default function BudgetCategoryComponent({
 				title='Delete Category'
 				itemName={selectedCategory?.name}
 				onConfirm={handleDeleteCategory}
-				isDeleting={deleteCategoryMutation.isPending}
+				isDeleting={deleteCategoryMutation.status === 'loading'}
 			/>
 
 			{/* Category Cards */}
