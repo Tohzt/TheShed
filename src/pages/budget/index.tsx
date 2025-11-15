@@ -4,9 +4,9 @@ import {api} from '../../utils/api'
 import BudgetCategoryComponent, {
 	type BudgetCategory,
 } from './_components/budget_category'
-import BudgetExpenseComponent, {
+import BudgetStatementsComponent, {
 	type Statement,
-} from './_components/budget_expense'
+} from './_components/budget_statements'
 import BudgetSummary from './_components/budget_summary'
 
 interface MonthlyData {
@@ -64,7 +64,9 @@ export default function BudgetPage() {
 
 		const filteredStatements = (budgetData.statements ?? []).filter(
 			(statement) => {
-				const statementDate = new Date(statement.date)
+				// Parse YYYY-MM-DD as local date (not UTC)
+				const [year, month, day] = statement.date.split('-').map(Number)
+				const statementDate = new Date(year, month - 1, day)
 				return statementDate >= startOfMonth && statementDate <= endOfMonth
 			}
 		)
@@ -76,7 +78,10 @@ export default function BudgetPage() {
 				type: item.type as 'income' | 'expense',
 				dates: item.dates ?? [],
 			})),
-			statements: filteredStatements,
+			statements: filteredStatements.map((stmt) => ({
+				...stmt,
+				type: stmt.type as 'income' | 'expense',
+			})),
 			categories: budgetData.categories,
 		}
 	}, [budgetData, selectedMonth, selectedYear])
@@ -205,7 +210,7 @@ export default function BudgetPage() {
 					<div className='my-8 w-full max-w-6xl border-t border-border' />
 
 					{/* Statements */}
-					<BudgetExpenseComponent
+					<BudgetStatementsComponent
 						statements={data.statements}
 						categories={data.categories}
 						onRefetch={() => void refetch()}

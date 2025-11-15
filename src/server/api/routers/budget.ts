@@ -139,14 +139,24 @@ export const budgetRouter = createTRPCRouter({
 					}
 				}),
 				categories: categoriesWithSpent,
-				statements: statements.map((stmt) => ({
-					id: stmt.id,
-					category: stmt.category,
-					type: stmt.type,
-					amount: stmt.amount,
-					description: stmt.description,
-					date: stmt.date.toISOString().split('T')[0],
-				})),
+				statements: statements.map((stmt) => {
+					// Format date as YYYY-MM-DD
+					// Since dates are stored as local dates (midnight local time),
+					// we use UTC methods to extract the date components
+					// This ensures we get the exact date that was stored, regardless of server timezone
+					const date = new Date(stmt.date)
+					const year = date.getUTCFullYear()
+					const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+					const day = String(date.getUTCDate()).padStart(2, '0')
+					return {
+						id: stmt.id,
+						category: stmt.category,
+						type: stmt.type,
+						amount: stmt.amount,
+						description: stmt.description,
+						date: `${year}-${month}-${day}`,
+					}
+				}),
 			}
 		}),
 
@@ -190,7 +200,7 @@ export const budgetRouter = createTRPCRouter({
 				type: z.enum(['income', 'expense']),
 				amount: z.number().min(0.01),
 				description: z.string().min(1),
-				date: z.string(), // ISO date string
+				date: z.string(), // YYYY-MM-DD format (local date, not UTC)
 			})
 		)
 		.mutation(async ({ctx, input}) => {
@@ -204,6 +214,11 @@ export const budgetRouter = createTRPCRouter({
 				},
 			})
 
+			// Parse YYYY-MM-DD as local date (not UTC)
+			// This ensures the date stored is exactly what the user selected
+			const [year, month, day] = input.date.split('-').map(Number)
+			const localDate = new Date(year, month - 1, day)
+
 			return await ctx.prisma.statement.create({
 				data: {
 					userId,
@@ -212,7 +227,7 @@ export const budgetRouter = createTRPCRouter({
 					type: input.type,
 					amount: input.amount,
 					description: input.description,
-					date: new Date(input.date),
+					date: localDate,
 				},
 			})
 		}),
@@ -226,6 +241,7 @@ export const budgetRouter = createTRPCRouter({
 				type: z.enum(['income', 'expense']).optional(),
 				amount: z.number().min(0.01).optional(),
 				description: z.string().min(1).optional(),
+				date: z.string().optional(), // ISO date string
 			})
 		)
 		.mutation(async ({ctx, input}) => {
@@ -268,7 +284,40 @@ export const budgetRouter = createTRPCRouter({
 						amount: updateData.amount,
 					}),
 					...(updateData.description && {description: updateData.description}),
+					...(updateData.date &&
+						(() => {
+							// Parse YYYY-MM-DD as local date (not UTC)
+							const [year, month, day] = updateData.date.split('-').map(Number)
+							return {date: new Date(year, month - 1, day)}
+						})()),
 				},
+			})
+		}),
+
+	// Delete a statement
+	deleteStatement: protectedProcedure
+		.input(
+			z.object({
+				statementId: z.string(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			// Verify the statement belongs to the user
+			const statement = await ctx.prisma.statement.findFirst({
+				where: {
+					id: input.statementId,
+					userId,
+				},
+			})
+
+			if (!statement) {
+				throw new Error('Statement not found')
+			}
+
+			return await ctx.prisma.statement.delete({
+				where: {id: input.statementId},
 			})
 		}),
 
