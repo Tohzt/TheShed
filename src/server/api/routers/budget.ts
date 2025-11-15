@@ -41,7 +41,11 @@ async function syncAutomatedItemsToStatements(
 
 		// For each date, ensure a statement exists
 		for (const dateStr of dates) {
-			const [year, month, day] = dateStr.split('-').map(Number)
+			const [year, month, day] = dateStr.split('-').map(Number) as [
+				number,
+				number,
+				number
+			]
 			const date = new Date(year, month - 1, day)
 
 			// Check if a statement already exists for this automated item + date
@@ -692,7 +696,11 @@ export const budgetRouter = createTRPCRouter({
 
 			// Delete old statements that match the old item
 			for (const dateStr of oldDates) {
-				const [year, month, day] = dateStr.split('-').map(Number)
+				const [year, month, day] = dateStr.split('-').map(Number) as [
+					number,
+					number,
+					number
+				]
 
 				await ctx.prisma.statement.deleteMany({
 					where: {
@@ -756,7 +764,11 @@ export const budgetRouter = createTRPCRouter({
 			// Delete all statements that match this automated item
 			// Match by label, amount, type, and date
 			for (const dateStr of dates) {
-				const [year, month, day] = dateStr.split('-').map(Number)
+				const [year, month, day] = dateStr.split('-').map(Number) as [
+					number,
+					number,
+					number
+				]
 				const date = new Date(year, month - 1, day)
 
 				await ctx.prisma.statement.deleteMany({
