@@ -387,11 +387,13 @@ export default function BudgetStatementsComponent({
 								!editStatement.amount ||
 								!editStatement.description ||
 								!editStatement.date ||
-								updateStatementMutation.isPending
+								updateStatementMutation.status === 'loading'
 							}
 							className='flex-1'
 						>
-							{updateStatementMutation.isPending ? 'Saving...' : 'Save Changes'}
+							{updateStatementMutation.status === 'loading'
+								? 'Saving...'
+								: 'Save Changes'}
 						</Button>
 						<Button
 							onClick={() => {
@@ -414,9 +416,9 @@ export default function BudgetStatementsComponent({
 						onClick={() => setShowDeleteDialog(true)}
 						variant='destructive'
 						className='w-full'
-						disabled={deleteStatementMutation.isPending}
+						disabled={deleteStatementMutation.status === 'loading'}
 					>
-						{deleteStatementMutation.isPending
+						{deleteStatementMutation.status === 'loading'
 							? 'Deleting...'
 							: 'Delete Statement'}
 					</Button>
@@ -430,7 +432,7 @@ export default function BudgetStatementsComponent({
 				title='Delete Statement'
 				description={`Are you sure you want to delete this ${selectedStatement?.type} statement? This action cannot be undone.`}
 				onConfirm={handleDeleteStatement}
-				isDeleting={deleteStatementMutation.isPending}
+				isDeleting={deleteStatementMutation.status === 'loading'}
 			/>
 
 			{/* Automated Item Notice Dialog */}
