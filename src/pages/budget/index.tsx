@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useMemo, useState, useEffect} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../utils/api'
 import BudgetCategoryComponent, {
@@ -33,6 +33,14 @@ export default function BudgetPage() {
 		new Date().getFullYear()
 	)
 
+	// Sync mutation for automated items
+	const syncMutation = api.budget.syncAutomatedItemsToStatements.useMutation({
+		onSuccess: () => {
+			// Refetch budget data after sync completes
+			void refetch()
+		},
+	})
+
 	// Fetch budget data from tRPC API
 	const {
 		data: budgetData,
@@ -47,6 +55,14 @@ export default function BudgetPage() {
 			enabled: !!sessionData?.user?.id,
 		}
 	)
+
+	// Sync automated items to statements on page load
+	useEffect(() => {
+		if (sessionData?.user?.id && !loading) {
+			syncMutation.mutate()
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [sessionData?.user?.id]) // Only run once on mount when user is available
 	// Transform API data to match component state
 	const data: MonthlyData = useMemo(() => {
 		if (!budgetData) {
@@ -213,6 +229,7 @@ export default function BudgetPage() {
 					<BudgetStatementsComponent
 						statements={data.statements}
 						categories={data.categories}
+						automatedItems={data.automatedItems}
 						onRefetch={() => void refetch()}
 					/>
 				</div>

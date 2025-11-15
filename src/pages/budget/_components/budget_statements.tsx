@@ -16,15 +16,25 @@ export interface Statement {
 	date: string
 }
 
+interface AutomatedItem {
+	id: string
+	label: string
+	amount: number
+	type: 'income' | 'expense'
+	dates: string[]
+}
+
 interface BudgetStatementsComponentProps {
 	statements: Statement[]
 	categories: BudgetCategory[]
+	automatedItems: AutomatedItem[]
 	onRefetch: () => void
 }
 
 export default function BudgetStatementsComponent({
 	statements,
 	categories,
+	automatedItems,
 	onRefetch,
 }: BudgetStatementsComponentProps) {
 	const [selectedStatement, setSelectedStatement] = useState<Statement | null>(
@@ -38,6 +48,7 @@ export default function BudgetStatementsComponent({
 		date: '',
 	})
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+	const [showAutomatedItemNotice, setShowAutomatedItemNotice] = useState(false)
 
 	// Mutation for updating statements
 	const updateStatementMutation = api.budget.updateStatement.useMutation({
@@ -56,8 +67,32 @@ export default function BudgetStatementsComponent({
 		},
 	})
 
+	// Check if a statement comes from an automated item
+	const isStatementFromAutomatedItem = (statement: Statement): boolean => {
+		return automatedItems.some((item) => {
+			// Check if label, amount, and type match
+			const matchesItem =
+				item.label === statement.description &&
+				item.amount === statement.amount &&
+				item.type === statement.type
+
+			if (!matchesItem) return false
+
+			// Check if the statement's date is in the automated item's dates array
+			return item.dates.includes(statement.date)
+		})
+	}
+
 	// Handle clicking on a statement row
 	const handleStatementClick = (statement: Statement) => {
+		// Check if this statement comes from an automated item
+		if (isStatementFromAutomatedItem(statement)) {
+			setSelectedStatement(statement)
+			setShowAutomatedItemNotice(true)
+			return
+		}
+
+		// Otherwise, allow editing
 		setSelectedStatement(statement)
 		setEditStatement({
 			type: statement.type,
@@ -205,19 +240,31 @@ export default function BudgetStatementsComponent({
 											</span>
 										</td>
 										<td className='px-6 py-4'>
-											<span
-												className='inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-all'
-												style={{
-													backgroundColor: lightenColor(
-														getCategoryColor(statement.category)
-													),
-													color: darkenColor(
-														getCategoryColor(statement.category)
-													),
-												}}
-											>
-												{statement.category}
-											</span>
+											{isStatementFromAutomatedItem(statement) ? (
+												<span
+													className={`inline-flex w-28 items-center justify-center rounded-full border-2 px-3 py-1 text-sm font-medium transition-all ${
+														statement.type === 'income'
+															? 'border-green-500 text-green-500 dark:border-green-400 dark:text-green-400'
+															: 'border-red-500 text-red-500 dark:border-red-400 dark:text-red-400'
+													}`}
+												>
+													Auto
+												</span>
+											) : (
+												<span
+													className='inline-flex w-28 items-center justify-center truncate rounded-full px-3 py-1 text-sm font-medium transition-all'
+													style={{
+														backgroundColor: lightenColor(
+															getCategoryColor(statement.category)
+														),
+														color: darkenColor(
+															getCategoryColor(statement.category)
+														),
+													}}
+												>
+													{statement.category}
+												</span>
+											)}
 										</td>
 										<td className='px-6 py-4 text-sm text-foreground'>
 											{statement.description}
@@ -226,6 +273,10 @@ export default function BudgetStatementsComponent({
 											className={`px-6 py-4 text-right text-sm font-semibold ${
 												statement.type === 'income'
 													? 'text-green-600 dark:text-green-400'
+													: 'text-foreground'
+											} ${
+												statement.type === 'expense'
+													? 'text-red-600 dark:text-red-400'
 													: 'text-foreground'
 											}`}
 										>
@@ -381,6 +432,41 @@ export default function BudgetStatementsComponent({
 				onConfirm={handleDeleteStatement}
 				isDeleting={deleteStatementMutation.isPending}
 			/>
+
+			{/* Automated Item Notice Dialog */}
+			<BudgetPopup
+				isOpen={showAutomatedItemNotice}
+				onClose={() => {
+					setShowAutomatedItemNotice(false)
+					setSelectedStatement(null)
+				}}
+				title='Automated Item'
+			>
+				<div className='space-y-4'>
+					<p className='text-sm text-muted-foreground'>
+						This statement was created from an automated item and cannot be
+						edited directly.
+					</p>
+					<p className='text-sm text-muted-foreground'>
+						To modify this item, please edit it in the{' '}
+						<span className='font-semibold text-foreground'>
+							Monthly Money editor
+						</span>{' '}
+						located in the Monthly Summary section above.
+					</p>
+					<div className='flex justify-end'>
+						<Button
+							onClick={() => {
+								setShowAutomatedItemNotice(false)
+								setSelectedStatement(null)
+							}}
+							className='flex-1 sm:flex-initial'
+						>
+							Got it
+						</Button>
+					</div>
+				</div>
+			</BudgetPopup>
 		</div>
 	)
 }

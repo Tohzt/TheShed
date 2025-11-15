@@ -1,6 +1,88 @@
 import {z} from 'zod'
 import {Prisma} from '@prisma/client'
 import {createTRPCRouter, protectedProcedure} from '../trpc'
+import type {PrismaClient} from '@prisma/client'
+
+// Helper function to sync automated items to statements
+async function syncAutomatedItemsToStatements(
+	prisma: PrismaClient,
+	userId: string
+) {
+	// Get all automated items for this user
+	const automatedItems = (await prisma.automateditem.findMany({
+		where: {userId},
+	})) as Array<{
+		id: string
+		userId: string
+		label: string
+		amount: number
+		type: string
+		month: number
+		year: number
+		dates: string[]
+		createdAt: Date
+		updatedAt: Date
+	}>
+
+	// Helper function to parse YYYY-MM-DD string as local date (not UTC)
+	const parseDateLocal = (dateStr: string): Date => {
+		const [y, m, d] = dateStr.split('-').map(Number)
+		return new Date(y, m - 1, d)
+	}
+
+	// Process each automated item
+	for (const item of automatedItems) {
+		// Parse dates array from JSON
+		const dates = Array.isArray(item.dates)
+			? item.dates
+			: typeof item.dates === 'string'
+			? JSON.parse(item.dates)
+			: []
+
+		// For each date, ensure a statement exists
+		for (const dateStr of dates) {
+			const [year, month, day] = dateStr.split('-').map(Number)
+			const date = new Date(year, month - 1, day)
+
+			// Check if a statement already exists for this automated item + date
+			const existingStatement = await prisma.statement.findFirst({
+				where: {
+					userId,
+					description: item.label,
+					amount: item.amount,
+					type: item.type,
+					date: {
+						gte: new Date(year, month - 1, day),
+						lt: new Date(year, month - 1, day + 1),
+					},
+				},
+			})
+
+			// If no statement exists, create one
+			if (!existingStatement) {
+				// Find the category by name (if it exists)
+				const budgetCategory = await prisma.budgetcategory.findFirst({
+					where: {
+						userId,
+						name: item.label,
+					},
+				})
+
+				await prisma.statement.create({
+					data: {
+						userId,
+						categoryId: budgetCategory?.id,
+						category: item.label,
+						type: item.type,
+						amount: item.amount,
+						description: item.label,
+						date: date,
+					},
+				})
+			}
+		}
+	}
+}
 
 export const budgetRouter = createTRPCRouter({
 	// Get current month's budget data
@@ -549,7 +631,7 @@ export const budgetRouter = createTRPCRouter({
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
 
-			return await ctx.prisma.automateditem.create({
+			const item = await ctx.prisma.automateditem.create({
 				data: {
 					userId,
 					label: input.label,
@@ -560,6 +642,15 @@ export const budgetRouter = createTRPCRouter({
 					dates: input.dates as Prisma.InputJsonValue,
 				} as Prisma.automateditemUncheckedCreateInput,
 			})
+
+			// Sync automated items to statements after creation
+			// We'll do this in a fire-and-forget manner to avoid blocking the response
+			syncAutomatedItemsToStatements(ctx.prisma, userId).catch((err) => {
+				// Log error but don't fail the mutation
+				console.error('Error syncing automated items to statements:', err)
+			})
+
+			return item
 		}),
 
 	// Update an existing automated item
@@ -580,22 +671,57 @@ export const budgetRouter = createTRPCRouter({
 			const userId = ctx.session.user.id
 			const {itemId, ...updateData} = input
 
-			// Verify the item belongs to the user
-			const item = await ctx.prisma.automateditem.findFirst({
+			// Verify the item belongs to the user and get the old item
+			const oldItem = await ctx.prisma.automateditem.findFirst({
 				where: {
 					id: itemId,
 					userId,
 				},
 			})
 
-			if (!item) {
+			if (!oldItem) {
 				throw new Error('Automated item not found')
 			}
 
-			return await ctx.prisma.automateditem.update({
+			// Parse old dates from JSON
+			const oldDates = Array.isArray(oldItem.dates)
+				? oldItem.dates
+				: typeof oldItem.dates === 'string'
+				? JSON.parse(oldItem.dates)
+				: []
+
+			// Delete old statements that match the old item
+			for (const dateStr of oldDates) {
+				const [year, month, day] = dateStr.split('-').map(Number)
+
+				await ctx.prisma.statement.deleteMany({
+					where: {
+						userId,
+						description: oldItem.label,
+						amount: oldItem.amount,
+						type: oldItem.type,
+						date: {
+							gte: new Date(year, month - 1, day),
+							lt: new Date(year, month - 1, day + 1),
+						},
+					},
+				})
+			}
+
+			// Update the automated item
+			const updatedItem = await ctx.prisma.automateditem.update({
 				where: {id: itemId},
 				data: updateData,
 			})
+
+			// Sync automated items to statements after update
+			// We'll do this in a fire-and-forget manner to avoid blocking the response
+			syncAutomatedItemsToStatements(ctx.prisma, userId).catch((err) => {
+				// Log error but don't fail the mutation
+				console.error('Error syncing automated items to statements:', err)
+			})
+
+			return updatedItem
 		}),
 
 	// Delete an automated item
@@ -608,7 +734,7 @@ export const budgetRouter = createTRPCRouter({
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
 
-			// Verify the item belongs to the user
+			// Verify the item belongs to the user and get it
 			const item = await ctx.prisma.automateditem.findFirst({
 				where: {
 					id: input.itemId,
@@ -620,8 +746,43 @@ export const budgetRouter = createTRPCRouter({
 				throw new Error('Automated item not found')
 			}
 
+			// Parse dates from JSON
+			const dates = Array.isArray(item.dates)
+				? item.dates
+				: typeof item.dates === 'string'
+				? JSON.parse(item.dates)
+				: []
+
+			// Delete all statements that match this automated item
+			// Match by label, amount, type, and date
+			for (const dateStr of dates) {
+				const [year, month, day] = dateStr.split('-').map(Number)
+				const date = new Date(year, month - 1, day)
+
+				await ctx.prisma.statement.deleteMany({
+					where: {
+						userId,
+						description: item.label,
+						amount: item.amount,
+						type: item.type,
+						date: {
+							gte: new Date(year, month - 1, day),
+							lt: new Date(year, month - 1, day + 1),
+						},
+					},
+				})
+			}
+
 			return await ctx.prisma.automateditem.delete({
 				where: {id: input.itemId},
 			})
 		}),
+
+	// Sync automated items to statements
+	// This function ensures all automated items have corresponding statements
+	syncAutomatedItemsToStatements: protectedProcedure.mutation(async ({ctx}) => {
+		const userId = ctx.session.user.id
+		await syncAutomatedItemsToStatements(ctx.prisma, userId)
+		return {success: true}
+	}),
 })
