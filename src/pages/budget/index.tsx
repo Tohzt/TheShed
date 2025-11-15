@@ -1,12 +1,12 @@
-import {useMemo, useState} from 'react'
+import {useMemo, useState, useEffect} from 'react'
 import {useSession} from 'next-auth/react'
 import {api} from '../../utils/api'
 import BudgetCategoryComponent, {
 	type BudgetCategory,
 } from './_components/budget_category'
-import BudgetExpenseComponent, {
-	type Expense,
-} from './_components/budget_expense'
+import BudgetStatementsComponent, {
+	type Statement,
+} from './_components/budget_statements'
 import BudgetSummary from './_components/budget_summary'
 
 interface MonthlyData {
@@ -18,7 +18,7 @@ interface MonthlyData {
 		type: 'income' | 'expense'
 		dates: string[]
 	}>
-	expenses: Expense[]
+	statements: Statement[]
 	categories: BudgetCategory[]
 }
 
@@ -32,6 +32,14 @@ export default function BudgetPage() {
 	const [selectedYear, setSelectedYear] = useState<number>(
 		new Date().getFullYear()
 	)
+
+	// Sync mutation for automated items
+	const syncMutation = api.budget.syncAutomatedItemsToStatements.useMutation({
+		onSuccess: () => {
+			// Refetch budget data after sync completes
+			void refetch()
+		},
+	})
 
 	// Fetch budget data from tRPC API
 	const {
@@ -47,25 +55,37 @@ export default function BudgetPage() {
 			enabled: !!sessionData?.user?.id,
 		}
 	)
+
+	// Sync automated items to statements on page load
+	useEffect(() => {
+		if (sessionData?.user?.id && !loading) {
+			syncMutation.mutate()
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [sessionData?.user?.id]) // Only run once on mount when user is available
 	// Transform API data to match component state
 	const data: MonthlyData = useMemo(() => {
 		if (!budgetData) {
 			return {
 				income: 0,
 				automatedItems: [],
-				expenses: [],
+				statements: [],
 				categories: [],
 			}
 		}
 
-		// Filter expenses to ensure they're within the selected month/year
+		// Filter statements to ensure they're within the selected month/year
 		const startOfMonth = new Date(selectedYear, selectedMonth - 1, 1)
 		const endOfMonth = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999)
 
-		const filteredExpenses = budgetData.expenses.filter((expense) => {
-			const expenseDate = new Date(expense.date)
-			return expenseDate >= startOfMonth && expenseDate <= endOfMonth
-		})
+		const filteredStatements = (budgetData.statements ?? []).filter(
+			(statement) => {
+				// Parse YYYY-MM-DD as local date (not UTC)
+				const [year, month, day] = statement.date.split('-').map(Number)
+				const statementDate = new Date(year, month - 1, day)
+				return statementDate >= startOfMonth && statementDate <= endOfMonth
+			}
+		)
 
 		return {
 			income: budgetData.income,
@@ -74,7 +94,10 @@ export default function BudgetPage() {
 				type: item.type as 'income' | 'expense',
 				dates: item.dates ?? [],
 			})),
-			expenses: filteredExpenses,
+			statements: filteredStatements.map((stmt) => ({
+				...stmt,
+				type: stmt.type as 'income' | 'expense',
+			})),
 			categories: budgetData.categories,
 		}
 	}, [budgetData, selectedMonth, selectedYear])
@@ -129,7 +152,7 @@ export default function BudgetPage() {
 	}
 
 	// Show empty state if no data
-	const hasData = data.categories.length > 0 || data.expenses.length > 0
+	const hasData = data.categories.length > 0 || data.statements.length > 0
 
 	return (
 		<main className='min-h-screen overflow-x-hidden bg-background'>
@@ -202,10 +225,11 @@ export default function BudgetPage() {
 					{/* Divider */}
 					<div className='my-8 w-full max-w-6xl border-t border-border' />
 
-					{/* Expenses */}
-					<BudgetExpenseComponent
-						expenses={data.expenses}
+					{/* Statements */}
+					<BudgetStatementsComponent
+						statements={data.statements}
 						categories={data.categories}
+						automatedItems={data.automatedItems}
 						onRefetch={() => void refetch()}
 					/>
 				</div>

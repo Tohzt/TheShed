@@ -1,6 +1,88 @@
 import {z} from 'zod'
 import {Prisma} from '@prisma/client'
 import {createTRPCRouter, protectedProcedure} from '../trpc'
+import type {PrismaClient} from '@prisma/client'
+
+// Helper function to sync automated items to statements
+async function syncAutomatedItemsToStatements(
+	prisma: PrismaClient,
+	userId: string
+) {
+	// Get all automated items for this user
+	const automatedItems = (await prisma.automateditem.findMany({
+		where: {userId},
+	})) as Array<{
+		id: string
+		userId: string
+		label: string
+		amount: number
+		type: string
+		month: number
+		year: number
+		dates: string[]
+		createdAt: Date
+		updatedAt: Date
+	}>
+
+	// Helper function to parse YYYY-MM-DD string as local date (not UTC)
+	const parseDateLocal = (dateStr: string): Date => {
+		const [y, m, d] = dateStr.split('-').map(Number)
+		return new Date(y, m - 1, d)
+	}
+
+	// Process each automated item
+	for (const item of automatedItems) {
+		// Parse dates array from JSON
+		const dates = Array.isArray(item.dates)
+			? item.dates
+			: typeof item.dates === 'string'
+			? JSON.parse(item.dates)
+			: []
+
+		// For each date, ensure a statement exists
+		for (const dateStr of dates) {
+			const [year, month, day] = dateStr.split('-').map(Number)
+			const date = new Date(year, month - 1, day)
+
+			// Check if a statement already exists for this automated item + date
+			const existingStatement = await prisma.statement.findFirst({
+				where: {
+					userId,
+					description: item.label,
+					amount: item.amount,
+					type: item.type,
+					date: {
+						gte: new Date(year, month - 1, day),
+						lt: new Date(year, month - 1, day + 1),
+					},
+				},
+			})
+
+			// If no statement exists, create one
+			if (!existingStatement) {
+				// Find the category by name (if it exists)
+				const budgetCategory = await prisma.budgetcategory.findFirst({
+					where: {
+						userId,
+						name: item.label,
+					},
+				})
+
+				await prisma.statement.create({
+					data: {
+						userId,
+						categoryId: budgetCategory?.id,
+						category: item.label,
+						type: item.type,
+						amount: item.amount,
+						description: item.label,
+						date: date,
+					},
+				})
+			}
+		}
+	}
+}
 
 export const budgetRouter = createTRPCRouter({
 	// Get current month's budget data
@@ -34,9 +116,9 @@ export const budgetRouter = createTRPCRouter({
 				orderBy: {name: 'asc'},
 			})
 
-			// Get expenses for this month
+			// Get statements for this month
 			// month is 1-indexed (1-12), Date constructor uses 0-indexed months (0-11)
-			const expenses = await ctx.prisma.expense.findMany({
+			const statements = await ctx.prisma.statement.findMany({
 				where: {
 					userId,
 					date: {
@@ -48,11 +130,13 @@ export const budgetRouter = createTRPCRouter({
 				take: 50, // Limit to 50 most recent
 			})
 
-			// Calculate spent amount per category
+			// Calculate spent amount per category (only expenses, not income)
 			const categorySpent = new Map<string, number>()
-			expenses.forEach((expense) => {
-				const current = categorySpent.get(expense.category) || 0
-				categorySpent.set(expense.category, current + expense.amount)
+			statements.forEach((statement) => {
+				if (statement.type === 'expense') {
+					const current = categorySpent.get(statement.category) || 0
+					categorySpent.set(statement.category, current + statement.amount)
+				}
 			})
 
 			// Combine categories with spent amounts
@@ -137,13 +221,24 @@ export const budgetRouter = createTRPCRouter({
 					}
 				}),
 				categories: categoriesWithSpent,
-				expenses: expenses.map((exp) => ({
-					id: exp.id,
-					category: exp.category,
-					amount: exp.amount,
-					description: exp.description,
-					date: exp.date.toISOString().split('T')[0],
-				})),
+				statements: statements.map((stmt) => {
+					// Format date as YYYY-MM-DD
+					// Since dates are stored as local dates (midnight local time),
+					// we use UTC methods to extract the date components
+					// This ensures we get the exact date that was stored, regardless of server timezone
+					const date = new Date(stmt.date)
+					const year = date.getUTCFullYear()
+					const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+					const day = String(date.getUTCDate()).padStart(2, '0')
+					return {
+						id: stmt.id,
+						category: stmt.category,
+						type: stmt.type,
+						amount: stmt.amount,
+						description: stmt.description,
+						date: `${year}-${month}-${day}`,
+					}
+				}),
 			}
 		}),
 
@@ -179,14 +274,15 @@ export const budgetRouter = createTRPCRouter({
 			})
 		}),
 
-	// Create a new expense
-	createExpense: protectedProcedure
+	// Create a new statement
+	createStatement: protectedProcedure
 		.input(
 			z.object({
 				category: z.string(),
+				type: z.enum(['income', 'expense']),
 				amount: z.number().min(0.01),
 				description: z.string().min(1),
-				date: z.string(), // ISO date string
+				date: z.string(), // YYYY-MM-DD format (local date, not UTC)
 			})
 		)
 		.mutation(async ({ctx, input}) => {
@@ -200,47 +296,55 @@ export const budgetRouter = createTRPCRouter({
 				},
 			})
 
-			return await ctx.prisma.expense.create({
+			// Parse YYYY-MM-DD as local date (not UTC)
+			// This ensures the date stored is exactly what the user selected
+			const [year, month, day] = input.date.split('-').map(Number)
+			const localDate = new Date(year, month - 1, day)
+
+			return await ctx.prisma.statement.create({
 				data: {
 					userId,
 					categoryId: budgetCategory?.id,
 					category: input.category,
+					type: input.type,
 					amount: input.amount,
 					description: input.description,
-					date: new Date(input.date),
+					date: localDate,
 				},
 			})
 		}),
 
-	// Update an existing expense
-	updateExpense: protectedProcedure
+	// Update an existing statement
+	updateStatement: protectedProcedure
 		.input(
 			z.object({
-				expenseId: z.string(),
+				statementId: z.string(),
 				category: z.string().optional(),
+				type: z.enum(['income', 'expense']).optional(),
 				amount: z.number().min(0.01).optional(),
 				description: z.string().min(1).optional(),
+				date: z.string().optional(), // ISO date string
 			})
 		)
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
-			const {expenseId, ...updateData} = input
+			const {statementId, ...updateData} = input
 
-			// Verify the expense belongs to the user
-			const expense = await ctx.prisma.expense.findFirst({
+			// Verify the statement belongs to the user
+			const statement = await ctx.prisma.statement.findFirst({
 				where: {
-					id: expenseId,
+					id: statementId,
 					userId,
 				},
 			})
 
-			if (!expense) {
-				throw new Error('Expense not found')
+			if (!statement) {
+				throw new Error('Statement not found')
 			}
 
 			// If category is being updated, find the new category
-			let categoryId = expense.categoryId
-			if (updateData.category && updateData.category !== expense.category) {
+			let categoryId = statement.categoryId
+			if (updateData.category && updateData.category !== statement.category) {
 				const budgetCategory = await ctx.prisma.budgetcategory.findFirst({
 					where: {
 						userId,
@@ -250,18 +354,52 @@ export const budgetRouter = createTRPCRouter({
 				categoryId = budgetCategory?.id || null
 			}
 
-			return await ctx.prisma.expense.update({
-				where: {id: expenseId},
+			return await ctx.prisma.statement.update({
+				where: {id: statementId},
 				data: {
 					...(updateData.category && {
 						category: updateData.category,
 						categoryId,
 					}),
+					...(updateData.type && {type: updateData.type}),
 					...(updateData.amount !== undefined && {
 						amount: updateData.amount,
 					}),
 					...(updateData.description && {description: updateData.description}),
+					...(updateData.date &&
+						(() => {
+							// Parse YYYY-MM-DD as local date (not UTC)
+							const [year, month, day] = updateData.date.split('-').map(Number)
+							return {date: new Date(year, month - 1, day)}
+						})()),
 				},
+			})
+		}),
+
+	// Delete a statement
+	deleteStatement: protectedProcedure
+		.input(
+			z.object({
+				statementId: z.string(),
+			})
+		)
+		.mutation(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			// Verify the statement belongs to the user
+			const statement = await ctx.prisma.statement.findFirst({
+				where: {
+					id: input.statementId,
+					userId,
+				},
+			})
+
+			if (!statement) {
+				throw new Error('Statement not found')
+			}
+
+			return await ctx.prisma.statement.delete({
+				where: {id: input.statementId},
 			})
 		}),
 
@@ -402,8 +540,8 @@ export const budgetRouter = createTRPCRouter({
 				orderBy: [{year: 'asc'}, {month: 'asc'}],
 			})
 
-			// Get all expenses in range
-			const expenses = await ctx.prisma.expense.findMany({
+			// Get all statements in range
+			const statements = await ctx.prisma.statement.findMany({
 				where: {
 					userId,
 					date: {
@@ -427,11 +565,14 @@ export const budgetRouter = createTRPCRouter({
 				)
 				const income = monthlyBudget?.income ?? 0
 
-				// Calculate total spent for this month
+				// Calculate total spent for this month (only expenses, not income)
 				const monthStart = new Date(year, month - 1, 1)
 				const monthEnd = new Date(year, month, 0, 23, 59, 59)
-				const monthExpenses = expenses.filter(
-					(exp) => exp.date >= monthStart && exp.date <= monthEnd
+				const monthExpenses = statements.filter(
+					(stmt) =>
+						stmt.date >= monthStart &&
+						stmt.date <= monthEnd &&
+						stmt.type === 'expense'
 				)
 				const totalSpent = monthExpenses.reduce(
 					(sum, exp) => sum + exp.amount,
@@ -490,7 +631,7 @@ export const budgetRouter = createTRPCRouter({
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
 
-			return await ctx.prisma.automateditem.create({
+			const item = await ctx.prisma.automateditem.create({
 				data: {
 					userId,
 					label: input.label,
@@ -501,6 +642,15 @@ export const budgetRouter = createTRPCRouter({
 					dates: input.dates as Prisma.InputJsonValue,
 				} as Prisma.automateditemUncheckedCreateInput,
 			})
+
+			// Sync automated items to statements after creation
+			// We'll do this in a fire-and-forget manner to avoid blocking the response
+			syncAutomatedItemsToStatements(ctx.prisma, userId).catch((err) => {
+				// Log error but don't fail the mutation
+				console.error('Error syncing automated items to statements:', err)
+			})
+
+			return item
 		}),
 
 	// Update an existing automated item
@@ -521,22 +671,57 @@ export const budgetRouter = createTRPCRouter({
 			const userId = ctx.session.user.id
 			const {itemId, ...updateData} = input
 
-			// Verify the item belongs to the user
-			const item = await ctx.prisma.automateditem.findFirst({
+			// Verify the item belongs to the user and get the old item
+			const oldItem = await ctx.prisma.automateditem.findFirst({
 				where: {
 					id: itemId,
 					userId,
 				},
 			})
 
-			if (!item) {
+			if (!oldItem) {
 				throw new Error('Automated item not found')
 			}
 
-			return await ctx.prisma.automateditem.update({
+			// Parse old dates from JSON
+			const oldDates = Array.isArray(oldItem.dates)
+				? oldItem.dates
+				: typeof oldItem.dates === 'string'
+				? JSON.parse(oldItem.dates)
+				: []
+
+			// Delete old statements that match the old item
+			for (const dateStr of oldDates) {
+				const [year, month, day] = dateStr.split('-').map(Number)
+
+				await ctx.prisma.statement.deleteMany({
+					where: {
+						userId,
+						description: oldItem.label,
+						amount: oldItem.amount,
+						type: oldItem.type,
+						date: {
+							gte: new Date(year, month - 1, day),
+							lt: new Date(year, month - 1, day + 1),
+						},
+					},
+				})
+			}
+
+			// Update the automated item
+			const updatedItem = await ctx.prisma.automateditem.update({
 				where: {id: itemId},
 				data: updateData,
 			})
+
+			// Sync automated items to statements after update
+			// We'll do this in a fire-and-forget manner to avoid blocking the response
+			syncAutomatedItemsToStatements(ctx.prisma, userId).catch((err) => {
+				// Log error but don't fail the mutation
+				console.error('Error syncing automated items to statements:', err)
+			})
+
+			return updatedItem
 		}),
 
 	// Delete an automated item
@@ -549,7 +734,7 @@ export const budgetRouter = createTRPCRouter({
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
 
-			// Verify the item belongs to the user
+			// Verify the item belongs to the user and get it
 			const item = await ctx.prisma.automateditem.findFirst({
 				where: {
 					id: input.itemId,
@@ -561,8 +746,43 @@ export const budgetRouter = createTRPCRouter({
 				throw new Error('Automated item not found')
 			}
 
+			// Parse dates from JSON
+			const dates = Array.isArray(item.dates)
+				? item.dates
+				: typeof item.dates === 'string'
+				? JSON.parse(item.dates)
+				: []
+
+			// Delete all statements that match this automated item
+			// Match by label, amount, type, and date
+			for (const dateStr of dates) {
+				const [year, month, day] = dateStr.split('-').map(Number)
+				const date = new Date(year, month - 1, day)
+
+				await ctx.prisma.statement.deleteMany({
+					where: {
+						userId,
+						description: item.label,
+						amount: item.amount,
+						type: item.type,
+						date: {
+							gte: new Date(year, month - 1, day),
+							lt: new Date(year, month - 1, day + 1),
+						},
+					},
+				})
+			}
+
 			return await ctx.prisma.automateditem.delete({
 				where: {id: input.itemId},
 			})
 		}),
+
+	// Sync automated items to statements
+	// This function ensures all automated items have corresponding statements
+	syncAutomatedItemsToStatements: protectedProcedure.mutation(async ({ctx}) => {
+		const userId = ctx.session.user.id
+		await syncAutomatedItemsToStatements(ctx.prisma, userId)
+		return {success: true}
+	}),
 })
