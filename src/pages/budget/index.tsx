@@ -5,7 +5,7 @@ import BudgetCategoryComponent, {
 	type BudgetCategory,
 } from './_components/budget_category'
 import BudgetExpenseComponent, {
-	type Expense,
+	type Statement,
 } from './_components/budget_expense'
 import BudgetSummary from './_components/budget_summary'
 
@@ -18,7 +18,7 @@ interface MonthlyData {
 		type: 'income' | 'expense'
 		dates: string[]
 	}>
-	expenses: Expense[]
+	statements: Statement[]
 	categories: BudgetCategory[]
 }
 
@@ -53,19 +53,21 @@ export default function BudgetPage() {
 			return {
 				income: 0,
 				automatedItems: [],
-				expenses: [],
+				statements: [],
 				categories: [],
 			}
 		}
 
-		// Filter expenses to ensure they're within the selected month/year
+		// Filter statements to ensure they're within the selected month/year
 		const startOfMonth = new Date(selectedYear, selectedMonth - 1, 1)
 		const endOfMonth = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999)
 
-		const filteredExpenses = budgetData.expenses.filter((expense) => {
-			const expenseDate = new Date(expense.date)
-			return expenseDate >= startOfMonth && expenseDate <= endOfMonth
-		})
+		const filteredStatements = (budgetData.statements ?? []).filter(
+			(statement) => {
+				const statementDate = new Date(statement.date)
+				return statementDate >= startOfMonth && statementDate <= endOfMonth
+			}
+		)
 
 		return {
 			income: budgetData.income,
@@ -74,7 +76,7 @@ export default function BudgetPage() {
 				type: item.type as 'income' | 'expense',
 				dates: item.dates ?? [],
 			})),
-			expenses: filteredExpenses,
+			statements: filteredStatements,
 			categories: budgetData.categories,
 		}
 	}, [budgetData, selectedMonth, selectedYear])
@@ -129,7 +131,7 @@ export default function BudgetPage() {
 	}
 
 	// Show empty state if no data
-	const hasData = data.categories.length > 0 || data.expenses.length > 0
+	const hasData = data.categories.length > 0 || data.statements.length > 0
 
 	return (
 		<main className='min-h-screen overflow-x-hidden bg-background'>
@@ -202,9 +204,9 @@ export default function BudgetPage() {
 					{/* Divider */}
 					<div className='my-8 w-full max-w-6xl border-t border-border' />
 
-					{/* Expenses */}
+					{/* Statements */}
 					<BudgetExpenseComponent
-						expenses={data.expenses}
+						statements={data.statements}
 						categories={data.categories}
 						onRefetch={() => void refetch()}
 					/>

@@ -69,7 +69,7 @@ model user {
   accounts      account[]
   sessions      session[]
   budgetCategories budgetcategory[]
-  expenses      expense[]
+  statements    statement[]
   monthlyBudgets monthlybudget[]
   automatedItems automateditem[]
 }
@@ -92,16 +92,17 @@ model budgetcategory {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expenses    expense[]
+  statements  statement[]
 
   @@unique([userId, name], map: "BudgetCategory_userId_name_key")
 }
 
-model expense {
+model statement {
   id          String   @id @default(cuid())
   userId      String
   categoryId  String?
   category    String
+  type        String   // 'income' or 'expense'
   amount      Float
   description String
   date        DateTime

@@ -3,39 +3,42 @@ import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
 import {Card} from '../../../store/components/ui/card'
 
-export interface Expense {
+export interface Statement {
 	id: string
 	category: string
+	type: 'income' | 'expense'
 	amount: number
 	description: string
 	date: string
 }
 
 interface BudgetExpenseComponentProps {
-	expenses: Expense[]
+	statements: Statement[]
 	categories: BudgetCategory[]
 	onRefetch: () => void
 }
 
 export default function BudgetExpenseComponent({
-	expenses,
+	statements,
 	categories,
 	onRefetch,
 }: BudgetExpenseComponentProps) {
-	const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null)
+	const [editingStatementId, setEditingStatementId] = useState<string | null>(
+		null
+	)
 
-	// Mutation for updating expenses
-	const updateExpenseMutation = api.budget.updateExpense.useMutation({
+	// Mutation for updating statements
+	const updateStatementMutation = api.budget.updateStatement.useMutation({
 		onSuccess: () => {
 			onRefetch()
-			setEditingExpenseId(null)
+			setEditingStatementId(null)
 		},
 	})
 
 	// Handle category change
-	const handleCategoryChange = (expenseId: string, newCategory: string) => {
-		updateExpenseMutation.mutate({
-			expenseId,
+	const handleCategoryChange = (statementId: string, newCategory: string) => {
+		updateStatementMutation.mutate({
+			statementId,
 			category: newCategory,
 		})
 	}
@@ -80,10 +83,10 @@ export default function BudgetExpenseComponent({
 	return (
 		<div className='mb-12 w-full max-w-6xl'>
 			<div className='mb-6'>
-				<h2 className='text-2xl font-bold text-foreground'>Expenses</h2>
+				<h2 className='text-2xl font-bold text-foreground'>Statements</h2>
 			</div>
 
-			{/* Recent Expenses Table */}
+			{/* Recent Statements Table */}
 			<Card className='overflow-hidden'>
 				<div className='overflow-x-auto'>
 					<table className='w-full'>
@@ -91,6 +94,9 @@ export default function BudgetExpenseComponent({
 							<tr>
 								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
 									Date
+								</th>
+								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
+									Type
 								</th>
 								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
 									Category
@@ -104,43 +110,54 @@ export default function BudgetExpenseComponent({
 							</tr>
 						</thead>
 						<tbody className='divide-y divide-border'>
-							{expenses.length === 0 ? (
+							{statements.length === 0 ? (
 								<tr>
 									<td
-										colSpan={4}
+										colSpan={5}
 										className='px-6 py-8 text-center text-muted-foreground'
 									>
-										No expenses yet
+										No statements yet
 									</td>
 								</tr>
 							) : (
-								expenses.map((expense) => (
+								statements.map((statement) => (
 									<tr
-										key={expense.id}
+										key={statement.id}
 										className='transition-colors hover:bg-muted/50'
 									>
 										<td className='px-6 py-4 text-sm text-muted-foreground'>
-											{new Date(expense.date).toLocaleDateString('en-US', {
+											{new Date(statement.date).toLocaleDateString('en-US', {
 												month: 'short',
 												day: 'numeric',
 											})}
 										</td>
 										<td className='px-6 py-4'>
-											{editingExpenseId === expense.id ? (
+											<span
+												className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+													statement.type === 'income'
+														? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+														: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+												}`}
+											>
+												{statement.type === 'income' ? 'Income' : 'Expense'}
+											</span>
+										</td>
+										<td className='px-6 py-4'>
+											{editingStatementId === statement.id ? (
 												<select
-													value={expense.category}
+													value={statement.category}
 													onChange={(e) => {
-														handleCategoryChange(expense.id, e.target.value)
+														handleCategoryChange(statement.id, e.target.value)
 													}}
-													onBlur={() => setEditingExpenseId(null)}
+													onBlur={() => setEditingStatementId(null)}
 													autoFocus
 													className='cursor-pointer rounded-full border-0 px-3 py-1 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring dark:bg-[#2a2a2a]'
 													style={{
 														backgroundColor: lightenColor(
-															getCategoryColor(expense.category)
+															getCategoryColor(statement.category)
 														),
 														color: darkenColor(
-															getCategoryColor(expense.category)
+															getCategoryColor(statement.category)
 														),
 													}}
 												>
@@ -161,26 +178,33 @@ export default function BudgetExpenseComponent({
 												</select>
 											) : (
 												<button
-													onClick={() => setEditingExpenseId(expense.id)}
+													onClick={() => setEditingStatementId(statement.id)}
 													className='inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1'
 													style={{
 														backgroundColor: lightenColor(
-															getCategoryColor(expense.category)
+															getCategoryColor(statement.category)
 														),
 														color: darkenColor(
-															getCategoryColor(expense.category)
+															getCategoryColor(statement.category)
 														),
 													}}
 												>
-													{expense.category}
+													{statement.category}
 												</button>
 											)}
 										</td>
 										<td className='px-6 py-4 text-sm text-foreground'>
-											{expense.description}
+											{statement.description}
 										</td>
-										<td className='px-6 py-4 text-right text-sm font-semibold text-foreground'>
-											${expense.amount.toFixed(2)}
+										<td
+											className={`px-6 py-4 text-right text-sm font-semibold ${
+												statement.type === 'income'
+													? 'text-green-600 dark:text-green-400'
+													: 'text-foreground'
+											}`}
+										>
+											{statement.type === 'income' ? '+' : '-'}$
+											{statement.amount.toFixed(2)}
 										</td>
 									</tr>
 								))

@@ -34,9 +34,9 @@ export const budgetRouter = createTRPCRouter({
 				orderBy: {name: 'asc'},
 			})
 
-			// Get expenses for this month
+			// Get statements for this month
 			// month is 1-indexed (1-12), Date constructor uses 0-indexed months (0-11)
-			const expenses = await ctx.prisma.expense.findMany({
+			const statements = await ctx.prisma.statement.findMany({
 				where: {
 					userId,
 					date: {
@@ -48,11 +48,13 @@ export const budgetRouter = createTRPCRouter({
 				take: 50, // Limit to 50 most recent
 			})
 
-			// Calculate spent amount per category
+			// Calculate spent amount per category (only expenses, not income)
 			const categorySpent = new Map<string, number>()
-			expenses.forEach((expense) => {
-				const current = categorySpent.get(expense.category) || 0
-				categorySpent.set(expense.category, current + expense.amount)
+			statements.forEach((statement) => {
+				if (statement.type === 'expense') {
+					const current = categorySpent.get(statement.category) || 0
+					categorySpent.set(statement.category, current + statement.amount)
+				}
 			})
 
 			// Combine categories with spent amounts
@@ -137,12 +139,13 @@ export const budgetRouter = createTRPCRouter({
 					}
 				}),
 				categories: categoriesWithSpent,
-				expenses: expenses.map((exp) => ({
-					id: exp.id,
-					category: exp.category,
-					amount: exp.amount,
-					description: exp.description,
-					date: exp.date.toISOString().split('T')[0],
+				statements: statements.map((stmt) => ({
+					id: stmt.id,
+					category: stmt.category,
+					type: stmt.type,
+					amount: stmt.amount,
+					description: stmt.description,
+					date: stmt.date.toISOString().split('T')[0],
 				})),
 			}
 		}),
@@ -179,11 +182,12 @@ export const budgetRouter = createTRPCRouter({
 			})
 		}),
 
-	// Create a new expense
-	createExpense: protectedProcedure
+	// Create a new statement
+	createStatement: protectedProcedure
 		.input(
 			z.object({
 				category: z.string(),
+				type: z.enum(['income', 'expense']),
 				amount: z.number().min(0.01),
 				description: z.string().min(1),
 				date: z.string(), // ISO date string
@@ -200,11 +204,12 @@ export const budgetRouter = createTRPCRouter({
 				},
 			})
 
-			return await ctx.prisma.expense.create({
+			return await ctx.prisma.statement.create({
 				data: {
 					userId,
 					categoryId: budgetCategory?.id,
 					category: input.category,
+					type: input.type,
 					amount: input.amount,
 					description: input.description,
 					date: new Date(input.date),
@@ -212,35 +217,36 @@ export const budgetRouter = createTRPCRouter({
 			})
 		}),
 
-	// Update an existing expense
-	updateExpense: protectedProcedure
+	// Update an existing statement
+	updateStatement: protectedProcedure
 		.input(
 			z.object({
-				expenseId: z.string(),
+				statementId: z.string(),
 				category: z.string().optional(),
+				type: z.enum(['income', 'expense']).optional(),
 				amount: z.number().min(0.01).optional(),
 				description: z.string().min(1).optional(),
 			})
 		)
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
-			const {expenseId, ...updateData} = input
+			const {statementId, ...updateData} = input
 
-			// Verify the expense belongs to the user
-			const expense = await ctx.prisma.expense.findFirst({
+			// Verify the statement belongs to the user
+			const statement = await ctx.prisma.statement.findFirst({
 				where: {
-					id: expenseId,
+					id: statementId,
 					userId,
 				},
 			})
 
-			if (!expense) {
-				throw new Error('Expense not found')
+			if (!statement) {
+				throw new Error('Statement not found')
 			}
 
 			// If category is being updated, find the new category
-			let categoryId = expense.categoryId
-			if (updateData.category && updateData.category !== expense.category) {
+			let categoryId = statement.categoryId
+			if (updateData.category && updateData.category !== statement.category) {
 				const budgetCategory = await ctx.prisma.budgetcategory.findFirst({
 					where: {
 						userId,
@@ -250,13 +256,14 @@ export const budgetRouter = createTRPCRouter({
 				categoryId = budgetCategory?.id || null
 			}
 
-			return await ctx.prisma.expense.update({
-				where: {id: expenseId},
+			return await ctx.prisma.statement.update({
+				where: {id: statementId},
 				data: {
 					...(updateData.category && {
 						category: updateData.category,
 						categoryId,
 					}),
+					...(updateData.type && {type: updateData.type}),
 					...(updateData.amount !== undefined && {
 						amount: updateData.amount,
 					}),
@@ -402,8 +409,8 @@ export const budgetRouter = createTRPCRouter({
 				orderBy: [{year: 'asc'}, {month: 'asc'}],
 			})
 
-			// Get all expenses in range
-			const expenses = await ctx.prisma.expense.findMany({
+			// Get all statements in range
+			const statements = await ctx.prisma.statement.findMany({
 				where: {
 					userId,
 					date: {
@@ -427,11 +434,14 @@ export const budgetRouter = createTRPCRouter({
 				)
 				const income = monthlyBudget?.income ?? 0
 
-				// Calculate total spent for this month
+				// Calculate total spent for this month (only expenses, not income)
 				const monthStart = new Date(year, month - 1, 1)
 				const monthEnd = new Date(year, month, 0, 23, 59, 59)
-				const monthExpenses = expenses.filter(
-					(exp) => exp.date >= monthStart && exp.date <= monthEnd
+				const monthExpenses = statements.filter(
+					(stmt) =>
+						stmt.date >= monthStart &&
+						stmt.date <= monthEnd &&
+						stmt.type === 'expense'
 				)
 				const totalSpent = monthExpenses.reduce(
 					(sum, exp) => sum + exp.amount,

@@ -99,8 +99,8 @@ export default function BudgetCategoryComponent({
 		},
 	})
 
-	// Mutation for creating expenses
-	const createExpenseMutation = api.budget.createExpense.useMutation({
+	// Mutation for creating statements (expenses only from categories)
+	const createStatementMutation = api.budget.createStatement.useMutation({
 		onSuccess: () => {
 			onRefetch()
 			setNewExpense({amount: '', description: ''})
@@ -157,8 +157,9 @@ export default function BudgetCategoryComponent({
 
 		if (!sessionData?.user?.id) return
 
-		createExpenseMutation.mutate({
+		createStatementMutation.mutate({
 			category: selectedCategory.name,
+			type: 'expense', // Categories only track expenses
 			amount: parseFloat(newExpense.amount),
 			description: newExpense.description,
 			date: new Date().toISOString().split('T')[0],
