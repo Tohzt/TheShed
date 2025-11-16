@@ -6,6 +6,7 @@ import ConfirmDeleteDialog from './delete_category_dialog'
 import EmojiPicker from './emoji_picker'
 import {DatePicker} from './date_picker'
 import {Button} from '../../../store/components/ui/button'
+import {Minus, Plus} from 'lucide-react'
 
 export interface BudgetCategory {
 	id: string
@@ -80,6 +81,7 @@ export default function BudgetCategoryComponent({
 		description: '',
 		date: getTodayLocal(), // Default to today (local date)
 	})
+	const [isIncome, setIsIncome] = useState(false) // false = expense (red -), true = income (green +)
 	const newCategoryColorRef = useRef<HTMLInputElement>(null)
 	const editCategoryColorRef = useRef<HTMLInputElement>(null)
 
@@ -110,7 +112,7 @@ export default function BudgetCategoryComponent({
 		},
 	})
 
-	// Mutation for creating statements (expenses only from categories)
+	// Mutation for creating statements (expenses or income from categories)
 	const createStatementMutation = api.budget.createStatement.useMutation({
 		onSuccess: () => {
 			onRefetch()
@@ -119,6 +121,7 @@ export default function BudgetCategoryComponent({
 				description: '',
 				date: getTodayLocal(),
 			})
+			setIsIncome(false) // Reset to expense by default
 		},
 	})
 
@@ -151,6 +154,7 @@ export default function BudgetCategoryComponent({
 			description: '',
 			date: new Date().toISOString().split('T')[0],
 		})
+		setIsIncome(false) // Reset to expense by default
 	}
 
 	// Handle updating category
@@ -169,7 +173,7 @@ export default function BudgetCategoryComponent({
 		})
 	}
 
-	// Handle adding expense
+	// Handle adding expense or income
 	const handleAddExpense = () => {
 		if (
 			!selectedCategory ||
@@ -183,7 +187,7 @@ export default function BudgetCategoryComponent({
 
 		createStatementMutation.mutate({
 			category: selectedCategory.name,
-			type: 'expense', // Categories only track expenses
+			type: isIncome ? 'income' : 'expense',
 			amount: parseFloat(newExpense.amount),
 			description: newExpense.description,
 			date: newExpense.date,
@@ -314,6 +318,7 @@ export default function BudgetCategoryComponent({
 						description: '',
 						date: new Date().toISOString().split('T')[0],
 					})
+					setIsIncome(false) // Reset to expense by default
 				}}
 				title={selectedCategory?.name || 'Category'}
 			>
@@ -337,7 +342,7 @@ export default function BudgetCategoryComponent({
 								: 'text-muted-foreground hover:text-foreground'
 						}`}
 					>
-						Add Expense
+						Add to Statement
 					</button>
 				</div>
 
@@ -449,15 +454,32 @@ export default function BudgetCategoryComponent({
 				{activeTab === 'expense' && (
 					<>
 						<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
-							<input
-								type='number'
-								placeholder='Amount'
-								value={newExpense.amount}
-								onChange={(e) =>
-									setNewExpense({...newExpense, amount: e.target.value})
-								}
-								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-							/>
+							<div className='flex items-center gap-2'>
+								<button
+									type='button'
+									onClick={() => setIsIncome(!isIncome)}
+									className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+										isIncome
+											? 'border-green-500 bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400'
+											: 'border-red-500 bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-400'
+									}`}
+								>
+									{isIncome ? (
+										<Plus className='h-5 w-5' />
+									) : (
+										<Minus className='h-5 w-5' />
+									)}
+								</button>
+								<input
+									type='number'
+									placeholder='Amount'
+									value={newExpense.amount}
+									onChange={(e) =>
+										setNewExpense({...newExpense, amount: e.target.value})
+									}
+									className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+								/>
+							</div>
 							<DatePicker
 								value={newExpense.date}
 								onChange={(date) =>
@@ -492,7 +514,7 @@ export default function BudgetCategoryComponent({
 								}
 								className='flex-1'
 							>
-								Add Expense
+								Add to Statement
 							</Button>
 							<Button
 								onClick={() => {
@@ -502,6 +524,7 @@ export default function BudgetCategoryComponent({
 										description: '',
 										date: new Date().toISOString().split('T')[0],
 									})
+									setIsIncome(false) // Reset to expense by default
 								}}
 								variant='outline'
 								className='flex-1'

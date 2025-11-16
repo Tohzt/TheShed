@@ -7,7 +7,7 @@ import ConfirmDeleteDialog from './delete_category_dialog'
 import {DatePicker} from './date_picker'
 import {Button} from '../../../store/components/ui/button'
 import {Switch} from '../../../store/components/ui/switch'
-import {ChevronUp, ChevronDown} from 'lucide-react'
+import {ChevronUp, ChevronDown, Minus, Plus} from 'lucide-react'
 
 export interface Statement {
 	id: string
@@ -255,6 +255,7 @@ export default function BudgetStatementsComponent({
 		updateStatementMutation.mutate({
 			statementId: selectedStatement.id,
 			category: editStatement.category,
+			type: editStatement.type,
 			amount: parseFloat(editStatement.amount),
 			description: editStatement.description,
 			date: editStatement.date,
@@ -609,19 +610,42 @@ export default function BudgetStatementsComponent({
 						<label className='mb-2 block text-sm font-medium text-foreground'>
 							Amount
 						</label>
-						<input
-							type='number'
-							step='0.01'
-							min='0.01'
-							value={editStatement.amount}
-							onChange={(e) =>
-								setEditStatement({
-									...editStatement,
-									amount: e.target.value,
-								})
-							}
-							className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-						/>
+						<div className='flex items-center gap-2'>
+							<input
+								type='number'
+								step='0.01'
+								min='0.01'
+								value={editStatement.amount}
+								onChange={(e) =>
+									setEditStatement({
+										...editStatement,
+										amount: e.target.value,
+									})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+							/>
+							<button
+								type='button'
+								onClick={() =>
+									setEditStatement({
+										...editStatement,
+										type:
+											editStatement.type === 'income' ? 'expense' : 'income',
+									})
+								}
+								className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+									editStatement.type === 'income'
+										? 'border-green-500 bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400'
+										: 'border-red-500 bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-400'
+								}`}
+							>
+								{editStatement.type === 'income' ? (
+									<Plus className='h-5 w-5' />
+								) : (
+									<Minus className='h-5 w-5' />
+								)}
+							</button>
+						</div>
 					</div>
 					<div>
 						<label className='mb-2 block text-sm font-medium text-foreground'>
