@@ -123,21 +123,26 @@ export const budgetRouter = createTRPCRouter({
 				take: 50, // Limit to 50 most recent
 			})
 
-			// Calculate spent amount per category (only expenses, not income)
-			const categorySpent = new Map<string, number>()
+			// Calculate income and expenses per category
+			const categoryIncome = new Map<string, number>()
+			const categoryExpenses = new Map<string, number>()
 			statements.forEach((statement) => {
-				if (statement.type === 'expense') {
-					const current = categorySpent.get(statement.category) || 0
-					categorySpent.set(statement.category, current + statement.amount)
+				if (statement.type === 'income') {
+					const current = categoryIncome.get(statement.category) || 0
+					categoryIncome.set(statement.category, current + statement.amount)
+				} else if (statement.type === 'expense') {
+					const current = categoryExpenses.get(statement.category) || 0
+					categoryExpenses.set(statement.category, current + statement.amount)
 				}
 			})
 
-			// Combine categories with spent amounts
+			// Combine categories with income and expense amounts
 			const categoriesWithSpent = categories.map((cat) => ({
 				id: cat.id,
 				name: cat.name,
 				allocated: cat.allocated,
-				spent: categorySpent.get(cat.name) || 0,
+				expense: categoryExpenses.get(cat.name) || 0,
+				income: categoryIncome.get(cat.name) || 0,
 				icon: cat.icon,
 				color: cat.color,
 			}))
@@ -415,7 +420,11 @@ export const budgetRouter = createTRPCRouter({
 				throw new Error('Category not found')
 			}
 
-			return await ctx.prisma.budgetcategory.update({
+			const oldCategoryName = category.name
+			const newCategoryName = updateData.name
+
+			// Update the category
+			const updatedCategory = await ctx.prisma.budgetcategory.update({
 				where: {id: categoryId},
 				data: {
 					...(updateData.name && {name: updateData.name}),
@@ -426,6 +435,21 @@ export const budgetRouter = createTRPCRouter({
 					...(updateData.color !== undefined && {color: updateData.color}),
 				},
 			})
+
+			// If the category name changed, update all related statements
+			if (newCategoryName && newCategoryName !== oldCategoryName) {
+				await ctx.prisma.statement.updateMany({
+					where: {
+						userId,
+						category: oldCategoryName,
+					},
+					data: {
+						category: newCategoryName,
+					},
+				})
+			}
+
+			return updatedCategory
 		}),
 
 	// Delete a budget category

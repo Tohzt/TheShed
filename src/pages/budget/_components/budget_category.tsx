@@ -6,13 +6,14 @@ import ConfirmDeleteDialog from './delete_category_dialog'
 import EmojiPicker from './emoji_picker'
 import {DatePicker} from './date_picker'
 import {Button} from '../../../store/components/ui/button'
-import {Minus, Plus} from 'lucide-react'
+import {Minus, Plus, X} from 'lucide-react'
 
 export interface BudgetCategory {
 	id: string
 	name: string
 	allocated: number
-	spent: number
+	expense: number
+	income: number
 	icon: string | null
 	color: string | null
 }
@@ -82,6 +83,8 @@ export default function BudgetCategoryComponent({
 		date: getTodayLocal(), // Default to today (local date)
 	})
 	const [isIncome, setIsIncome] = useState(false) // false = expense (red -), true = income (green +)
+	const [newCategoryHasBudget, setNewCategoryHasBudget] = useState(false)
+	const [editCategoryHasBudget, setEditCategoryHasBudget] = useState(false)
 	const newCategoryColorRef = useRef<HTMLInputElement>(null)
 	const editCategoryColorRef = useRef<HTMLInputElement>(null)
 
@@ -90,6 +93,7 @@ export default function BudgetCategoryComponent({
 		onSuccess: () => {
 			onRefetch()
 			setNewCategory({name: '', allocated: '', icon: '', color: ''})
+			setNewCategoryHasBudget(false)
 			setShowAddCategory(false)
 		},
 	})
@@ -100,6 +104,7 @@ export default function BudgetCategoryComponent({
 			onRefetch()
 			setSelectedCategory(null)
 			setEditCategory({name: '', allocated: '', icon: '', color: ''})
+			setEditCategoryHasBudget(false)
 		},
 	})
 
@@ -127,13 +132,14 @@ export default function BudgetCategoryComponent({
 
 	// Handle adding category
 	const handleAddCategory = () => {
-		if (!newCategory.name || !newCategory.allocated) return
+		if (!newCategory.name) return
+		if (newCategoryHasBudget && !newCategory.allocated) return
 
 		if (!sessionData?.user?.id) return
 
 		createCategoryMutation.mutate({
 			name: newCategory.name,
-			allocated: parseFloat(newCategory.allocated),
+			allocated: newCategoryHasBudget ? parseFloat(newCategory.allocated) : 0,
 			icon: newCategory.icon || null,
 			color: newCategory.color || null,
 		})
@@ -142,9 +148,11 @@ export default function BudgetCategoryComponent({
 	// Handle clicking category card - open popup
 	const handleCategoryClick = (category: BudgetCategory) => {
 		setSelectedCategory(category)
+		const hasBudget = category.allocated > 0
+		setEditCategoryHasBudget(hasBudget)
 		setEditCategory({
 			name: category.name,
-			allocated: category.allocated.toString(),
+			allocated: hasBudget ? category.allocated.toString() : '',
 			icon: category.icon || '',
 			color: category.color || '',
 		})
@@ -159,15 +167,15 @@ export default function BudgetCategoryComponent({
 
 	// Handle updating category
 	const handleUpdateCategory = () => {
-		if (!selectedCategory || !editCategory.name || !editCategory.allocated)
-			return
+		if (!selectedCategory || !editCategory.name) return
+		if (editCategoryHasBudget && !editCategory.allocated) return
 
 		if (!sessionData?.user?.id) return
 
 		updateCategoryMutation.mutate({
 			categoryId: selectedCategory.id,
 			name: editCategory.name,
-			allocated: parseFloat(editCategory.allocated),
+			allocated: editCategoryHasBudget ? parseFloat(editCategory.allocated) : 0,
 			icon: editCategory.icon || null,
 			color: editCategory.color || null,
 		})
@@ -219,6 +227,7 @@ export default function BudgetCategoryComponent({
 				onClose={() => {
 					setShowAddCategory(false)
 					setNewCategory({name: '', allocated: '', icon: '', color: ''})
+					setNewCategoryHasBudget(false)
 				}}
 				title='Create Category'
 			>
@@ -232,18 +241,41 @@ export default function BudgetCategoryComponent({
 						}
 						className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 					/>
-					<input
-						type='number'
-						placeholder='Allocated Amount'
-						value={newCategory.allocated}
-						onChange={(e) =>
-							setNewCategory({
-								...newCategory,
-								allocated: e.target.value,
-							})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-					/>
+					{newCategoryHasBudget ? (
+						<div className='flex items-center gap-2'>
+							<input
+								type='number'
+								placeholder='Allocated Amount'
+								value={newCategory.allocated}
+								onChange={(e) =>
+									setNewCategory({
+										...newCategory,
+										allocated: e.target.value,
+									})
+								}
+								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+							/>
+							<button
+								type='button'
+								onClick={() => {
+									setNewCategoryHasBudget(false)
+									setNewCategory({...newCategory, allocated: ''})
+								}}
+								className='flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+							>
+								<X className='h-4 w-4' />
+							</button>
+						</div>
+					) : (
+						<Button
+							type='button'
+							variant='outline'
+							onClick={() => setNewCategoryHasBudget(true)}
+							className='h-9'
+						>
+							Has a Budget?
+						</Button>
+					)}
 					<div className='flex justify-around gap-4'>
 						{/* Emoji Picker */}
 						<EmojiPicker
@@ -284,7 +316,10 @@ export default function BudgetCategoryComponent({
 				<div className='flex gap-3'>
 					<Button
 						onClick={handleAddCategory}
-						disabled={!newCategory.name || !newCategory.allocated}
+						disabled={
+							!newCategory.name ||
+							(newCategoryHasBudget && !newCategory.allocated)
+						}
 						className='flex-1'
 					>
 						Create
@@ -298,6 +333,7 @@ export default function BudgetCategoryComponent({
 								icon: '',
 								color: '',
 							})
+							setNewCategoryHasBudget(false)
 						}}
 						variant='outline'
 						className='flex-1'
@@ -313,6 +349,7 @@ export default function BudgetCategoryComponent({
 				onClose={() => {
 					setSelectedCategory(null)
 					setEditCategory({name: '', allocated: '', icon: '', color: ''})
+					setEditCategoryHasBudget(false)
 					setNewExpense({
 						amount: '',
 						description: '',
@@ -359,18 +396,41 @@ export default function BudgetCategoryComponent({
 								}
 								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 							/>
-							<input
-								type='number'
-								placeholder='Allocated Amount'
-								value={editCategory.allocated}
-								onChange={(e) =>
-									setEditCategory({
-										...editCategory,
-										allocated: e.target.value,
-									})
-								}
-								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-							/>
+							{editCategoryHasBudget ? (
+								<div className='flex items-center gap-2'>
+									<input
+										type='number'
+										placeholder='Allocated Amount'
+										value={editCategory.allocated}
+										onChange={(e) =>
+											setEditCategory({
+												...editCategory,
+												allocated: e.target.value,
+											})
+										}
+										className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+									/>
+									<button
+										type='button'
+										onClick={() => {
+											setEditCategoryHasBudget(false)
+											setEditCategory({...editCategory, allocated: ''})
+										}}
+										className='flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+									>
+										<X className='h-4 w-4' />
+									</button>
+								</div>
+							) : (
+								<Button
+									type='button'
+									variant='outline'
+									onClick={() => setEditCategoryHasBudget(true)}
+									className='h-9'
+								>
+									Has a Budget?
+								</Button>
+							)}
 							<div className='flex justify-around gap-4'>
 								{/* Emoji Picker */}
 								<EmojiPicker
@@ -415,7 +475,10 @@ export default function BudgetCategoryComponent({
 							<div className='flex gap-3'>
 								<Button
 									onClick={handleUpdateCategory}
-									disabled={!editCategory.name || !editCategory.allocated}
+									disabled={
+										!editCategory.name ||
+										(editCategoryHasBudget && !editCategory.allocated)
+									}
 									className='flex-1'
 								>
 									Save Changes
@@ -429,6 +492,7 @@ export default function BudgetCategoryComponent({
 											icon: '',
 											color: '',
 										})
+										setEditCategoryHasBudget(false)
 									}}
 									variant='outline'
 									className='flex-1'
@@ -549,8 +613,20 @@ export default function BudgetCategoryComponent({
 			{/* Category Cards */}
 			<div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
 				{categories.map((category) => {
-					const percentage = (category.spent / category.allocated) * 100
-					const isOverBudget = category.spent > category.allocated
+					const hasBudget = category.allocated > 0
+					const percentage = hasBudget
+						? (category.expense / category.allocated) * 100
+						: 0
+					const isOverBudget =
+						hasBudget && category.expense > category.allocated
+
+					// For categories without budgets, calculate income/expense percentages
+					const totalFlow = category.income + category.expense
+					const incomePercent =
+						totalFlow > 0 ? (category.income / totalFlow) * 100 : 0
+					const expensePercent =
+						totalFlow > 0 ? (category.expense / totalFlow) * 100 : 0
+					const netAmount = category.income - category.expense
 
 					return (
 						<div
@@ -575,49 +651,113 @@ export default function BudgetCategoryComponent({
 							</div>
 							<div className='p-6 pt-4'>
 								<div className='mb-3'>
-									<div className='mb-2 flex justify-between text-sm'>
-										<span className='text-muted-foreground'>Spent</span>
-										<span
-											className={`font-bold ${
-												isOverBudget ? 'text-destructive' : 'text-foreground'
-											}`}
-										>
-											${category.spent} / ${category.allocated}
-										</span>
-									</div>
+									{hasBudget ? (
+										<>
+											<div className='mb-2 flex justify-between text-sm'>
+												<span className='text-muted-foreground'>Expense</span>
+												<span
+													className={`font-bold ${
+														isOverBudget
+															? 'text-destructive'
+															: 'text-foreground'
+													}`}
+												>
+													${category.expense.toFixed(2)} / $
+													{category.allocated.toFixed(2)}
+												</span>
+											</div>
 
-									{/* Progress Bar */}
-									<div className='h-3 w-full overflow-hidden rounded-full bg-muted'>
-										<div
-											className={`h-full transition-all duration-500 ${
-												isOverBudget ? 'bg-red-500' : ''
-											}`}
-											style={{
-												width: `${Math.min(percentage, 100)}%`,
-												backgroundColor: isOverBudget
-													? undefined
-													: getColorValue(category.color),
-											}}
-										/>
-									</div>
+											{/* Progress Bar */}
+											<div className='h-3 w-full overflow-hidden rounded-full bg-muted'>
+												<div
+													className={`h-full transition-all duration-500 ${
+														isOverBudget ? 'bg-red-500' : ''
+													}`}
+													style={{
+														width: `${Math.min(percentage, 100)}%`,
+														backgroundColor: isOverBudget
+															? undefined
+															: getColorValue(category.color),
+													}}
+												/>
+											</div>
+										</>
+									) : (
+										<>
+											<div className='mb-2 flex justify-between text-sm'>
+												<span className='text-muted-foreground'>
+													Income / Expenses
+												</span>
+												<span className='font-bold text-foreground'>
+													${category.income.toFixed(2)} / $
+													{category.expense.toFixed(2)}
+												</span>
+											</div>
+
+											{/* Income/Expense Bar */}
+											<div className='h-3 w-full overflow-hidden rounded-full bg-muted'>
+												{totalFlow > 0 ? (
+													<div className='flex h-full'>
+														{incomePercent > 0 && (
+															<div
+																className='h-full bg-green-500 transition-all duration-500'
+																style={{width: `${incomePercent}%`}}
+															/>
+														)}
+														{expensePercent > 0 && (
+															<div
+																className='h-full bg-red-500 transition-all duration-500'
+																style={{width: `${expensePercent}%`}}
+															/>
+														)}
+													</div>
+												) : (
+													<div className='h-full bg-muted' />
+												)}
+											</div>
+										</>
+									)}
 								</div>
 
 								<div className='flex items-center justify-between'>
-									<span className='text-sm text-muted-foreground'>
-										{percentage.toFixed(0)}% used
-									</span>
-									<span
-										className={`text-sm font-bold ${
-											isOverBudget ? 'text-destructive' : ''
-										}`}
-										style={{
-											color: isOverBudget
-												? undefined
-												: getTextColor(category.color),
-										}}
-									>
-										${(category.allocated - category.spent).toFixed(2)} left
-									</span>
+									{hasBudget ? (
+										<>
+											<span className='text-sm text-muted-foreground'>
+												{percentage.toFixed(0)}% used
+											</span>
+											<span
+												className={`text-sm font-bold ${
+													isOverBudget ? 'text-destructive' : ''
+												}`}
+												style={{
+													color: isOverBudget
+														? undefined
+														: getTextColor(category.color),
+												}}
+											>
+												${(category.allocated - category.expense).toFixed(2)}{' '}
+												left
+											</span>
+										</>
+									) : (
+										<>
+											<span className='text-sm font-bold text-green-600 dark:text-green-400'>
+												+${category.income.toFixed(2)}
+											</span>
+											<span
+												className={`text-sm font-bold ${
+													netAmount >= 0
+														? 'text-green-600 dark:text-green-400'
+														: 'text-red-600 dark:text-red-400'
+												}`}
+											>
+												{netAmount >= 0 ? '+' : ''}${netAmount.toFixed(2)}
+											</span>
+											<span className='text-sm font-bold text-red-600 dark:text-red-400'>
+												-${category.expense.toFixed(2)}
+											</span>
+										</>
+									)}
 								</div>
 							</div>
 						</div>
