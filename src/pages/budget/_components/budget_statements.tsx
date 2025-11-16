@@ -1,4 +1,4 @@
-import {useState, useEffect, useMemo} from 'react'
+import {useState, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
 import {Card} from '../../../store/components/ui/card'
@@ -55,9 +55,10 @@ export default function BudgetStatementsComponent({
 	const [showAutomatedItemNotice, setShowAutomatedItemNotice] = useState(false)
 	const [showFutureDates, setShowFutureDates] = useState(false)
 	const [sortColumn, setSortColumn] = useState<
-		'date' | 'type' | 'category' | 'description' | 'amount' | null
+		'date' | 'category' | 'description' | 'amount' | null
 	>(null)
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+	const hasInitializedRef = useRef(false)
 
 	// Get today's date at start of day for comparison
 	const getToday = () => {
@@ -120,9 +121,6 @@ export default function BudgetStatementsComponent({
 					comparison = dateA.getTime() - dateB.getTime()
 					break
 				}
-				case 'type':
-					comparison = a.type.localeCompare(b.type)
-					break
 				case 'category': {
 					const aIsAuto = isStatementFromAutomatedItem(a)
 					const bIsAuto = isStatementFromAutomatedItem(b)
@@ -178,7 +176,7 @@ export default function BudgetStatementsComponent({
 
 	// Handle column header click for sorting
 	const handleSort = (
-		column: 'date' | 'type' | 'category' | 'description' | 'amount'
+		column: 'date' | 'category' | 'description' | 'amount'
 	) => {
 		if (sortColumn === column) {
 			// Toggle direction if clicking the same column
@@ -191,8 +189,19 @@ export default function BudgetStatementsComponent({
 	}
 
 	// Notify parent of filter state changes
-	useEffect(() => {
-		onFilterChange?.(showFutureDates)
+	// Ensure initial state is communicated on mount
+	useLayoutEffect(() => {
+		if (!hasInitializedRef.current) {
+			hasInitializedRef.current = true
+			onFilterChange?.(showFutureDates)
+		}
+	}, []) // Only run on mount
+
+	// Notify parent when filter state changes after mount
+	useLayoutEffect(() => {
+		if (hasInitializedRef.current) {
+			onFilterChange?.(showFutureDates)
+		}
 	}, [showFutureDates, onFilterChange])
 
 	// Mutation for updating statements
@@ -339,11 +348,11 @@ export default function BudgetStatementsComponent({
 								</th>
 								<th
 									className='cursor-pointer select-none px-6 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
-									onClick={() => handleSort('type')}
+									onClick={() => handleSort('amount')}
 								>
-									<div className='flex items-center gap-2'>
-										<span>Type</span>
-										{sortColumn === 'type' &&
+									<div className='flex w-full items-center justify-start gap-2'>
+										<span>Amount</span>
+										{sortColumn === 'amount' &&
 											(sortDirection === 'asc' ? (
 												<ChevronUp className='h-4 w-4' />
 											) : (
@@ -379,27 +388,13 @@ export default function BudgetStatementsComponent({
 											))}
 									</div>
 								</th>
-								<th
-									className='cursor-pointer select-none px-6 py-4 text-right text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
-									onClick={() => handleSort('amount')}
-								>
-									<div className='flex items-center justify-end gap-2'>
-										<span>Amount</span>
-										{sortColumn === 'amount' &&
-											(sortDirection === 'asc' ? (
-												<ChevronUp className='h-4 w-4' />
-											) : (
-												<ChevronDown className='h-4 w-4' />
-											))}
-									</div>
-								</th>
 							</tr>
 						</thead>
 						<tbody className='divide-y divide-border'>
 							{sortedStatements.length === 0 ? (
 								<tr>
 									<td
-										colSpan={5}
+										colSpan={4}
 										className='px-6 py-8 text-center text-muted-foreground'
 									>
 										{statements.length === 0
@@ -432,16 +427,21 @@ export default function BudgetStatementsComponent({
 													})
 												})()}
 											</td>
-											<td className='px-6 py-4'>
-												<span
-													className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-														statement.type === 'income'
-															? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-															: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-													}`}
-												>
-													{statement.type === 'income' ? 'Income' : 'Expense'}
-												</span>
+											<td
+												className={`px-6 py-4 text-right text-sm font-semibold tabular-nums ${
+													statement.type === 'income'
+														? 'text-green-600 dark:text-green-400'
+														: 'text-foreground'
+												} ${
+													statement.type === 'expense'
+														? 'text-red-600 dark:text-red-400'
+														: 'text-foreground'
+												}`}
+											>
+												<div className='max-w-[70px]'>
+													{statement.type === 'income' ? '+' : '-'}$
+													{statement.amount.toFixed(2)}
+												</div>
 											</td>
 											<td className='px-6 py-4'>
 												{isStatementFromAutomatedItem(statement) ? (
@@ -473,20 +473,6 @@ export default function BudgetStatementsComponent({
 											<td className='px-6 py-4 text-sm text-foreground'>
 												{statement.description}
 											</td>
-											<td
-												className={`px-6 py-4 text-right text-sm font-semibold ${
-													statement.type === 'income'
-														? 'text-green-600 dark:text-green-400'
-														: 'text-foreground'
-												} ${
-													statement.type === 'expense'
-														? 'text-red-600 dark:text-red-400'
-														: 'text-foreground'
-												}`}
-											>
-												{statement.type === 'income' ? '+' : '-'}$
-												{statement.amount.toFixed(2)}
-											</td>
 										</tr>
 									))}
 
@@ -494,7 +480,7 @@ export default function BudgetStatementsComponent({
 									{showDivider && (
 										<tr>
 											<td
-												colSpan={5}
+												colSpan={4}
 												className='border-t border-dashed border-border/60 bg-muted/20 px-6 py-2'
 											>
 												<div className='flex items-center gap-2'>
@@ -529,16 +515,19 @@ export default function BudgetStatementsComponent({
 														})
 													})()}
 												</td>
-												<td className='px-6 py-4'>
-													<span
-														className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-															statement.type === 'income'
-																? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-																: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-														}`}
-													>
-														{statement.type === 'income' ? 'Income' : 'Expense'}
-													</span>
+												<td
+													className={`px-6 py-4 text-right text-sm font-semibold tabular-nums ${
+														statement.type === 'income'
+															? 'text-green-600 dark:text-green-400'
+															: 'text-foreground'
+													} ${
+														statement.type === 'expense'
+															? 'text-red-600 dark:text-red-400'
+															: 'text-foreground'
+													}`}
+												>
+													{statement.type === 'income' ? '+' : '-'}$
+													{statement.amount.toFixed(2)}
 												</td>
 												<td className='px-6 py-4'>
 													{isStatementFromAutomatedItem(statement) ? (
@@ -569,20 +558,6 @@ export default function BudgetStatementsComponent({
 												</td>
 												<td className='px-6 py-4 text-sm text-foreground'>
 													{statement.description}
-												</td>
-												<td
-													className={`px-6 py-4 text-right text-sm font-semibold ${
-														statement.type === 'income'
-															? 'text-green-600 dark:text-green-400'
-															: 'text-foreground'
-													} ${
-														statement.type === 'expense'
-															? 'text-red-600 dark:text-red-400'
-															: 'text-foreground'
-													}`}
-												>
-													{statement.type === 'income' ? '+' : '-'}$
-													{statement.amount.toFixed(2)}
 												</td>
 											</tr>
 										))}
