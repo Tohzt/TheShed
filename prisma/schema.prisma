@@ -70,7 +70,6 @@ model user {
   sessions      session[]
   budgetCategories budgetcategory[]
   statements    statement[]
-  monthlyBudgets monthlybudget[]
   automatedItems automateditem[]
 }
 
@@ -110,19 +109,6 @@ model statement {
   updatedAt   DateTime @updatedAt
   user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   budgetCategory budgetcategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-}
-
-model monthlybudget {
-  id          String   @id @default(cuid())
-  userId      String
-  month       Int
-  year        Int
-  income      Float    @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, month, year], map: "MonthlyBudget_userId_month_year_key")
 }
 
 model automateditem {

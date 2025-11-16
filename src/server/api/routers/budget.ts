@@ -103,17 +103,6 @@ export const budgetRouter = createTRPCRouter({
 			const month = input.month ?? now.getMonth() + 1
 			const year = input.year ?? now.getFullYear()
 
-			// Get monthly budget (income)
-			const monthlyBudget = await ctx.prisma.monthlybudget.findUnique({
-				where: {
-					userId_month_year: {
-						userId,
-						month,
-						year,
-					},
-				},
-			})
-
 			// Get all budget categories for this user
 			const categories = await ctx.prisma.budgetcategory.findMany({
 				where: {userId},
@@ -244,38 +233,6 @@ export const budgetRouter = createTRPCRouter({
 					}
 				}),
 			}
-		}),
-
-	// Create or update monthly budget (income)
-	setMonthlyIncome: protectedProcedure
-		.input(
-			z.object({
-				month: z.number().min(1).max(12),
-				year: z.number(),
-				income: z.number().min(0),
-			})
-		)
-		.mutation(async ({ctx, input}) => {
-			const userId = ctx.session.user.id
-
-			return await ctx.prisma.monthlybudget.upsert({
-				where: {
-					userId_month_year: {
-						userId,
-						month: input.month,
-						year: input.year,
-					},
-				},
-				update: {
-					income: input.income,
-				},
-				create: {
-					userId,
-					month: input.month,
-					year: input.year,
-					income: input.income,
-				},
-			})
 		}),
 
 	// Create a new statement
@@ -496,107 +453,6 @@ export const budgetRouter = createTRPCRouter({
 			return await ctx.prisma.budgetcategory.delete({
 				where: {id: input.categoryId},
 			})
-		}),
-
-	// Get historical budget data for charts (last 6 months)
-	getHistoricalBudget: protectedProcedure
-		.input(
-			z.object({
-				months: z.number().min(1).max(12).default(6),
-			})
-		)
-		.query(async ({ctx, input}) => {
-			const userId = ctx.session.user.id
-			const now = new Date()
-			const currentMonth = now.getMonth() + 1
-			const currentYear = now.getFullYear()
-
-			// Calculate date range
-			const startDate = new Date(currentYear, currentMonth - input.months, 1)
-			const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59)
-
-			// Get all monthly budgets in range
-			const startYear = startDate.getFullYear()
-			const startMonth = startDate.getMonth() + 1
-			const endYear = endDate.getFullYear()
-			const endMonth = endDate.getMonth() + 1
-
-			const monthlyBudgets = await ctx.prisma.monthlybudget.findMany({
-				where: {
-					userId,
-					OR: [
-						{
-							year: {
-								gt: startYear,
-								lt: endYear,
-							},
-						},
-						{
-							year: startYear,
-							month: {gte: startMonth},
-						},
-						{
-							year: endYear,
-							month: {lte: endMonth},
-						},
-					],
-				},
-				orderBy: [{year: 'asc'}, {month: 'asc'}],
-			})
-
-			// Get all statements in range
-			const statements = await ctx.prisma.statement.findMany({
-				where: {
-					userId,
-					date: {
-						gte: startDate,
-						lte: endDate,
-					},
-				},
-			})
-
-			// Generate data for each month
-			const chartData = []
-			for (let i = input.months - 1; i >= 0; i--) {
-				const date = new Date(currentYear, currentMonth - i - 1, 1)
-				const month = date.getMonth() + 1
-				const year = date.getFullYear()
-				const monthName = date.toLocaleString('default', {month: 'short'})
-
-				// Get income for this month
-				const monthlyBudget = monthlyBudgets.find(
-					(mb) => mb.month === month && mb.year === year
-				)
-				const income = monthlyBudget?.income ?? 0
-
-				// Calculate total spent for this month (only expenses, not income)
-				const monthStart = new Date(year, month - 1, 1)
-				const monthEnd = new Date(year, month, 0, 23, 59, 59)
-				const monthExpenses = statements.filter(
-					(stmt) =>
-						stmt.date >= monthStart &&
-						stmt.date <= monthEnd &&
-						stmt.type === 'expense'
-				)
-				const totalSpent = monthExpenses.reduce(
-					(sum, exp) => sum + exp.amount,
-					0
-				)
-
-				const remaining = income - totalSpent
-				const savingsRate =
-					income > 0 ? ((remaining / income) * 100).toFixed(1) : '0.0'
-
-				chartData.push({
-					month: monthName,
-					income,
-					totalSpent,
-					remaining,
-					savingsRate: parseFloat(savingsRate),
-				})
-			}
-
-			return chartData
 		}),
 
 	// Get automated items for a specific month/year

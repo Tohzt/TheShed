@@ -1,5 +1,5 @@
 import {useId, useState, useMemo, useRef, useEffect, useCallback} from 'react'
-import {Area, AreaChart, PieChart, Pie, Cell} from 'recharts'
+import {PieChart, Pie, Cell} from 'recharts'
 import {Plus, Minus} from 'lucide-react'
 import {api} from '../../../utils/api'
 import BudgetPopup from './budget_popup'
@@ -56,11 +56,6 @@ export default function BudgetSummary({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [automatedItems.length])
 
-	// Get unique IDs for gradients
-	const spentGradientId = useId()
-	const remainingGradientId = useId()
-	const savingsGradientId = useId()
-
 	// Prepare pie chart data
 	const pieData = useMemo(() => {
 		const data: Array<{name: string; value: number; color: string}> = []
@@ -101,32 +96,6 @@ export default function BudgetSummary({
 		})
 		return config
 	}, [pieData])
-
-	// Fetch historical data for charts
-	const {data: historicalData = []} = api.budget.getHistoricalBudget.useQuery({
-		months: 6,
-	})
-
-	const spentChartConfig = {
-		value: {
-			label: 'Spent',
-			color: 'hsl(var(--destructive))',
-		},
-	} satisfies ChartConfig
-
-	const remainingChartConfig = {
-		value: {
-			label: 'Remaining',
-			color: 'hsl(var(--chart-1))',
-		},
-	} satisfies ChartConfig
-
-	const savingsChartConfig = {
-		value: {
-			label: 'Savings Rate',
-			color: 'hsl(var(--chart-4))',
-		},
-	} satisfies ChartConfig
 
 	// Handle clicking on income card
 	const handleIncomeClick = () => {
@@ -359,47 +328,6 @@ export default function BudgetSummary({
 						<p className='flex justify-center text-2xl font-bold text-foreground sm:text-3xl'>
 							${totalSpent.toLocaleString()}
 						</p>
-						<ChartContainer
-							config={spentChartConfig}
-							className='absolute bottom-0 left-0 right-0 top-[50%] h-[50%] w-full overflow-hidden [&>div]:!h-full [&>div]:!w-full'
-						>
-							<AreaChart
-								data={historicalData}
-								margin={{left: 0, right: 0, top: 0, bottom: 0}}
-							>
-								<defs>
-									<linearGradient
-										id={spentGradientId}
-										x1='0'
-										y1='0'
-										x2='0'
-										y2='1'
-									>
-										<stop
-											offset='5%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.8}
-										/>
-										<stop
-											offset='95%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.1}
-										/>
-									</linearGradient>
-								</defs>
-								<Area
-									dataKey='totalSpent'
-									type='natural'
-									fill={`url(#${spentGradientId})`}
-									fillOpacity={0.4}
-									stroke='var(--color-value)'
-								/>
-								<ChartTooltip
-									cursor={false}
-									content={<ChartTooltipContent hideLabel />}
-								/>
-							</AreaChart>
-						</ChartContainer>
 					</CardContent>
 				</Card>
 
@@ -412,47 +340,6 @@ export default function BudgetSummary({
 						<p className='flex justify-center text-2xl font-bold text-foreground sm:text-3xl'>
 							${remaining.toLocaleString()}
 						</p>
-						<ChartContainer
-							config={remainingChartConfig}
-							className='absolute bottom-0 left-0 right-0 top-[50%] h-[50%] w-full overflow-hidden [&>div]:!h-full [&>div]:!w-full'
-						>
-							<AreaChart
-								data={historicalData}
-								margin={{left: 0, right: 0, top: 0, bottom: 0}}
-							>
-								<defs>
-									<linearGradient
-										id={remainingGradientId}
-										x1='0'
-										y1='0'
-										x2='0'
-										y2='1'
-									>
-										<stop
-											offset='5%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.8}
-										/>
-										<stop
-											offset='95%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.1}
-										/>
-									</linearGradient>
-								</defs>
-								<Area
-									dataKey='remaining'
-									type='natural'
-									fill={`url(#${remainingGradientId})`}
-									fillOpacity={0.4}
-									stroke='var(--color-value)'
-								/>
-								<ChartTooltip
-									cursor={false}
-									content={<ChartTooltipContent hideLabel />}
-								/>
-							</AreaChart>
-						</ChartContainer>
 					</CardContent>
 				</Card>
 
@@ -465,47 +352,6 @@ export default function BudgetSummary({
 						<p className='flex justify-center text-2xl font-bold text-foreground sm:text-3xl'>
 							{savingsRate}%
 						</p>
-						<ChartContainer
-							config={savingsChartConfig}
-							className='absolute bottom-0 left-0 right-0 top-[50%] h-[50%] w-full overflow-hidden [&>div]:!h-full [&>div]:!w-full'
-						>
-							<AreaChart
-								data={historicalData}
-								margin={{left: 0, right: 0, top: 0, bottom: 0}}
-							>
-								<defs>
-									<linearGradient
-										id={savingsGradientId}
-										x1='0'
-										y1='0'
-										x2='0'
-										y2='1'
-									>
-										<stop
-											offset='5%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.8}
-										/>
-										<stop
-											offset='95%'
-											stopColor='var(--color-value)'
-											stopOpacity={0.1}
-										/>
-									</linearGradient>
-								</defs>
-								<Area
-									dataKey='savingsRate'
-									type='natural'
-									fill={`url(#${savingsGradientId})`}
-									fillOpacity={0.4}
-									stroke='var(--color-value)'
-								/>
-								<ChartTooltip
-									cursor={false}
-									content={<ChartTooltipContent hideLabel />}
-								/>
-							</AreaChart>
-						</ChartContainer>
 					</CardContent>
 				</Card>
 			</div>
