@@ -527,8 +527,10 @@ export default function BudgetStatementsComponent({
 															: 'text-foreground'
 													}`}
 												>
-													{statement.type === 'income' ? '+' : '-'}$
-													{statement.amount.toFixed(2)}
+													<div className='max-w-[70px]'>
+														{statement.type === 'income' ? '+' : '-'}$
+														{statement.amount.toFixed(2)}
+													</div>
 												</td>
 												<td className='px-6 py-4'>
 													{isStatementFromAutomatedItem(statement) ? (
