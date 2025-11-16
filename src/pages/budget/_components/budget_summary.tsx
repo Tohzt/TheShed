@@ -19,7 +19,7 @@ import {
 interface BudgetSummaryProps {
 	income: number
 	automatedItems: AutomatedItem[]
-	totalSpent: number
+	totalExpense: number
 	remaining: number
 	savingsRate: string
 	month: number
@@ -30,7 +30,7 @@ interface BudgetSummaryProps {
 export default function BudgetSummary({
 	income,
 	automatedItems,
-	totalSpent,
+	totalExpense,
 	remaining,
 	savingsRate,
 	month,
@@ -326,7 +326,7 @@ export default function BudgetSummary({
 							Total Spent
 						</span>
 						<p className='flex justify-center text-2xl font-bold text-foreground sm:text-3xl'>
-							${totalSpent.toLocaleString()}
+							${totalExpense.toLocaleString()}
 						</p>
 					</CardContent>
 				</Card>

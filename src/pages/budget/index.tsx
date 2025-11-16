@@ -104,6 +104,52 @@ export default function BudgetPage() {
 		}
 	}, [budgetData, selectedMonth, selectedYear])
 
+	// Get today's date at start of day for comparison
+	const getToday = () => {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		return today
+	}
+
+	// Filter statements based on showFutureDates
+	// When showFutureDates is false, only include past/present transactions
+	const filteredStatements = useMemo(() => {
+		if (showFutureDates) {
+			return data.statements
+		}
+		const today = getToday()
+		return data.statements.filter((statement) => {
+			// Parse YYYY-MM-DD as local date
+			const [year, month, day] = statement.date.split('-').map(Number)
+			const statementDate = new Date(year, month - 1, day)
+			return statementDate <= today
+		})
+	}, [data.statements, showFutureDates])
+
+	// Recalculate category totals based on filtered statements
+	const categoriesWithFilteredTotals = useMemo(() => {
+		// Calculate income and expenses per category from filtered statements
+		const categoryIncome = new Map<string, number>()
+		const categoryExpenses = new Map<string, number>()
+
+		filteredStatements.forEach((statement) => {
+			if (statement.type === 'income') {
+				const current = categoryIncome.get(statement.category) || 0
+				categoryIncome.set(statement.category, current + statement.amount)
+			} else if (statement.type === 'expense') {
+				const current = categoryExpenses.get(statement.category) || 0
+				categoryExpenses.set(statement.category, current + statement.amount)
+			}
+		})
+
+		// Update categories with filtered totals
+		return data.categories.map((cat) => ({
+			...cat,
+			income: categoryIncome.get(cat.name) || 0,
+			expense: categoryExpenses.get(cat.name) || 0,
+		}))
+	}, [data.categories, filteredStatements])
+
 	// Calculate totals based on filtered statements (when filtering future dates)
 	const totals = useMemo(() => {
 		const totalAllocated = data.categories.reduce(
@@ -111,37 +157,21 @@ export default function BudgetPage() {
 			0
 		)
 
-		// Get today's date at start of day for comparison
-		const getToday = () => {
-			const today = new Date()
-			today.setHours(0, 0, 0, 0)
-			return today
-		}
-
-		// Filter statements based on showFutureDates
-		// When showFutureDates is false, only include past/present transactions
-		const filteredStatementsForTotals = showFutureDates
-			? data.statements
-			: data.statements.filter((statement) => {
-					// Parse YYYY-MM-DD as local date
-					const [year, month, day] = statement.date.split('-').map(Number)
-					const statementDate = new Date(year, month - 1, day)
-					const today = getToday()
-					return statementDate <= today
-				})
-
-		// Recalculate totalSpent from filtered statements (only expenses)
-		const totalSpent = filteredStatementsForTotals
+		// Calculate income and expenses from filtered statements
+		const totalIncome = filteredStatements
+			.filter((stmt) => stmt.type === 'income')
+			.reduce((sum, stmt) => sum + stmt.amount, 0)
+		const totalExpense = filteredStatements
 			.filter((stmt) => stmt.type === 'expense')
 			.reduce((sum, stmt) => sum + stmt.amount, 0)
 
-		// Income always uses full automated items (unchanged)
-		const remaining = data.income - totalSpent
+		// Remaining is income minus expenses from statements
+		const remaining = totalIncome - totalExpense
 		const savingsRate =
-			data.income > 0 ? ((remaining / data.income) * 100).toFixed(1) : '0.0'
+			totalIncome > 0 ? ((remaining / totalIncome) * 100).toFixed(1) : '0.0'
 
-		return {totalAllocated, totalSpent, remaining, savingsRate}
-	}, [data, showFutureDates])
+		return {totalAllocated, totalExpense, remaining, savingsRate}
+	}, [data.categories, filteredStatements])
 
 	// Format selected month/year for display
 	const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleString(
@@ -232,7 +262,7 @@ export default function BudgetPage() {
 					<BudgetSummary
 						income={data.income}
 						automatedItems={data.automatedItems}
-						totalSpent={totals.totalSpent}
+						totalExpense={totals.totalExpense}
 						remaining={totals.remaining}
 						savingsRate={totals.savingsRate}
 						month={selectedMonth}
@@ -245,7 +275,7 @@ export default function BudgetPage() {
 
 					{/* Category Breakdown */}
 					<BudgetCategoryComponent
-						categories={data.categories}
+						categories={categoriesWithFilteredTotals}
 						onRefetch={() => void refetch()}
 					/>
 
