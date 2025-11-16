@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useState, useEffect, useMemo} from 'react'
 import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
 import {Card} from '../../../store/components/ui/card'
@@ -6,6 +6,8 @@ import BudgetPopup from './budget_popup'
 import ConfirmDeleteDialog from './delete_category_dialog'
 import {DatePicker} from './date_picker'
 import {Button} from '../../../store/components/ui/button'
+import {Switch} from '../../../store/components/ui/switch'
+import {ChevronUp, ChevronDown} from 'lucide-react'
 
 export interface Statement {
 	id: string
@@ -29,6 +31,7 @@ interface BudgetStatementsComponentProps {
 	categories: BudgetCategory[]
 	automatedItems: AutomatedItem[]
 	onRefetch: () => void
+	onFilterChange?: (showFutureDates: boolean) => void
 }
 
 export default function BudgetStatementsComponent({
@@ -36,6 +39,7 @@ export default function BudgetStatementsComponent({
 	categories,
 	automatedItems,
 	onRefetch,
+	onFilterChange,
 }: BudgetStatementsComponentProps) {
 	const [selectedStatement, setSelectedStatement] = useState<Statement | null>(
 		null
@@ -49,6 +53,147 @@ export default function BudgetStatementsComponent({
 	})
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const [showAutomatedItemNotice, setShowAutomatedItemNotice] = useState(false)
+	const [showFutureDates, setShowFutureDates] = useState(false)
+	const [sortColumn, setSortColumn] = useState<
+		'date' | 'type' | 'category' | 'description' | 'amount' | null
+	>(null)
+	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+	// Get today's date at start of day for comparison
+	const getToday = () => {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		return today
+	}
+
+	// Check if a statement comes from an automated item
+	const isStatementFromAutomatedItem = (statement: Statement): boolean => {
+		return automatedItems.some((item) => {
+			// Check if label, amount, and type match
+			const matchesItem =
+				item.label === statement.description &&
+				item.amount === statement.amount &&
+				item.type === statement.type
+
+			if (!matchesItem) return false
+
+			// Check if the statement's date is in the automated item's dates array
+			return item.dates.includes(statement.date)
+		})
+	}
+
+	// Separate statements into past/present and future when showing all
+	const today = getToday()
+	const pastPresentStatements: Statement[] = []
+	const futureStatements: Statement[] = []
+
+	statements.forEach((statement) => {
+		// Parse YYYY-MM-DD as local date
+		const [year, month, day] = statement.date.split('-').map(Number)
+		const statementDate = new Date(year, month - 1, day)
+
+		if (statementDate <= today) {
+			pastPresentStatements.push(statement)
+		} else {
+			futureStatements.push(statement)
+		}
+	})
+
+	// Filter statements based on showFutureDates
+	const filteredStatements = showFutureDates
+		? [...pastPresentStatements, ...futureStatements]
+		: pastPresentStatements
+
+	// Sort statements based on sortColumn and sortDirection
+	const sortedStatements = useMemo(() => {
+		if (!sortColumn) return filteredStatements
+
+		const sorted = [...filteredStatements].sort((a, b) => {
+			let comparison = 0
+
+			switch (sortColumn) {
+				case 'date': {
+					const [yearA, monthA, dayA] = a.date.split('-').map(Number)
+					const [yearB, monthB, dayB] = b.date.split('-').map(Number)
+					const dateA = new Date(yearA, monthA - 1, dayA)
+					const dateB = new Date(yearB, monthB - 1, dayB)
+					comparison = dateA.getTime() - dateB.getTime()
+					break
+				}
+				case 'type':
+					comparison = a.type.localeCompare(b.type)
+					break
+				case 'category': {
+					const aIsAuto = isStatementFromAutomatedItem(a)
+					const bIsAuto = isStatementFromAutomatedItem(b)
+
+					// First, sort by whether it's automated (group automated items together)
+					if (aIsAuto !== bIsAuto) {
+						comparison = aIsAuto ? -1 : 1
+					} else {
+						// If both are automated or both are not, sort by category name
+						comparison = a.category.localeCompare(b.category)
+					}
+					break
+				}
+				case 'description':
+					comparison = a.description.localeCompare(b.description)
+					break
+				case 'amount': {
+					// Convert to signed values: expenses are negative, income is positive
+					const aValue = a.type === 'expense' ? -a.amount : a.amount
+					const bValue = b.type === 'expense' ? -b.amount : b.amount
+					comparison = aValue - bValue
+					break
+				}
+			}
+
+			return sortDirection === 'asc' ? comparison : -comparison
+		})
+
+		return sorted
+	}, [filteredStatements, sortColumn, sortDirection])
+
+	// Separate sorted statements back into past/present and future for divider
+	const sortedPastPresentStatements: Statement[] = []
+	const sortedFutureStatements: Statement[] = []
+
+	sortedStatements.forEach((statement) => {
+		// Parse YYYY-MM-DD as local date
+		const [year, month, day] = statement.date.split('-').map(Number)
+		const statementDate = new Date(year, month - 1, day)
+
+		if (statementDate <= today) {
+			sortedPastPresentStatements.push(statement)
+		} else {
+			sortedFutureStatements.push(statement)
+		}
+	})
+
+	// Determine if we should show a divider (only when showing future dates and both groups exist)
+	const showDivider =
+		showFutureDates &&
+		sortedPastPresentStatements.length > 0 &&
+		sortedFutureStatements.length > 0
+
+	// Handle column header click for sorting
+	const handleSort = (
+		column: 'date' | 'type' | 'category' | 'description' | 'amount'
+	) => {
+		if (sortColumn === column) {
+			// Toggle direction if clicking the same column
+			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+		} else {
+			// Set new column and default to ascending
+			setSortColumn(column)
+			setSortDirection('asc')
+		}
+	}
+
+	// Notify parent of filter state changes
+	useEffect(() => {
+		onFilterChange?.(showFutureDates)
+	}, [showFutureDates, onFilterChange])
 
 	// Mutation for updating statements
 	const updateStatementMutation = api.budget.updateStatement.useMutation({
@@ -66,22 +211,6 @@ export default function BudgetStatementsComponent({
 			setShowDeleteDialog(false)
 		},
 	})
-
-	// Check if a statement comes from an automated item
-	const isStatementFromAutomatedItem = (statement: Statement): boolean => {
-		return automatedItems.some((item) => {
-			// Check if label, amount, and type match
-			const matchesItem =
-				item.label === statement.description &&
-				item.amount === statement.amount &&
-				item.type === statement.type
-
-			if (!matchesItem) return false
-
-			// Check if the statement's date is in the automated item's dates array
-			return item.dates.includes(statement.date)
-		})
-	}
 
 	// Handle clicking on a statement row
 	const handleStatementClick = (statement: Statement) => {
@@ -171,8 +300,21 @@ export default function BudgetStatementsComponent({
 
 	return (
 		<div className='mb-12 w-full max-w-6xl'>
-			<div className='mb-6'>
+			<div className='mb-6 flex items-center justify-between'>
 				<h2 className='text-2xl font-bold text-foreground'>Statements</h2>
+				<div className='flex items-center gap-3'>
+					<label
+						htmlFor='show-future-dates'
+						className='cursor-pointer text-sm font-medium text-foreground'
+					>
+						Show future transactions
+					</label>
+					<Switch
+						id='show-future-dates'
+						checked={showFutureDates}
+						onCheckedChange={setShowFutureDates}
+					/>
+				</div>
 			</div>
 
 			{/* Recent Statements Table */}
@@ -181,110 +323,270 @@ export default function BudgetStatementsComponent({
 					<table className='w-full'>
 						<thead className='border-b border-border bg-muted/50'>
 							<tr>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
-									Date
+								<th
+									className='cursor-pointer select-none px-6 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
+									onClick={() => handleSort('date')}
+								>
+									<div className='flex items-center gap-2'>
+										<span>Date</span>
+										{sortColumn === 'date' &&
+											(sortDirection === 'asc' ? (
+												<ChevronUp className='h-4 w-4' />
+											) : (
+												<ChevronDown className='h-4 w-4' />
+											))}
+									</div>
 								</th>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
-									Type
+								<th
+									className='cursor-pointer select-none px-6 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
+									onClick={() => handleSort('type')}
+								>
+									<div className='flex items-center gap-2'>
+										<span>Type</span>
+										{sortColumn === 'type' &&
+											(sortDirection === 'asc' ? (
+												<ChevronUp className='h-4 w-4' />
+											) : (
+												<ChevronDown className='h-4 w-4' />
+											))}
+									</div>
 								</th>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
-									Category
+								<th
+									className='cursor-pointer select-none px-6 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
+									onClick={() => handleSort('category')}
+								>
+									<div className='flex items-center gap-2'>
+										<span>Category</span>
+										{sortColumn === 'category' &&
+											(sortDirection === 'asc' ? (
+												<ChevronUp className='h-4 w-4' />
+											) : (
+												<ChevronDown className='h-4 w-4' />
+											))}
+									</div>
 								</th>
-								<th className='px-6 py-4 text-left text-sm font-semibold text-foreground'>
-									Description
+								<th
+									className='cursor-pointer select-none px-6 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
+									onClick={() => handleSort('description')}
+								>
+									<div className='flex items-center gap-2'>
+										<span>Description</span>
+										{sortColumn === 'description' &&
+											(sortDirection === 'asc' ? (
+												<ChevronUp className='h-4 w-4' />
+											) : (
+												<ChevronDown className='h-4 w-4' />
+											))}
+									</div>
 								</th>
-								<th className='px-6 py-4 text-right text-sm font-semibold text-foreground'>
-									Amount
+								<th
+									className='cursor-pointer select-none px-6 py-4 text-right text-sm font-semibold text-foreground transition-colors hover:bg-muted/70'
+									onClick={() => handleSort('amount')}
+								>
+									<div className='flex items-center justify-end gap-2'>
+										<span>Amount</span>
+										{sortColumn === 'amount' &&
+											(sortDirection === 'asc' ? (
+												<ChevronUp className='h-4 w-4' />
+											) : (
+												<ChevronDown className='h-4 w-4' />
+											))}
+									</div>
 								</th>
 							</tr>
 						</thead>
 						<tbody className='divide-y divide-border'>
-							{statements.length === 0 ? (
+							{sortedStatements.length === 0 ? (
 								<tr>
 									<td
 										colSpan={5}
 										className='px-6 py-8 text-center text-muted-foreground'
 									>
-										No statements yet
+										{statements.length === 0
+											? 'No statements yet'
+											: 'No statements match the current filter'}
 									</td>
 								</tr>
 							) : (
-								statements.map((statement) => (
-									<tr
-										key={statement.id}
-										className='cursor-pointer transition-colors hover:bg-muted/50'
-										onClick={() => handleStatementClick(statement)}
-									>
-										<td className='px-6 py-4 text-sm text-muted-foreground'>
-											{(() => {
-												// Parse YYYY-MM-DD as local date
-												const [year, month, day] = statement.date
-													.split('-')
-													.map(Number)
-												const date = new Date(year, month - 1, day)
-												return date.toLocaleDateString('en-US', {
-													month: 'short',
-													day: 'numeric',
-												})
-											})()}
-										</td>
-										<td className='px-6 py-4'>
-											<span
-												className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-													statement.type === 'income'
-														? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-														: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-												}`}
-											>
-												{statement.type === 'income' ? 'Income' : 'Expense'}
-											</span>
-										</td>
-										<td className='px-6 py-4'>
-											{isStatementFromAutomatedItem(statement) ? (
+								<>
+									{/* Past/Present Statements */}
+									{(showFutureDates
+										? sortedPastPresentStatements
+										: sortedStatements
+									).map((statement) => (
+										<tr
+											key={statement.id}
+											className='cursor-pointer transition-colors hover:bg-muted/50'
+											onClick={() => handleStatementClick(statement)}
+										>
+											<td className='px-6 py-4 text-sm text-muted-foreground'>
+												{(() => {
+													// Parse YYYY-MM-DD as local date
+													const [year, month, day] = statement.date
+														.split('-')
+														.map(Number)
+													const date = new Date(year, month - 1, day)
+													return date.toLocaleDateString('en-US', {
+														month: 'short',
+														day: 'numeric',
+													})
+												})()}
+											</td>
+											<td className='px-6 py-4'>
 												<span
-													className={`inline-flex w-28 items-center justify-center rounded-full border-2 px-3 py-1 text-sm font-medium transition-all ${
+													className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
 														statement.type === 'income'
-															? 'border-green-500 text-green-500 dark:border-green-400 dark:text-green-400'
-															: 'border-red-500 text-red-500 dark:border-red-400 dark:text-red-400'
+															? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+															: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
 													}`}
 												>
-													Auto
+													{statement.type === 'income' ? 'Income' : 'Expense'}
 												</span>
-											) : (
-												<span
-													className='inline-flex w-28 items-center justify-center truncate rounded-full px-3 py-1 text-sm font-medium transition-all'
-													style={{
-														backgroundColor: lightenColor(
-															getCategoryColor(statement.category)
-														),
-														color: darkenColor(
-															getCategoryColor(statement.category)
-														),
-													}}
+											</td>
+											<td className='px-6 py-4'>
+												{isStatementFromAutomatedItem(statement) ? (
+													<span
+														className={`inline-flex w-28 items-center justify-center rounded-full border-2 px-3 py-1 text-sm font-medium transition-all ${
+															statement.type === 'income'
+																? 'border-green-500 text-green-500 dark:border-green-400 dark:text-green-400'
+																: 'border-red-500 text-red-500 dark:border-red-400 dark:text-red-400'
+														}`}
+													>
+														Auto
+													</span>
+												) : (
+													<span
+														className='inline-flex w-28 items-center justify-center truncate rounded-full px-3 py-1 text-sm font-medium transition-all'
+														style={{
+															backgroundColor: lightenColor(
+																getCategoryColor(statement.category)
+															),
+															color: darkenColor(
+																getCategoryColor(statement.category)
+															),
+														}}
+													>
+														{statement.category}
+													</span>
+												)}
+											</td>
+											<td className='px-6 py-4 text-sm text-foreground'>
+												{statement.description}
+											</td>
+											<td
+												className={`px-6 py-4 text-right text-sm font-semibold ${
+													statement.type === 'income'
+														? 'text-green-600 dark:text-green-400'
+														: 'text-foreground'
+												} ${
+													statement.type === 'expense'
+														? 'text-red-600 dark:text-red-400'
+														: 'text-foreground'
+												}`}
+											>
+												{statement.type === 'income' ? '+' : '-'}$
+												{statement.amount.toFixed(2)}
+											</td>
+										</tr>
+									))}
+
+									{/* Subtle Divider between past/present and future */}
+									{showDivider && (
+										<tr>
+											<td
+												colSpan={5}
+												className='border-t border-dashed border-border/60 bg-muted/20 px-6 py-2'
+											>
+												<div className='flex items-center gap-2'>
+													<div className='h-px flex-1 bg-border/40' />
+													<span className='text-xs font-medium text-muted-foreground'>
+														Upcoming
+													</span>
+													<div className='h-px flex-1 bg-border/40' />
+												</div>
+											</td>
+										</tr>
+									)}
+
+									{/* Future Statements */}
+									{showFutureDates &&
+										sortedFutureStatements.map((statement) => (
+											<tr
+												key={statement.id}
+												className='cursor-pointer opacity-75 transition-colors hover:bg-muted/50'
+												onClick={() => handleStatementClick(statement)}
+											>
+												<td className='px-6 py-4 text-sm text-muted-foreground'>
+													{(() => {
+														// Parse YYYY-MM-DD as local date
+														const [year, month, day] = statement.date
+															.split('-')
+															.map(Number)
+														const date = new Date(year, month - 1, day)
+														return date.toLocaleDateString('en-US', {
+															month: 'short',
+															day: 'numeric',
+														})
+													})()}
+												</td>
+												<td className='px-6 py-4'>
+													<span
+														className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+															statement.type === 'income'
+																? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+																: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+														}`}
+													>
+														{statement.type === 'income' ? 'Income' : 'Expense'}
+													</span>
+												</td>
+												<td className='px-6 py-4'>
+													{isStatementFromAutomatedItem(statement) ? (
+														<span
+															className={`inline-flex w-28 items-center justify-center rounded-full border-2 px-3 py-1 text-sm font-medium transition-all ${
+																statement.type === 'income'
+																	? 'border-green-500 text-green-500 dark:border-green-400 dark:text-green-400'
+																	: 'border-red-500 text-red-500 dark:border-red-400 dark:text-red-400'
+															}`}
+														>
+															Auto
+														</span>
+													) : (
+														<span
+															className='inline-flex w-28 items-center justify-center truncate rounded-full px-3 py-1 text-sm font-medium transition-all'
+															style={{
+																backgroundColor: lightenColor(
+																	getCategoryColor(statement.category)
+																),
+																color: darkenColor(
+																	getCategoryColor(statement.category)
+																),
+															}}
+														>
+															{statement.category}
+														</span>
+													)}
+												</td>
+												<td className='px-6 py-4 text-sm text-foreground'>
+													{statement.description}
+												</td>
+												<td
+													className={`px-6 py-4 text-right text-sm font-semibold ${
+														statement.type === 'income'
+															? 'text-green-600 dark:text-green-400'
+															: 'text-foreground'
+													} ${
+														statement.type === 'expense'
+															? 'text-red-600 dark:text-red-400'
+															: 'text-foreground'
+													}`}
 												>
-													{statement.category}
-												</span>
-											)}
-										</td>
-										<td className='px-6 py-4 text-sm text-foreground'>
-											{statement.description}
-										</td>
-										<td
-											className={`px-6 py-4 text-right text-sm font-semibold ${
-												statement.type === 'income'
-													? 'text-green-600 dark:text-green-400'
-													: 'text-foreground'
-											} ${
-												statement.type === 'expense'
-													? 'text-red-600 dark:text-red-400'
-													: 'text-foreground'
-											}`}
-										>
-											{statement.type === 'income' ? '+' : '-'}$
-											{statement.amount.toFixed(2)}
-										</td>
-									</tr>
-								))
+													{statement.type === 'income' ? '+' : '-'}$
+													{statement.amount.toFixed(2)}
+												</td>
+											</tr>
+										))}
+								</>
 							)}
 						</tbody>
 					</table>

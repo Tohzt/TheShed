@@ -32,6 +32,8 @@ export default function BudgetPage() {
 	const [selectedYear, setSelectedYear] = useState<number>(
 		new Date().getFullYear()
 	)
+	// State for filtering future dates in statements
+	const [showFutureDates, setShowFutureDates] = useState(false)
 
 	// Sync mutation for automated items
 	const syncMutation = api.budget.syncAutomatedItemsToStatements.useMutation({
@@ -102,19 +104,44 @@ export default function BudgetPage() {
 		}
 	}, [budgetData, selectedMonth, selectedYear])
 
-	// Calculate totals
+	// Calculate totals based on filtered statements (when filtering future dates)
 	const totals = useMemo(() => {
 		const totalAllocated = data.categories.reduce(
 			(sum, cat) => sum + cat.allocated,
 			0
 		)
-		const totalSpent = data.categories.reduce((sum, cat) => sum + cat.spent, 0)
+
+		// Get today's date at start of day for comparison
+		const getToday = () => {
+			const today = new Date()
+			today.setHours(0, 0, 0, 0)
+			return today
+		}
+
+		// Filter statements based on showFutureDates
+		// When showFutureDates is false, only include past/present transactions
+		const filteredStatementsForTotals = showFutureDates
+			? data.statements
+			: data.statements.filter((statement) => {
+					// Parse YYYY-MM-DD as local date
+					const [year, month, day] = statement.date.split('-').map(Number)
+					const statementDate = new Date(year, month - 1, day)
+					const today = getToday()
+					return statementDate <= today
+				})
+
+		// Recalculate totalSpent from filtered statements (only expenses)
+		const totalSpent = filteredStatementsForTotals
+			.filter((stmt) => stmt.type === 'expense')
+			.reduce((sum, stmt) => sum + stmt.amount, 0)
+
+		// Income always uses full automated items (unchanged)
 		const remaining = data.income - totalSpent
 		const savingsRate =
 			data.income > 0 ? ((remaining / data.income) * 100).toFixed(1) : '0.0'
 
 		return {totalAllocated, totalSpent, remaining, savingsRate}
-	}, [data])
+	}, [data, showFutureDates])
 
 	// Format selected month/year for display
 	const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleString(
@@ -231,6 +258,7 @@ export default function BudgetPage() {
 						categories={data.categories}
 						automatedItems={data.automatedItems}
 						onRefetch={() => void refetch()}
+						onFilterChange={setShowFutureDates}
 					/>
 				</div>
 			</div>
