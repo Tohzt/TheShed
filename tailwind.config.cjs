@@ -1,76 +1,116 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    darkMode: ['class'],
-    content: ['./src/**/*.{js,ts,jsx,tsx}'],
+	darkMode: ['class'],
+	content: ['./src/**/*.{js,ts,jsx,tsx}'],
+	safelist: [
+		// Border colors (default state) - applies to all sides
+		'border-blue-500',
+		'border-green-500',
+		'border-purple-500',
+		'border-red-500',
+		'border-yellow-500',
+		'border-indigo-500',
+		'border-pink-500',
+		'border-pink-600',
+		'border-red-600',
+		'border-emerald-500',
+		'border-gray-500',
+		// Hover background colors
+		'hover:bg-blue-500',
+		'hover:bg-green-500',
+		'hover:bg-purple-500',
+		'hover:bg-red-500',
+		'hover:bg-yellow-500',
+		'hover:bg-indigo-500',
+		'hover:bg-pink-500',
+		'hover:bg-pink-600',
+		'hover:bg-red-600',
+		'hover:bg-emerald-500',
+		'hover:bg-gray-500',
+		// Hover border colors with opacity - applies to all sides
+		'hover:border-blue-950/30',
+		'hover:border-green-950/30',
+		'hover:border-purple-950/30',
+		'hover:border-red-950/30',
+		'hover:border-yellow-950/30',
+		'hover:border-indigo-950/30',
+		'hover:border-pink-950/30',
+		'hover:border-emerald-950/30',
+		'hover:border-gray-950/30',
+		// Group hover text colors
+		'group-hover:text-blue-950/30',
+		'group-hover:text-green-950/30',
+		'group-hover:text-purple-950/30',
+		'group-hover:text-red-950/30',
+		'group-hover:text-yellow-950/30',
+		'group-hover:text-indigo-950/30',
+		'group-hover:text-pink-950/30',
+		'group-hover:text-emerald-950/30',
+		'group-hover:text-gray-950/30',
+	],
 	theme: {
-    	extend: {
-    		fontFamily: {
-    			heading: [
-    				'Poppins',
-    				'sans-serif'
-    			],
-    			body: [
-    				'Hind',
-    				'sans-serif'
-    			]
-    		},
-    		colors: {
-    			primary: {
-    				light: '#5d5b68',
-    				DEFAULT: 'hsl(var(--primary))',
-    				dark: '#232531',
-    				foreground: 'hsl(var(--primary-foreground))'
-    			},
-    			tertiary: {
-    				light: '#ff4081',
-    				DEFAULT: '#f50057',
-    				dark: '#c51162'
-    			},
-    			secondary: {
-    				light: '#40c4ff',
-    				DEFAULT: 'hsl(var(--secondary))',
-    				dark: '#0091ea',
-    				foreground: 'hsl(var(--secondary-foreground))'
-    			},
-    			background: 'hsl(var(--background))',
-    			foreground: 'hsl(var(--foreground))',
-    			card: {
-    				DEFAULT: 'hsl(var(--card))',
-    				foreground: 'hsl(var(--card-foreground))'
-    			},
-    			popover: {
-    				DEFAULT: 'hsl(var(--popover))',
-    				foreground: 'hsl(var(--popover-foreground))'
-    			},
-    			muted: {
-    				DEFAULT: 'hsl(var(--muted))',
-    				foreground: 'hsl(var(--muted-foreground))'
-    			},
-    			accent: {
-    				DEFAULT: 'hsl(var(--accent))',
-    				foreground: 'hsl(var(--accent-foreground))'
-    			},
-    			destructive: {
-    				DEFAULT: 'hsl(var(--destructive))',
-    				foreground: 'hsl(var(--destructive-foreground))'
-    			},
-    			border: 'hsl(var(--border))',
-    			input: 'hsl(var(--input))',
-    			ring: 'hsl(var(--ring))',
-    			chart: {
-    				'1': 'hsl(var(--chart-1))',
-    				'2': 'hsl(var(--chart-2))',
-    				'3': 'hsl(var(--chart-3))',
-    				'4': 'hsl(var(--chart-4))',
-    				'5': 'hsl(var(--chart-5))'
-    			}
-    		},
-    		borderRadius: {
-    			lg: 'var(--radius)',
-    			md: 'calc(var(--radius) - 2px)',
-    			sm: 'calc(var(--radius) - 4px)'
-    		}
-    	}
-    },
-	plugins: [require("tailwindcss-animate")],
+		extend: {
+			fontFamily: {
+				heading: ['Poppins', 'sans-serif'],
+				body: ['Hind', 'sans-serif'],
+			},
+			colors: {
+				primary: {
+					light: '#5d5b68',
+					DEFAULT: 'hsl(var(--primary))',
+					dark: '#232531',
+					foreground: 'hsl(var(--primary-foreground))',
+				},
+				tertiary: {
+					light: '#ff4081',
+					DEFAULT: '#f50057',
+					dark: '#c51162',
+				},
+				secondary: {
+					light: '#40c4ff',
+					DEFAULT: 'hsl(var(--secondary))',
+					dark: '#0091ea',
+					foreground: 'hsl(var(--secondary-foreground))',
+				},
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
+				card: {
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))',
+				},
+				popover: {
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))',
+				},
+				muted: {
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))',
+				},
+				accent: {
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))',
+				},
+				destructive: {
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))',
+				},
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				chart: {
+					1: 'hsl(var(--chart-1))',
+					2: 'hsl(var(--chart-2))',
+					3: 'hsl(var(--chart-3))',
+					4: 'hsl(var(--chart-4))',
+					5: 'hsl(var(--chart-5))',
+				},
+			},
+			borderRadius: {
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)',
+			},
+		},
+	},
+	plugins: [require('tailwindcss-animate')],
 }

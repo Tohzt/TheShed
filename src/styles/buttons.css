@@ -4,7 +4,7 @@
     border-b-[8px]
     font-mono text-2xl
     font-extrabold
-    transition-all duration-75 ease-out;
+    transition-all duration-200 ease-out;
 }
 
 .social-button {

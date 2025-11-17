@@ -1,6 +1,6 @@
 /**/
 .tasks-page {
-	@apply screen relative
+	@apply w-screen h-screen relative
 		flex
 		flex-col
 		justify-between;

@@ -167,8 +167,23 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 		const buttonColors = getButtonColor(button)
 
 		// Use border color and muted background
+		// Apply border color to all sides (border- applies to all sides)
 		const borderStyle = buttonColors.borderColor
 		const bgStyle = buttonColors.mutedBg
+
+		// Create hover classes that swap colors
+		// Hover background: use border color (replace 'border-' with 'hover:bg-')
+		const hoverBgStyle = buttonColors.borderColor.replace(
+			'border-',
+			'hover:bg-'
+		)
+
+		// Hover border: use muted background (replace 'bg-' with 'hover:border-')
+		// Tailwind supports opacity in border colors: 'bg-blue-950/30' -> 'hover:border-blue-950/30'
+		const hoverBorderStyle = buttonColors.mutedBg.replace(
+			'bg-',
+			'hover:border-'
+		)
 
 		// Handle disabled state - disabled buttons have equal borders and no press animation
 		const pressStyle = button.disabled
@@ -185,7 +200,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			? ' -translate-x-full'
 			: ' translate-x-full'
 
-		return `${baseStyle}${offsetStyle} ${borderStyle} ${bgStyle}${pressStyle}${visibilityStyle} ${className}`
+		return `${baseStyle}${offsetStyle} ${borderStyle} ${bgStyle} ${hoverBgStyle} ${hoverBorderStyle} group cursor-pointer ${pressStyle}${visibilityStyle} ${className}`
 	}
 
 	return (
@@ -193,7 +208,7 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			{buttons.map((button, index) => {
 				const buttonColors = getButtonColor(button)
 				return (
-					<div
+					<button
 						key={`${button.label}-${index}`}
 						data-button-index={index}
 						className={getButtonStyle(button, index, buttonStates[index])}
@@ -207,11 +222,13 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 						}}
 					>
 						<div
-							className={`pointer-events-none w-[80%] text-center ${buttonColors.textColor}`}
+							className={`pointer-events-none w-[80%] text-center ${
+								buttonColors.textColor
+							} ${buttonColors.mutedBg.replace('bg-', 'group-hover:text-')}`}
 						>
 							{button.label}
 						</div>
-					</div>
+					</button>
 				)
 			})}
 		</div>
