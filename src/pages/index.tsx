@@ -30,13 +30,13 @@ const getHomeButtons = (isLoggedIn: boolean): ButtonItem[] => [
 		path: '/smart-devices',
 		type: 'internal',
 	},
-	{
-		label: 'calendar',
-		path: '/',
-		style: 'bg-primary',
-		type: 'internal',
-		disabled: true,
-	},
+	// {
+	// 	label: 'calendar',
+	// 	path: '/',
+	// 	style: 'bg-primary',
+	// 	type: 'internal',
+	// 	disabled: true,
+	// },
 	{
 		label: 'arcade',
 		path: '/arcade',
@@ -45,7 +45,7 @@ const getHomeButtons = (isLoggedIn: boolean): ButtonItem[] => [
 	...(isLoggedIn
 		? [
 				{
-					label: 'Finances',
+					label: 'Budget',
 					path: '/budget',
 					type: 'internal',
 				} as ButtonItem,
@@ -106,7 +106,7 @@ const Home: React.FC = () => {
 
 			<main className='overflow-x-hidden bg-gradient-to-t from-primary-light to-primary-dark'>
 				<div className='screen -center flex-col justify-start'>
-					<div className='w-full flex-col gap-4 overflow-y-auto pt-[55vw] sm:pt-[15vh]'>
+					<div className='w-full flex-col gap-4 overflow-y-auto pt-20'>
 						{authError && (
 							<div className='mx-auto mb-4 max-w-md rounded-lg bg-red-600 p-4 text-center text-white'>
 								<p className='font-semibold'>Authentication Error</p>

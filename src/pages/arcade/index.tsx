@@ -49,7 +49,7 @@ const ArcadePage = () => {
 	return (
 		<main className={`overflow-x-hidden ${backgroundClass}`}>
 			<div className='screen -center flex-col justify-start'>
-				<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-[55vw] sm:pt-[15vh]'>
+				<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-20'>
 					<AnimatedButtonList
 						buttons={arcadeButtons}
 						staggerDelay={150}

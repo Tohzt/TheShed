@@ -1,9 +1,7 @@
 /**/
 
 .header-background {
-	@apply max-h-[25vh]
-    bg-secondary
-    sm:h-[10vh];
+	@apply bg-secondary;
 }
 /*
 .header-profile-container {
@@ -14,16 +12,30 @@
     border-b-4 border-r-4 border-white;
 }
 */
+.header-profile-rectangle {
+	@apply header-background
+    h-10 w-full
+    border-b-4
+    border-white;
+}
+
+.header-text-container {
+	@apply absolute
+    left-1/2
+    top-0
+    z-50
+    h-fit
+    w-fit -translate-x-1/2
+    rounded-b-lg
+    border-b-4 border-white
+    bg-secondary
+    px-4 pt-2;
+}
 .header-text {
 	@apply m-auto
-    h-[11vh] w-[10em]
-    overflow-hidden
-    rounded-b-lg bg-secondary
-    p-4
-    font-heading text-lg text-white
-    sm:h-[13vh]
-    sm:border-b-4 sm:border-white
-    sm:pl-8;
+    whitespace-nowrap
+    font-heading text-[2em] font-bold
+    text-white;
 }
 
 .header-icon {
@@ -44,6 +56,33 @@
     sm:hidden;
 }
 
+.header-drawer {
+	@apply w-full
+    overflow-hidden;
+}
+
+.header-drawer-content {
+	@apply flex flex-col
+    items-center 
+    justify-center
+    gap-4
+    px-4 py-4;
+}
+
+.header-drawer-button {
+	@apply flex items-center gap-2
+    rounded-lg bg-white/10
+    px-4 py-2
+    font-semibold
+    text-white
+    transition-all duration-75 ease-out
+    hover:bg-white/20;
+}
+
+.header-drawer-button-pressed {
+	@apply scale-95 bg-white/20;
+}
+
 /*
 .header-profile-square {
 	@apply header-background
@@ -52,15 +91,8 @@
     border-b-4 border-white;
 } 
 */
-.header-profile-rectangle {
-	@apply header-background
-    absolute right-0 top-0
-    w-[51vw] 
-    border-b-4
-    border-white sm:w-screen;
-}
-.header-profile-gap {
+/* .header-profile-gap {
 	@apply header-background
     absolute left-0 top-0
     h-[25vw] w-[50vw];
-}
+} */

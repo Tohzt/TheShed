@@ -1,4 +1,4 @@
-import {useState, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
+import {useState, useEffect, useMemo, useRef} from 'react'
 import {api} from '../../../utils/api'
 import type {BudgetCategory} from './budget_category'
 import {Card} from '../../../store/components/ui/card'
@@ -6,7 +6,6 @@ import BudgetPopup from './budget_popup'
 import ConfirmDeleteDialog from './delete_category_dialog'
 import {DatePicker} from './date_picker'
 import {Button} from '../../../store/components/ui/button'
-import {Switch} from '../../../store/components/ui/switch'
 import {ChevronUp, ChevronDown, Minus, Plus} from 'lucide-react'
 
 export interface Statement {
@@ -31,6 +30,7 @@ interface BudgetStatementsComponentProps {
 	categories: BudgetCategory[]
 	automatedItems: AutomatedItem[]
 	onRefetch: () => void
+	showFutureDates: boolean
 	onFilterChange?: (showFutureDates: boolean) => void
 }
 
@@ -39,6 +39,7 @@ export default function BudgetStatementsComponent({
 	categories,
 	automatedItems,
 	onRefetch,
+	showFutureDates: showFutureDatesProp,
 	onFilterChange,
 }: BudgetStatementsComponentProps) {
 	const [selectedStatement, setSelectedStatement] = useState<Statement | null>(
@@ -53,12 +54,10 @@ export default function BudgetStatementsComponent({
 	})
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const [showAutomatedItemNotice, setShowAutomatedItemNotice] = useState(false)
-	const [showFutureDates, setShowFutureDates] = useState(false)
 	const [sortColumn, setSortColumn] = useState<
 		'date' | 'category' | 'description' | 'amount' | null
 	>(null)
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
-	const hasInitializedRef = useRef(false)
 
 	// Get today's date at start of day for comparison
 	const getToday = () => {
@@ -101,7 +100,7 @@ export default function BudgetStatementsComponent({
 	})
 
 	// Filter statements based on showFutureDates
-	const filteredStatements = showFutureDates
+	const filteredStatements = showFutureDatesProp
 		? [...pastPresentStatements, ...futureStatements]
 		: pastPresentStatements
 
@@ -170,7 +169,7 @@ export default function BudgetStatementsComponent({
 
 	// Determine if we should show a divider (only when showing future dates and both groups exist)
 	const showDivider =
-		showFutureDates &&
+		showFutureDatesProp &&
 		sortedPastPresentStatements.length > 0 &&
 		sortedFutureStatements.length > 0
 
@@ -187,22 +186,6 @@ export default function BudgetStatementsComponent({
 			setSortDirection('asc')
 		}
 	}
-
-	// Notify parent of filter state changes
-	// Ensure initial state is communicated on mount
-	useLayoutEffect(() => {
-		if (!hasInitializedRef.current) {
-			hasInitializedRef.current = true
-			onFilterChange?.(showFutureDates)
-		}
-	}, []) // Only run on mount
-
-	// Notify parent when filter state changes after mount
-	useLayoutEffect(() => {
-		if (hasInitializedRef.current) {
-			onFilterChange?.(showFutureDates)
-		}
-	}, [showFutureDates, onFilterChange])
 
 	// Mutation for updating statements
 	const updateStatementMutation = api.budget.updateStatement.useMutation({
@@ -312,19 +295,6 @@ export default function BudgetStatementsComponent({
 		<div className='mb-12 w-full max-w-6xl'>
 			<div className='mb-6 flex items-center justify-between'>
 				<h2 className='text-2xl font-bold text-foreground'>Statements</h2>
-				<div className='flex items-center gap-3'>
-					<label
-						htmlFor='show-future-dates'
-						className='cursor-pointer text-sm font-medium text-foreground'
-					>
-						Show future transactions
-					</label>
-					<Switch
-						id='show-future-dates'
-						checked={showFutureDates}
-						onCheckedChange={setShowFutureDates}
-					/>
-				</div>
 			</div>
 
 			{/* Recent Statements Table */}
@@ -406,7 +376,7 @@ export default function BudgetStatementsComponent({
 							) : (
 								<>
 									{/* Past/Present Statements */}
-									{(showFutureDates
+									{(showFutureDatesProp
 										? sortedPastPresentStatements
 										: sortedStatements
 									).map((statement) => (
@@ -496,7 +466,7 @@ export default function BudgetStatementsComponent({
 									)}
 
 									{/* Future Statements */}
-									{showFutureDates &&
+									{showFutureDatesProp &&
 										sortedFutureStatements.map((statement) => (
 											<tr
 												key={statement.id}

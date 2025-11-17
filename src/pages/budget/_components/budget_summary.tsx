@@ -164,8 +164,8 @@ export default function BudgetSummary({
 								{/* Mobile Layout */}
 								<div className='relative z-10 md:hidden'>
 									{/* Header */}
-									<span className='pb-2 text-xl font-medium text-muted-foreground'>
-										Monthly Money
+									<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
+										Automated
 									</span>
 									{/* Mobile Chart */}
 									<div
@@ -331,6 +331,18 @@ export default function BudgetSummary({
 					</CardContent>
 				</Card>
 
+				{/* Total Earned Card */}
+				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-green-600 transition-all hover:shadow-lg'>
+					<CardContent className='relative h-full p-4'>
+						<span className='flex justify-center text-2xl font-medium text-muted-foreground'>
+							Total Earned
+						</span>
+						<p className='flex justify-center text-2xl font-bold text-green-600 sm:text-3xl'>
+							${income.toLocaleString()}
+						</p>
+					</CardContent>
+				</Card>
+
 				{/* Remaining Card */}
 				<Card className='relative min-h-[200px] overflow-hidden border-t-4 border-t-chart-1 transition-all hover:shadow-lg'>
 					<CardContent className='relative h-full p-4'>
@@ -364,7 +376,7 @@ export default function BudgetSummary({
 				}}
 				title={
 					<>
-						<span>Monthly Money</span>
+						<span>Automated</span>
 						<span className='hidden text-lg font-normal text-muted-foreground md:ml-2 md:inline'>
 							- Automated Items
 						</span>

@@ -7,6 +7,7 @@ import Header from '../components/header'
 import {getRubricColor} from '../utils/colorRubric'
 import {api} from '../utils/api'
 import {useStore} from '@root-store/store'
+import {HeaderDrawerProvider} from '../contexts/HeaderDrawerContext'
 
 import '../styles/globals.css'
 
@@ -39,8 +40,10 @@ const MyApp: AppType<{session: Session | null}> = ({
 
 	return (
 		<SessionProvider session={session}>
-			<Header colorHex={headerColorHex} />
-			<Component {...pageProps} />
+			<HeaderDrawerProvider>
+				<Header colorHex={headerColorHex} />
+				<Component {...pageProps} />
+			</HeaderDrawerProvider>
 		</SessionProvider>
 	)
 }

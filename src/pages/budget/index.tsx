@@ -8,6 +8,8 @@ import BudgetStatementsComponent, {
 	type Statement,
 } from './_components/budget_statements'
 import BudgetSummary from './_components/budget_summary'
+import {useHeaderDrawer} from '../../contexts/HeaderDrawerContext'
+import {Switch} from '@store/components/ui/switch'
 
 interface MonthlyData {
 	income: number
@@ -24,6 +26,7 @@ interface MonthlyData {
 
 export default function BudgetPage() {
 	const {data: sessionData} = useSession()
+	const {setDrawerContent} = useHeaderDrawer()
 
 	// State for selected month/year
 	const [selectedMonth, setSelectedMonth] = useState<number>(
@@ -34,6 +37,30 @@ export default function BudgetPage() {
 	)
 	// State for filtering future dates in statements
 	const [showFutureDates, setShowFutureDates] = useState(false)
+
+	// Register drawer content when component mounts
+	useEffect(() => {
+		setDrawerContent(
+			<div className='flex items-center gap-3'>
+				<label
+					htmlFor='show-future-dates-drawer'
+					className='cursor-pointer text-sm font-medium text-white'
+				>
+					Show future transactions
+				</label>
+				<Switch
+					id='show-future-dates-drawer'
+					checked={showFutureDates}
+					onCheckedChange={setShowFutureDates}
+				/>
+			</div>
+		)
+
+		// Cleanup: remove drawer content when component unmounts
+		return () => {
+			setDrawerContent(null)
+		}
+	}, [showFutureDates, setDrawerContent])
 
 	// Sync mutation for automated items
 	const syncMutation = api.budget.syncAutomatedItemsToStatements.useMutation({
@@ -170,7 +197,7 @@ export default function BudgetPage() {
 		const savingsRate =
 			totalIncome > 0 ? ((remaining / totalIncome) * 100).toFixed(1) : '0.0'
 
-		return {totalAllocated, totalExpense, remaining, savingsRate}
+		return {totalAllocated, totalIncome, totalExpense, remaining, savingsRate}
 	}, [data.categories, filteredStatements])
 
 	// Format selected month/year for display
@@ -196,7 +223,7 @@ export default function BudgetPage() {
 		return (
 			<main className='min-h-screen overflow-x-hidden bg-background'>
 				<div className='screen -center flex-col justify-start'>
-					<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
+					<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pt-8 sm:pt-[15vh]'>
 						<div className='flex h-64 items-center justify-center'>
 							<p className='text-lg text-muted-foreground'>
 								Loading budget data...
@@ -214,13 +241,10 @@ export default function BudgetPage() {
 	return (
 		<main className='min-h-screen overflow-x-hidden bg-background'>
 			<div className='screen -center flex-col justify-start'>
-				<div className='w-full flex-col items-center gap-4 overflow-y-auto overflow-x-hidden p-4 pt-[55vw] sm:pt-[15vh]'>
+				<div className='w-full flex-col items-center gap-4 overflow-y-auto overflow-x-hidden p-4 pt-20'>
 					{/* Header */}
-					<div className='mb-8 w-full max-w-6xl'>
-						<div className='mb-2 flex items-center justify-between gap-4'>
-							<h1 className='text-4xl font-bold text-foreground sm:text-5xl'>
-								Budget Tracker
-							</h1>
+					<div className='mb-8 flex w-full max-w-6xl justify-end'>
+						<div className='flex items-center justify-between gap-4'>
 							<div className='flex items-center gap-2'>
 								<select
 									value={selectedMonth}
@@ -260,7 +284,7 @@ export default function BudgetPage() {
 
 					{/* Monthly Summary Cards */}
 					<BudgetSummary
-						income={data.income}
+						income={totals.totalIncome}
 						automatedItems={data.automatedItems}
 						totalExpense={totals.totalExpense}
 						remaining={totals.remaining}
@@ -288,7 +312,7 @@ export default function BudgetPage() {
 						categories={data.categories}
 						automatedItems={data.automatedItems}
 						onRefetch={() => void refetch()}
-						onFilterChange={setShowFutureDates}
+						showFutureDates={showFutureDates}
 					/>
 				</div>
 			</div>
