@@ -141,8 +141,12 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			// Other external links get a neutral color with no page transition
 			return {
 				primary: 'bg-gray-600',
+				primaryHex: '#4b5563',
 				secondary: 'bg-gray-700',
-				text: 'text-white',
+				background: 'bg-gradient-to-t from-primary-light to-primary-dark',
+				borderColor: 'border-gray-500',
+				textColor: 'text-gray-500',
+				mutedBg: 'bg-gray-950/30',
 				shouldAnimatePageTransition: false,
 			}
 		}
@@ -158,10 +162,13 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 		isVisible: boolean
 	) => {
 		const baseStyle = 'page-button'
-		const offsetStyle = index % 2 === 0 ? ' offset-left' : ' offset-right'
+		const offsetStyle =
+			index % 2 === 0 ? ' offset-left border-r-0' : ' offset-right border-l-0'
 		const buttonColors = getButtonColor(button)
-		const colorStyle =
-			index % 2 === 0 ? buttonColors.secondary : buttonColors.primary
+
+		// Use border color and muted background
+		const borderStyle = buttonColors.borderColor
+		const bgStyle = buttonColors.mutedBg
 
 		// Handle disabled state - disabled buttons have equal borders and no press animation
 		const pressStyle = button.disabled
@@ -178,30 +185,35 @@ const AnimatedButtonList: React.FC<AnimatedButtonListProps> = ({
 			? ' -translate-x-full'
 			: ' translate-x-full'
 
-		return `${baseStyle}${offsetStyle} ${colorStyle}${pressStyle}${visibilityStyle} ${className}`
+		return `${baseStyle}${offsetStyle} ${borderStyle} ${bgStyle}${pressStyle}${visibilityStyle} ${className}`
 	}
 
 	return (
 		<div className='flex flex-col gap-4 overflow-x-hidden'>
-			{buttons.map((button, index) => (
-				<div
-					key={`${button.label}-${index}`}
-					data-button-index={index}
-					className={getButtonStyle(button, index, buttonStates[index])}
-					style={{
-						transition: `all ${animationDuration}ms ease-out ${
-							buttonStates[index] ? index * 25 : 0
-						}ms`,
-					}}
-					onClick={() => {
-						void handleButtonClick(button, index)
-					}}
-				>
-					<div className='pointer-events-none w-[80%] text-center'>
-						{button.label}
+			{buttons.map((button, index) => {
+				const buttonColors = getButtonColor(button)
+				return (
+					<div
+						key={`${button.label}-${index}`}
+						data-button-index={index}
+						className={getButtonStyle(button, index, buttonStates[index])}
+						style={{
+							transition: `all ${animationDuration}ms ease-out ${
+								buttonStates[index] ? index * 25 : 0
+							}ms`,
+						}}
+						onClick={() => {
+							void handleButtonClick(button, index)
+						}}
+					>
+						<div
+							className={`pointer-events-none w-[80%] text-center ${buttonColors.textColor}`}
+						>
+							{button.label}
+						</div>
 					</div>
-				</div>
-			))}
+				)
+			})}
 		</div>
 	)
 }

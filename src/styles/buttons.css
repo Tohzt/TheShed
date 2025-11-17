@@ -1,10 +1,9 @@
 .page-button {
 	@apply flex h-[10vh] 
     w-[80vw] items-center justify-center 
-    border-b-[8px] border-white
+    border-b-[8px]
     font-mono text-2xl
     font-extrabold
-    text-white
     transition-all duration-75 ease-out;
 }
 
@@ -19,10 +18,10 @@
 }
 
 .offset-left {
-	@apply ml-[20vw] rounded-l-[20px] border-l-4 bg-secondary-dark pr-[20vw];
+	@apply ml-[20vw] rounded-l-[20px] border-l-4 pr-[20vw];
 }
 .offset-right {
-	@apply mr-[20vw] rounded-r-[20px] border-r-4 bg-secondary-light pl-[20vw];
+	@apply mr-[20vw] rounded-r-[20px] border-r-4 pl-[20vw];
 }
 
 .diagonal {
@@ -76,11 +75,11 @@
 
 /* Button press animation classes */
 .button-pressed {
-	@apply border-b-[0px] border-t-[8px];
+	@apply border-4;
 }
 
 .button-default {
-	@apply border-b-[8px] border-t-[0px];
+	@apply border-2;
 }
 
 /* Disabled button styles */

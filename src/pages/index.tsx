@@ -104,16 +104,16 @@ const Home: React.FC = () => {
 				<link rel='manifest' href='/manifest.json' />
 			</Head>
 
-			<main className='overflow-x-hidden bg-gradient-to-t from-primary-light to-primary-dark'>
+			<main className='min-h-screen overflow-x-hidden bg-background'>
 				<div className='screen -center flex-col justify-start'>
 					<div className='w-full flex-col gap-4 overflow-y-auto pt-20'>
 						{authError && (
-							<div className='mx-auto mb-4 max-w-md rounded-lg bg-red-600 p-4 text-center text-white'>
+							<div className='mx-auto mb-4 max-w-md rounded-lg bg-destructive p-4 text-center text-destructive-foreground'>
 								<p className='font-semibold'>Authentication Error</p>
 								<p className='text-sm'>{authError}</p>
 								<button
 									onClick={() => setAuthError(null)}
-									className='mt-2 rounded bg-red-700 px-4 py-2 text-sm hover:bg-red-800'
+									className='mt-2 rounded bg-destructive/80 px-4 py-2 text-sm text-destructive-foreground transition-colors hover:bg-destructive/90'
 								>
 									Dismiss
 								</button>
