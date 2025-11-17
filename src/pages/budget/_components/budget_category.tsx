@@ -894,6 +894,11 @@ export default function BudgetCategoryComponent({
 															variant='outline'
 															onClick={cancelEditingStatement}
 															className='flex-1'
+															style={{
+																borderColor: getColorValue(
+																	selectedCategory?.color || null
+																),
+															}}
 														>
 															Cancel
 														</Button>
