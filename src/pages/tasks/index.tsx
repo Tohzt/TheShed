@@ -1,12 +1,10 @@
 import * as React from 'react'
 //import { useSession } from "next-auth/react";
 import Footer from '../../components/Footer'
-import {getRubricColor} from '../../utils/colorRubric'
 import BottomBackButton from '../../components/BottomBackButton'
 
 const Tasks = () => {
 	//const { data: session } = useSession();
-	const backgroundClass = getRubricColor('tasks').background
 	// const router = useRouter()
 
 	// State for back button animation
@@ -55,14 +53,14 @@ const Tasks = () => {
 	return (
 		true && (
 			<>
-				<main className={`overflow-x-hidden ${backgroundClass}`}>
-					<div className='tasks-page border-4 border-red-500'>
-						<div className='t-p-container mt-[150px] border-4 border-green-500'>
+				<main className='min-h-screen overflow-x-hidden bg-background'>
+					<div className='tasks-page'>
+						<div className='t-p-container mt-[150px]'>
 							<div className='t-p-content'>
-								<h4>Tasks</h4>
+								<h4 className='text-foreground'>Tasks</h4>
 								<div className='task-container'>
 									<div className='task-item-container'>
-										<span> Input </span>
+										<span className='text-foreground'> Input </span>
 										<button className='btn-add-task'> [Add Task] </button>
 									</div>
 								</div>

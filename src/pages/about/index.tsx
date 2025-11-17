@@ -1,16 +1,14 @@
 import * as React from 'react'
 //import { useSession } from "next-auth/react";
 import Footer from '../../components/Footer'
-import {getRubricColor} from '../../utils/colorRubric'
 
 const AboutPage = () => {
 	//const { data: session } = useSession();
-	const backgroundClass = getRubricColor('about').background
 
 	return (
 		true && (
 			<>
-				<main className={`overflow-x-hidden ${backgroundClass}`}>
+				<main className='min-h-screen overflow-x-hidden bg-background'>
 					<div className='screen flex flex-col items-center justify-between'>
 						<div className='header-margin'></div>
 						<div
@@ -20,41 +18,41 @@ const AboutPage = () => {
 								max-w-[96vw]
 								flex-1 rounded-2xl
 								border-4 
-								border-white bg-secondary-dark 
+								border-border bg-card 
 								p-4 
-								text-center text-white
+								text-center
 							'
 						>
-							<div className='h-full overflow-auto rounded-lg bg-secondary-light p-2'>
-								<div className='mb-4 text-lg font-medium text-gray-900'>
+							<div className='h-full overflow-auto rounded-lg bg-muted p-2'>
+								<div className='mb-4 text-lg font-medium text-foreground'>
 									Welcome to my full-stack application built on the t-3 stack
 									using Next.js, React, Tailwind, TypeScript, Prisma, and more!
 								</div>
-								<div className='mb-4 text-lg text-gray-700'>
+								<div className='mb-4 text-lg text-foreground'>
 									This app is not only a personal project, but also serves as a
 									showcase of my skills and experience in full-stack
 									development.
 								</div>
-								<div className='mb-4 text-lg text-gray-700'>
+								<div className='mb-4 text-lg text-foreground'>
 									As of now, the app includes user authentication through
 									Next-Auth and Discord, allowing users to create their own
 									profiles and save their progress in various features. The
 									profile page is currently in development and will soon provide
 									more functionality for users.
 								</div>
-								<div className='mb-4 text-lg text-gray-700'>
+								<div className='mb-4 text-lg text-foreground'>
 									In addition, the app features an arcade section where users
 									can play my personal game development projects. The first game
 									uploaded is a clone of Super Mario Brothers for the NES, but I
 									plan to add more games in the future.
 								</div>
-								<div className='mb-4 text-lg text-gray-700'>
+								<div className='mb-4 text-lg text-foreground'>
 									As for utility pages, I plan to include a calendar, an alarm
 									clock, and a task checklist. These basic features will provide
 									useful tools for users to organize their daily lives and keep
 									track of important events.
 								</div>
-								<div className='mb-4 text-lg text-gray-700'>
+								<div className='mb-4 text-lg text-foreground'>
 									Overall, my t-3 stack full-stack application demonstrates my
 									ability to build robust and user-friendly applications using
 									cutting-edge technologies. I look forward to continuing to

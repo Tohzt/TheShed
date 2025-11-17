@@ -3,10 +3,7 @@
 	@apply screen relative
 		flex
 		flex-col
-		justify-between
-		bg-gradient-to-b
-		from-primary-dark
-		to-primary-light;
+		justify-between;
 }
 .t-p-container {
 	@apply mx-auto
@@ -14,7 +11,7 @@
 		w-min
 		rounded-2xl
 		border-2
-		border-black bg-secondary-dark
+		border-border bg-card
 		p-4;
 }
 .t-p-content {
@@ -28,7 +25,7 @@
     justify-center
     overflow-auto 
     rounded-lg 
-    bg-secondary-light 
+    bg-muted 
     p-2;
 }
 
@@ -39,7 +36,7 @@
     items-center
     justify-center
     rounded-xl
-    bg-white
+    bg-card
     p-8;
 }
 
@@ -50,6 +47,6 @@
     justify-between
     rounded-md
     border-2
-    border-black bg-gray-300
+    border-border bg-muted
     p-2;
 }

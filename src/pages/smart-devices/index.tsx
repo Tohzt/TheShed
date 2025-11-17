@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react'
 import Head from 'next/head'
 import Footer from '../../components/Footer'
 import BottomBackButton from '../../components/BottomBackButton'
-import {getRubricColor} from '../../utils/colorRubric'
 
 interface DeviceReading {
 	id: string
@@ -25,7 +24,6 @@ interface Device {
 }
 
 const SmartDevices = () => {
-	const backgroundClass = getRubricColor('smart-devices').background
 	const [devices, setDevices] = useState<Device[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
@@ -97,33 +95,31 @@ const SmartDevices = () => {
 				<link rel='icon' href='/tohzt.ico' />
 			</Head>
 
-			<main
-				className={`overflow-x-hidden ${backgroundClass} h-screen pl-8 pr-8`}
-			>
+			<main className='min-h-screen overflow-x-hidden bg-background pl-8 pr-8'>
 				<div className='smart-devices-page'>
 					<div className='sd-p-container mt-[120px]'>
 						<div className='sd-p-content'>
-							<h4 className='mb-6 text-2xl font-bold text-white'>
+							<h4 className='mb-6 text-2xl font-bold text-foreground'>
 								Smart Devices
 							</h4>
 
 							{loading && (
-								<div className='text-center text-white'>
-									<div className='mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-white'></div>
+								<div className='text-center text-foreground'>
+									<div className='mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-foreground'></div>
 									<p>Loading devices...</p>
 								</div>
 							)}
 
 							{error && (
-								<div className='mb-4 rounded bg-red-500 p-4 text-white'>
+								<div className='mb-4 rounded bg-destructive p-4 text-destructive-foreground'>
 									Error: {error}
 								</div>
 							)}
 
 							{!loading && !error && devices.length === 0 && (
-								<div className='p-8 text-center text-white'>
+								<div className='p-8 text-center text-foreground'>
 									<p className='mb-4 text-xl'>No devices found</p>
-									<p className='text-gray-300'>
+									<p className='text-muted-foreground'>
 										Your ESP32 devices will appear here once they start sending
 										data.
 									</p>
@@ -138,7 +134,7 @@ const SmartDevices = () => {
 										return (
 											<div
 												key={device.id}
-												className='rounded-lg border border-white/20 bg-white/10 p-6 backdrop-blur-sm'
+												className='rounded-lg border border-border bg-card p-6 backdrop-blur-sm'
 											>
 												<div className='mb-4 flex items-center justify-between'>
 													<div className='flex items-center space-x-3'>
@@ -146,10 +142,10 @@ const SmartDevices = () => {
 															{getDeviceIcon(device.type)}
 														</span>
 														<div>
-															<h5 className='text-lg font-semibold text-white'>
+															<h5 className='text-lg font-semibold text-card-foreground'>
 																{device.name}
 															</h5>
-															<p className='text-sm text-gray-300'>
+															<p className='text-sm text-muted-foreground'>
 																{device.location}
 															</p>
 														</div>
@@ -168,40 +164,40 @@ const SmartDevices = () => {
 														<div className='grid grid-cols-2 gap-4'>
 															{latestReading.temperature !== null && (
 																<div className='text-center'>
-																	<div className='text-2xl font-bold text-white'>
+																	<div className='text-2xl font-bold text-card-foreground'>
 																		{formatTemperature(
 																			latestReading.temperature
 																		)}
 																	</div>
-																	<div className='text-xs text-gray-300'>
+																	<div className='text-xs text-muted-foreground'>
 																		Temperature
 																	</div>
 																</div>
 															)}
 															{latestReading.humidity !== null && (
 																<div className='text-center'>
-																	<div className='text-2xl font-bold text-white'>
+																	<div className='text-2xl font-bold text-card-foreground'>
 																		{formatHumidity(latestReading.humidity)}
 																	</div>
-																	<div className='text-xs text-gray-300'>
+																	<div className='text-xs text-muted-foreground'>
 																		Humidity
 																	</div>
 																</div>
 															)}
 														</div>
-														<div className='text-center text-xs text-gray-400'>
+														<div className='text-center text-xs text-muted-foreground'>
 															Last updated:{' '}
 															{formatTime(latestReading.createdAt)}
 														</div>
 													</div>
 												) : (
-													<div className='py-4 text-center text-gray-400'>
+													<div className='py-4 text-center text-muted-foreground'>
 														No recent readings
 													</div>
 												)}
 
-												<div className='mt-4 border-t border-white/20 pt-4'>
-													<div className='text-xs text-gray-300'>
+												<div className='mt-4 border-t border-border pt-4'>
+													<div className='text-xs text-muted-foreground'>
 														<div>Type: {device.type}</div>
 														{device.description && (
 															<div>Description: {device.description}</div>

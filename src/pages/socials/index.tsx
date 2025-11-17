@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Footer from '../../components/Footer'
 import AnimatedButtonList from '../../components/AnimatedButtonList'
-import {getRubricColor} from '../../utils/colorRubric'
 
 interface ButtonItem {
 	label: string
@@ -40,10 +39,8 @@ const socialButtons: ButtonItem[] = [
 ]
 
 const SocialsPage = () => {
-	const backgroundClass = getRubricColor('socials').background
-
 	return (
-		<main className={`overflow-x-hidden ${backgroundClass}`}>
+		<main className='min-h-screen overflow-x-hidden bg-background'>
 			<div className='screen -center flex-col justify-start'>
 				<div className='w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pt-20'>
 					<AnimatedButtonList

@@ -10,8 +10,8 @@ const ProfilePage = () => {
     <>
       <Header />
 
-      <div className="flex screen flex-col -center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="pt-10 text-white">
+      <div className="flex screen flex-col -center bg-background">
+        <div className="pt-10 text-foreground">
         {/*
           <span> User:    </span>
           <span>{session ? session?.user?.name : "Not Logged In"}</span>

@@ -29,7 +29,7 @@
 }
 
 .btn-add-task {
-	@apply rounded-lg border-2 border-black bg-red-500 p-4;
+	@apply rounded-lg border-2 border-border bg-destructive p-4 text-destructive-foreground;
 }
 
 /* Animation classes */
