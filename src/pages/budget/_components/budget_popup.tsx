@@ -50,7 +50,7 @@ export default function BudgetPopup({
 		>
 			<div
 				ref={popupRef}
-				className='relative w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl dark:border-border/50 dark:bg-[#1a1a1a]'
+				className='relative max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl dark:border-border/50 dark:bg-[#1a1a1a]'
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Close Button */}

@@ -677,4 +677,39 @@ export const budgetRouter = createTRPCRouter({
 		await syncAutomatedItemsToStatements(ctx.prisma, userId)
 		return {success: true}
 	}),
+
+	// Get statements by category name
+	getStatementsByCategory: protectedProcedure
+		.input(
+			z.object({
+				categoryName: z.string(),
+			})
+		)
+		.query(async ({ctx, input}) => {
+			const userId = ctx.session.user.id
+
+			const statements = await ctx.prisma.statement.findMany({
+				where: {
+					userId,
+					category: input.categoryName,
+				},
+				orderBy: {date: 'desc'},
+			})
+
+			return statements.map((stmt) => {
+				// Format date as YYYY-MM-DD
+				const date = new Date(stmt.date)
+				const year = date.getUTCFullYear()
+				const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+				const day = String(date.getUTCDate()).padStart(2, '0')
+				return {
+					id: stmt.id,
+					category: stmt.category,
+					type: stmt.type as 'income' | 'expense',
+					amount: stmt.amount,
+					description: stmt.description,
+					date: `${year}-${month}-${day}`,
+				}
+			})
+		}),
 })

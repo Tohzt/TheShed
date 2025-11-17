@@ -54,7 +54,9 @@ export default function BudgetCategoryComponent({
 	const [showAddCategory, setShowAddCategory] = useState(false)
 	const [selectedCategory, setSelectedCategory] =
 		useState<BudgetCategory | null>(null)
-	const [activeTab, setActiveTab] = useState<'edit' | 'expense'>('expense')
+	const [activeTab, setActiveTab] = useState<'edit' | 'expense' | 'statements'>(
+		'expense'
+	)
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const [newCategory, setNewCategory] = useState({
 		name: '',
@@ -87,6 +89,15 @@ export default function BudgetCategoryComponent({
 	const [editCategoryHasBudget, setEditCategoryHasBudget] = useState(false)
 	const newCategoryColorRef = useRef<HTMLInputElement>(null)
 	const editCategoryColorRef = useRef<HTMLInputElement>(null)
+	const [editingStatementId, setEditingStatementId] = useState<string | null>(
+		null
+	)
+	const [editingStatement, setEditingStatement] = useState({
+		description: '',
+		amount: '',
+		type: 'expense' as 'income' | 'expense',
+		date: '',
+	})
 
 	// Mutation for creating categories
 	const createCategoryMutation = api.budget.createCategory.useMutation({
@@ -121,6 +132,10 @@ export default function BudgetCategoryComponent({
 	const createStatementMutation = api.budget.createStatement.useMutation({
 		onSuccess: () => {
 			onRefetch()
+			// Refetch category statements if we're on that tab
+			if (activeTab === 'statements' && selectedCategory) {
+				void refetchCategoryStatements()
+			}
 			setNewExpense({
 				amount: '',
 				description: '',
@@ -129,6 +144,101 @@ export default function BudgetCategoryComponent({
 			setIsIncome(false) // Reset to expense by default
 		},
 	})
+
+	// Query to get statements by category
+	const {data: categoryStatements, refetch: refetchCategoryStatements} =
+		api.budget.getStatementsByCategory.useQuery(
+			{
+				categoryName: selectedCategory?.name || '',
+			},
+			{
+				enabled: !!selectedCategory && activeTab === 'statements',
+			}
+		)
+
+	// Mutation for updating statements
+	const updateStatementMutation = api.budget.updateStatement.useMutation({
+		onSuccess: () => {
+			onRefetch()
+			void refetchCategoryStatements()
+			setEditingStatementId(null)
+			setEditingStatement({
+				description: '',
+				amount: '',
+				type: 'expense',
+				date: '',
+			})
+		},
+	})
+
+	// Mutation for deleting statements
+	const deleteStatementMutation = api.budget.deleteStatement.useMutation({
+		onSuccess: () => {
+			onRefetch()
+			void refetchCategoryStatements()
+			setEditingStatementId(null)
+			setEditingStatement({
+				description: '',
+				amount: '',
+				type: 'expense',
+				date: '',
+			})
+		},
+	})
+
+	// Handle starting to edit a statement
+	const startEditingStatement = (statement: {
+		id: string
+		description: string
+		amount: number
+		type: 'income' | 'expense'
+		date: string
+	}) => {
+		setEditingStatementId(statement.id)
+		setEditingStatement({
+			description: statement.description,
+			amount: statement.amount.toString(),
+			type: statement.type,
+			date: statement.date,
+		})
+	}
+
+	// Handle canceling edit
+	const cancelEditingStatement = () => {
+		setEditingStatementId(null)
+		setEditingStatement({
+			description: '',
+			amount: '',
+			type: 'expense',
+			date: '',
+		})
+	}
+
+	// Handle updating statement
+	const handleUpdateStatement = (statementId: string) => {
+		if (
+			!editingStatement.amount ||
+			!editingStatement.description ||
+			!editingStatement.date
+		)
+			return
+
+		updateStatementMutation.mutate({
+			statementId,
+			category: selectedCategory?.name,
+			type: editingStatement.type,
+			amount: parseFloat(editingStatement.amount),
+			description: editingStatement.description,
+			date: editingStatement.date,
+		})
+	}
+
+	// Handle deleting statement
+	const handleDeleteStatement = (statementId: string) => {
+		deleteStatementMutation.mutate({
+			statementId,
+		})
+	}
 
 	// Handle adding category
 	const handleAddCategory = () => {
@@ -231,115 +341,122 @@ export default function BudgetCategoryComponent({
 				}}
 				title='Create Category'
 			>
-				<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-					<input
-						type='text'
-						placeholder='Category Name'
-						value={newCategory.name}
-						onChange={(e) =>
-							setNewCategory({...newCategory, name: e.target.value})
-						}
-						className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-					/>
-					{newCategoryHasBudget ? (
-						<div className='flex items-center gap-2'>
+				<div className='flex flex-col gap-4'>
+					<div className='flex gap-4'>
+						<div
+							className='flex w-full flex-col gap-2
+					'
+						>
 							<input
-								type='number'
-								placeholder='Allocated Amount'
-								value={newCategory.allocated}
+								type='text'
+								placeholder='Category Name'
+								value={newCategory.name}
 								onChange={(e) =>
-									setNewCategory({
-										...newCategory,
-										allocated: e.target.value,
-									})
+									setNewCategory({...newCategory, name: e.target.value})
 								}
 								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
 							/>
-							<button
-								type='button'
-								onClick={() => {
-									setNewCategoryHasBudget(false)
-									setNewCategory({...newCategory, allocated: ''})
-								}}
-								className='flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
-							>
-								<X className='h-4 w-4' />
-							</button>
-						</div>
-					) : (
-						<Button
-							type='button'
-							variant='outline'
-							onClick={() => setNewCategoryHasBudget(true)}
-							className='h-9'
-						>
-							Has a Budget?
-						</Button>
-					)}
-					<div className='flex justify-around gap-4'>
-						{/* Emoji Picker */}
-						<EmojiPicker
-							value={newCategory.icon}
-							onChange={(emoji) =>
-								setNewCategory({...newCategory, icon: emoji})
-							}
-							trigger={
-								<button
+							{newCategoryHasBudget ? (
+								<div className='flex items-center gap-2'>
+									<input
+										type='number'
+										placeholder='Allocated Amount'
+										value={newCategory.allocated}
+										onChange={(e) =>
+											setNewCategory({
+												...newCategory,
+												allocated: e.target.value,
+											})
+										}
+										className='flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+									/>
+									<button
+										type='button'
+										onClick={() => {
+											setNewCategoryHasBudget(false)
+											setNewCategory({...newCategory, allocated: ''})
+										}}
+										className='flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+									>
+										<X className='h-4 w-4' />
+									</button>
+								</div>
+							) : (
+								<Button
 									type='button'
-									className='flex h-20 w-20 items-center justify-center rounded-xl border-2 border-input bg-muted/50 text-4xl transition-all hover:scale-105 hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+									variant='outline'
+									onClick={() => setNewCategoryHasBudget(true)}
+									className='h-9'
 								>
-									{newCategory.icon || '😀'}
-								</button>
-							}
-						/>
-						{/* Color Picker */}
-						<div className='relative'>
-							<input
-								ref={newCategoryColorRef}
-								type='color'
-								value={newCategory.color || '#10b981'}
-								onChange={(e) =>
-									setNewCategory({...newCategory, color: e.target.value})
+									Has a Budget?
+								</Button>
+							)}
+						</div>
+						<div className='flex justify-around gap-4'>
+							{/* Emoji Picker */}
+							<EmojiPicker
+								value={newCategory.icon}
+								onChange={(emoji) =>
+									setNewCategory({...newCategory, icon: emoji})
 								}
-								className='absolute h-20 w-20 cursor-pointer opacity-0'
+								trigger={
+									<button
+										type='button'
+										className='flex h-20 w-20 items-center justify-center rounded-xl border-2 border-input bg-muted/50 text-4xl transition-all hover:scale-105 hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+									>
+										{newCategory.icon || '😀'}
+									</button>
+								}
 							/>
-							<div
-								className='flex h-20 w-20 cursor-pointer items-center justify-center rounded-xl border-2 border-input transition-all focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:scale-105 hover:border-primary'
-								style={{
-									backgroundColor: newCategory.color || '#10b981',
-								}}
-								onClick={() => newCategoryColorRef.current?.click()}
-							/>
+							{/* Color Picker */}
+							<div className='relative'>
+								<input
+									ref={newCategoryColorRef}
+									type='color'
+									value={newCategory.color || '#10b981'}
+									onChange={(e) =>
+										setNewCategory({...newCategory, color: e.target.value})
+									}
+									className='absolute h-20 w-20 cursor-pointer opacity-0'
+								/>
+								<div
+									className='flex h-20 w-20 cursor-pointer items-center justify-center rounded-xl border-2 border-input transition-all focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:scale-105 hover:border-primary'
+									style={{
+										backgroundColor: newCategory.color || '#10b981',
+									}}
+									onClick={() => newCategoryColorRef.current?.click()}
+								/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className='flex gap-3'>
-					<Button
-						onClick={handleAddCategory}
-						disabled={
-							!newCategory.name ||
-							(newCategoryHasBudget && !newCategory.allocated)
-						}
-						className='flex-1'
-					>
-						Create
-					</Button>
-					<Button
-						onClick={() => {
-							setShowAddCategory(false)
-							setNewCategory({
-								name: '',
-								allocated: '',
-								icon: '',
-								color: '',
-							})
-							setNewCategoryHasBudget(false)
-						}}
-						variant='outline'
-						className='flex-1'
-					>
-						Cancel
-					</Button>
+					<div className='flex gap-3'>
+						<Button
+							onClick={handleAddCategory}
+							disabled={
+								!newCategory.name ||
+								(newCategoryHasBudget && !newCategory.allocated)
+							}
+							className='flex-1'
+						>
+							Create
+						</Button>
+						<Button
+							onClick={() => {
+								setShowAddCategory(false)
+								setNewCategory({
+									name: '',
+									allocated: '',
+									icon: '',
+									color: '',
+								})
+								setNewCategoryHasBudget(false)
+							}}
+							variant='outline'
+							className='flex-1'
+						>
+							Cancel
+						</Button>
+					</div>
 				</div>
 			</BudgetPopup>
 
@@ -356,81 +473,133 @@ export default function BudgetCategoryComponent({
 						date: new Date().toISOString().split('T')[0],
 					})
 					setIsIncome(false) // Reset to expense by default
+					cancelEditingStatement()
 				}}
 				title={selectedCategory?.name || 'Category'}
 			>
 				{/* Tabs */}
 				<div className='mb-6 flex gap-2 border-b border-border'>
 					<button
-						onClick={() => setActiveTab('edit')}
+						onClick={() => {
+							setActiveTab('edit')
+							cancelEditingStatement()
+						}}
 						className={`px-4 py-2 font-medium transition-colors ${
 							activeTab === 'edit'
-								? 'border-b-2 border-primary text-primary'
+								? 'border-b-2'
 								: 'text-muted-foreground hover:text-foreground'
 						}`}
+						style={
+							activeTab === 'edit'
+								? {
+										borderBottomColor: getColorValue(
+											selectedCategory?.color || null
+										),
+										color: getColorValue(selectedCategory?.color || null),
+								  }
+								: undefined
+						}
 					>
 						Edit Category
 					</button>
 					<button
-						onClick={() => setActiveTab('expense')}
+						onClick={() => {
+							setActiveTab('expense')
+							cancelEditingStatement()
+						}}
 						className={`px-4 py-2 font-medium transition-colors ${
 							activeTab === 'expense'
-								? 'border-b-2 border-primary text-primary'
+								? 'border-b-2'
 								: 'text-muted-foreground hover:text-foreground'
 						}`}
+						style={
+							activeTab === 'expense'
+								? {
+										borderBottomColor: getColorValue(
+											selectedCategory?.color || null
+										),
+										color: getColorValue(selectedCategory?.color || null),
+								  }
+								: undefined
+						}
 					>
 						Add to Statement
+					</button>
+					<button
+						onClick={() => {
+							setActiveTab('statements')
+							cancelEditingStatement()
+						}}
+						className={`px-4 py-2 font-medium transition-colors ${
+							activeTab === 'statements'
+								? 'border-b-2'
+								: 'text-muted-foreground hover:text-foreground'
+						}`}
+						style={
+							activeTab === 'statements'
+								? {
+										borderBottomColor: getColorValue(
+											selectedCategory?.color || null
+										),
+										color: getColorValue(selectedCategory?.color || null),
+								  }
+								: undefined
+						}
+					>
+						View Related Statements
 					</button>
 				</div>
 
 				{/* Edit Category Tab */}
 				{activeTab === 'edit' && (
 					<>
-						<div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-							<input
-								type='text'
-								placeholder='Category Name'
-								value={editCategory.name}
-								onChange={(e) =>
-									setEditCategory({...editCategory, name: e.target.value})
-								}
-								className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-							/>
-							{editCategoryHasBudget ? (
-								<div className='flex items-center gap-2'>
-									<input
-										type='number'
-										placeholder='Allocated Amount'
-										value={editCategory.allocated}
-										onChange={(e) =>
-											setEditCategory({
-												...editCategory,
-												allocated: e.target.value,
-											})
-										}
-										className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
-									/>
-									<button
+						<div className='flex justify-around gap-4'>
+							<div className='flex flex-col gap-2'>
+								<input
+									type='text'
+									placeholder='Category Name'
+									value={editCategory.name}
+									onChange={(e) =>
+										setEditCategory({...editCategory, name: e.target.value})
+									}
+									className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+								/>
+								{editCategoryHasBudget ? (
+									<div className='flex items-center gap-2'>
+										<input
+											type='number'
+											placeholder='Allocated Amount'
+											value={editCategory.allocated}
+											onChange={(e) =>
+												setEditCategory({
+													...editCategory,
+													allocated: e.target.value,
+												})
+											}
+											className='flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-input/50 dark:bg-[#2a2a2a]'
+										/>
+										<button
+											type='button'
+											onClick={() => {
+												setEditCategoryHasBudget(false)
+												setEditCategory({...editCategory, allocated: ''})
+											}}
+											className='flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+										>
+											<X className='h-4 w-4' />
+										</button>
+									</div>
+								) : (
+									<Button
 										type='button'
-										onClick={() => {
-											setEditCategoryHasBudget(false)
-											setEditCategory({...editCategory, allocated: ''})
-										}}
-										className='flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+										variant='outline'
+										onClick={() => setEditCategoryHasBudget(true)}
+										className='h-9'
 									>
-										<X className='h-4 w-4' />
-									</button>
-								</div>
-							) : (
-								<Button
-									type='button'
-									variant='outline'
-									onClick={() => setEditCategoryHasBudget(true)}
-									className='h-9'
-								>
-									Has a Budget?
-								</Button>
-							)}
+										Has a Budget?
+									</Button>
+								)}
+							</div>
 							<div className='flex justify-around gap-4'>
 								{/* Emoji Picker */}
 								<EmojiPicker
@@ -471,39 +640,47 @@ export default function BudgetCategoryComponent({
 								</div>
 							</div>
 						</div>
-						<div className='mb-4 flex flex-col gap-3'>
-							<div className='flex gap-3'>
-								<Button
-									onClick={handleUpdateCategory}
-									disabled={
-										!editCategory.name ||
-										(editCategoryHasBudget && !editCategory.allocated)
-									}
-									className='flex-1'
-								>
-									Save Changes
-								</Button>
-								<Button
-									onClick={() => {
-										setSelectedCategory(null)
-										setEditCategory({
-											name: '',
-											allocated: '',
-											icon: '',
-											color: '',
-										})
-										setEditCategoryHasBudget(false)
-									}}
-									variant='outline'
-									className='flex-1'
-								>
-									Cancel
-								</Button>
-							</div>
+						{/* Save and Cancel Buttons */}
+						<div className='mt-4 flex justify-center gap-3'>
+							<Button
+								onClick={handleUpdateCategory}
+								className='flex-1'
+								disabled={
+									!editCategory.name ||
+									(editCategoryHasBudget && !editCategory.allocated)
+								}
+								style={{
+									backgroundColor: getColorValue(
+										selectedCategory?.color || null
+									),
+									color: '#ffffff',
+								}}
+							>
+								Save Changes
+							</Button>
+							<Button
+								onClick={() => {
+									setSelectedCategory(null)
+									setEditCategory({
+										name: '',
+										allocated: '',
+										icon: '',
+										color: '',
+									})
+									setEditCategoryHasBudget(false)
+								}}
+								style={{
+									borderColor: getColorValue(selectedCategory?.color || null),
+								}}
+								className='flex-1'
+								variant='outline'
+							>
+								Cancel
+							</Button>
 							<Button
 								onClick={() => setShowDeleteDialog(true)}
+								className='flex-1'
 								variant='destructive'
-								className='w-full'
 								disabled={deleteCategoryMutation.status === 'loading'}
 							>
 								{deleteCategoryMutation.status === 'loading'
@@ -577,6 +754,12 @@ export default function BudgetCategoryComponent({
 									!newExpense.date
 								}
 								className='flex-1'
+								style={{
+									backgroundColor: getColorValue(
+										selectedCategory?.color || null
+									),
+									color: '#ffffff',
+								}}
 							>
 								Add to Statement
 							</Button>
@@ -590,10 +773,216 @@ export default function BudgetCategoryComponent({
 									})
 									setIsIncome(false) // Reset to expense by default
 								}}
+								style={{
+									borderColor: getColorValue(selectedCategory?.color || null),
+								}}
 								variant='outline'
 								className='flex-1'
 							>
 								Cancel
+							</Button>
+						</div>
+					</>
+				)}
+
+				{/* View Related Statements Tab */}
+				{activeTab === 'statements' && (
+					<>
+						<div className='mb-4 max-h-[260px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] md:max-h-[400px] [&::-webkit-scrollbar]:hidden'>
+							{categoryStatements && categoryStatements.length > 0 ? (
+								<div className='space-y-1.5'>
+									{categoryStatements.map((statement) => {
+										const isEditing = editingStatementId === statement.id
+										if (isEditing) {
+											return (
+												<div
+													key={statement.id}
+													className={`space-y-3 rounded-md border-2 p-3 ${
+														editingStatement.type === 'income'
+															? 'border-green-700 bg-green-700/10 dark:bg-green-700/5'
+															: 'border-red-700 bg-red-700/10 dark:bg-red-700/5'
+													}`}
+												>
+													<div className='flex flex-wrap gap-2'>
+														<input
+															type='text'
+															placeholder='Description'
+															value={editingStatement.description}
+															onChange={(e) =>
+																setEditingStatement({
+																	...editingStatement,
+																	description: e.target.value,
+																})
+															}
+															className='min-w-[9rem] flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm dark:border-input/50 dark:bg-[#1a1a1a]'
+														/>
+														<input
+															type='number'
+															placeholder='Amount'
+															value={editingStatement.amount}
+															onChange={(e) =>
+																setEditingStatement({
+																	...editingStatement,
+																	amount: e.target.value,
+																})
+															}
+															className='w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm dark:border-input/50 dark:bg-[#1a1a1a]'
+															step='0.01'
+															min='0.01'
+														/>
+														<button
+															type='button'
+															onClick={() =>
+																setEditingStatement({
+																	...editingStatement,
+																	type:
+																		editingStatement.type === 'income'
+																			? 'expense'
+																			: 'income',
+																})
+															}
+															className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+																editingStatement.type === 'income'
+																	? 'border-green-500 bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400'
+																	: 'border-red-500 bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-400'
+															}`}
+														>
+															{editingStatement.type === 'income' ? (
+																<Plus className='h-5 w-5' />
+															) : (
+																<Minus className='h-5 w-5' />
+															)}
+														</button>
+													</div>
+													<DatePicker
+														value={editingStatement.date}
+														onChange={(date) =>
+															setEditingStatement({
+																...editingStatement,
+																date: date || '',
+															})
+														}
+														placeholder='Select date'
+														className='h-9'
+													/>
+													<div className='flex gap-2'>
+														<Button
+															size='sm'
+															onClick={() =>
+																handleUpdateStatement(statement.id)
+															}
+															disabled={
+																!editingStatement.amount ||
+																!editingStatement.description ||
+																!editingStatement.date ||
+																updateStatementMutation.status === 'loading'
+															}
+															className='flex-1'
+															style={{
+																backgroundColor: getColorValue(
+																	selectedCategory?.color || null
+																),
+																color: '#ffffff',
+															}}
+														>
+															{updateStatementMutation.status === 'loading'
+																? 'Saving...'
+																: 'Save'}
+														</Button>
+														<Button
+															size='sm'
+															variant='outline'
+															onClick={cancelEditingStatement}
+															className='flex-1'
+														>
+															Cancel
+														</Button>
+														<Button
+															size='sm'
+															variant='outline'
+															onClick={() => {
+																handleDeleteStatement(statement.id)
+																cancelEditingStatement()
+															}}
+															disabled={
+																deleteStatementMutation.status === 'loading'
+															}
+															className='flex-1 bg-destructive'
+														>
+															{deleteStatementMutation.status === 'loading'
+																? 'Deleting...'
+																: 'Delete'}
+														</Button>
+													</div>
+												</div>
+											)
+										}
+										return (
+											<div
+												key={statement.id}
+												onClick={() => startEditingStatement(statement)}
+												className={`cursor-pointer rounded-md border bg-background px-3 py-1 transition-colors hover:bg-muted/50 dark:bg-[#2a2a2a] ${
+													statement.type === 'income'
+														? 'border-green-700'
+														: 'border-red-700'
+												}`}
+											>
+												<div className='flex min-w-0 flex-1 items-center gap-2'>
+													<span className='shrink-0 truncate font-medium'>
+														{statement.description}
+													</span>
+													<span className='flex-1 text-xs text-muted-foreground'>
+														{(() => {
+															const [year, month, day] = statement.date
+																.split('-')
+																.map(Number)
+															const date = new Date(year, month - 1, day)
+															return date.toLocaleDateString('en-US', {
+																month: 'short',
+																day: 'numeric',
+															})
+														})()}
+													</span>
+													<span
+														className={`shrink-0 text-sm font-semibold ${
+															statement.type === 'income'
+																? 'text-green-600 dark:text-green-400'
+																: 'text-red-600 dark:text-red-400'
+														}`}
+													>
+														{statement.type === 'income' ? '+' : '-'}$
+														{statement.amount.toFixed(2)}
+													</span>
+												</div>
+											</div>
+										)
+									})}
+								</div>
+							) : (
+								<div className='py-8 text-center text-sm text-muted-foreground'>
+									No statements found for this category.
+								</div>
+							)}
+						</div>
+						<div className='flex gap-3'>
+							<Button
+								onClick={() => {
+									setSelectedCategory(null)
+									setNewExpense({
+										amount: '',
+										description: '',
+										date: new Date().toISOString().split('T')[0],
+									})
+									setIsIncome(false)
+									cancelEditingStatement()
+								}}
+								style={{
+									borderColor: getColorValue(selectedCategory?.color || null),
+								}}
+								variant='outline'
+								className='flex-1'
+							>
+								Close
 							</Button>
 						</div>
 					</>
