@@ -46,3 +46,6 @@ yarn-error.log*
 CURRENT_STATUS.md
 scripts/verification-checklist.md
 scripts/mqtt/mqtt-subscriber.js
+
+# Other Documents
+_Documents/*
