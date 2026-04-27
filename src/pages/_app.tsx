@@ -23,8 +23,9 @@ const MyApp: AppType<{session: Session | null}> = ({
 
 	useEffect(() => {
 		const path = router.pathname
+		const rubricKey = path === '/cookbook/[id]' ? 'cookbook' : path.slice(1)
 		const color = getRubricColor(
-			path === '/' ? 'home' : path.slice(1)
+			path === '/' ? 'home' : rubricKey
 		).primaryHex
 		setHeaderColorHex(color)
 	}, [router.pathname])

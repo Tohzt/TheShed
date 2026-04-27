@@ -22,6 +22,11 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 	const [isBackButtonPressed, setIsBackButtonPressed] = useState(false)
 	const [isTransitioning, setIsTransitioning] = useState(false)
 	const {drawerContent} = useHeaderDrawer()
+	const headerTitle = React.useMemo(() => {
+		if (path === '/') return 'THE SHED'
+		if (path === '/cookbook/[id]') return 'THE COOKBOOK'
+		return `THE ${path.slice(1).toUpperCase()}`
+	}, [path])
 
 	const handleToggle = (checked: boolean) => {
 		toggleDarkMode(checked)
@@ -135,9 +140,7 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 					transition={transition}
 					onClick={handleTextClick}
 				>
-					<span className='header-text'>
-						{path === '/' ? 'THE SHED' : 'THE ' + path.slice(1).toUpperCase()}
-					</span>
+					<span className='header-text'>{headerTitle}</span>
 				</motion.div>
 			</div>
 		</div>
