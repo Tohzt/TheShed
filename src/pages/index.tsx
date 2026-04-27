@@ -21,6 +21,11 @@ const getHomeButtons = (isLoggedIn: boolean): ButtonItem[] => [
 		type: 'internal',
 	},
 	{
+		label: 'Cookbook',
+		path: '/cookbook',
+		type: 'internal',
+	},
+	{
 		label: 'Socials',
 		path: '/socials',
 		type: 'internal',

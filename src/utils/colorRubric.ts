@@ -30,6 +30,16 @@ export const colorRubric: Record<string, ColorRubricEntry> = {
 		mutedBg: 'bg-green-950/30',
 		shouldAnimatePageTransition: true,
 	},
+	cookbook: {
+		primary: 'bg-orange-600',
+		primaryHex: '#ea580c',
+		secondary: 'bg-orange-700',
+		background: 'bg-gradient-to-t from-primary-light to-primary-dark',
+		borderColor: 'border-orange-500',
+		textColor: 'text-orange-500',
+		mutedBg: 'bg-orange-950/30',
+		shouldAnimatePageTransition: true,
+	},
 	socials: {
 		primary: 'bg-purple-600',
 		primaryHex: '#9333ea',
