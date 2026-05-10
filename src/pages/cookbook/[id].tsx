@@ -1,9 +1,10 @@
 import * as React from 'react'
 import Link from 'next/link'
-import {useRouter} from 'next/router'
+import { useRouter } from 'next/router'
 import Footer from '../../components/Footer'
-import {cookbookRepository} from '../../features/cookbook/repository'
-import type {Recipe} from '../../features/cookbook/types'
+import { cookbookRepository } from '../../features/cookbook/repository'
+import type { Recipe } from '../../features/cookbook/types'
+import { TagInput } from '../../store/components/cookbook/TagInput'
 
 const RecipeDetailPage = () => {
 	const router = useRouter()
@@ -12,6 +13,9 @@ const RecipeDetailPage = () => {
 	const [title, setTitle] = React.useState('')
 	const [sourceUrl, setSourceUrl] = React.useState('')
 	const [note, setNote] = React.useState('')
+	const [tags, setTags] = React.useState<string[]>([])
+	const [ingredients, setIngredients] = React.useState<string[]>([])
+	const [imageUrl, setImageUrl] = React.useState('')
 	const [loading, setLoading] = React.useState(true)
 	const [error, setError] = React.useState<string | null>(null)
 
@@ -29,6 +33,9 @@ const RecipeDetailPage = () => {
 				setTitle(nextRecipe.title)
 				setSourceUrl(nextRecipe.sourceUrl ?? '')
 				setNote(nextRecipe.note ?? '')
+				setTags(nextRecipe.tags ?? [])
+				setIngredients(nextRecipe.ingredients ?? [])
+				setImageUrl(nextRecipe.imageUrl ?? '')
 			}
 		} catch (hydrateError) {
 			setError(
@@ -56,6 +63,9 @@ const RecipeDetailPage = () => {
 				title,
 				sourceUrl,
 				note,
+				tags: tags.length > 0 ? tags : undefined,
+				ingredients: ingredients.length > 0 ? ingredients : undefined,
+				imageUrl: imageUrl || undefined,
 			})
 			setRecipe(updated)
 		} catch (saveError) {
@@ -90,13 +100,11 @@ const RecipeDetailPage = () => {
 						href='/cookbook'
 						className='text-sm font-medium text-orange-600 hover:text-orange-700'
 					>
-						← Back to Cookbook
+						← Back to Pokédex
 					</Link>
-					<h1 className='text-xl font-semibold text-foreground'>
-						Recipe Detail
-					</h1>
+					<h1 className='text-2xl font-bold text-foreground'>📖 Recipe Details</h1>
 					<p className='mt-1 text-sm text-muted-foreground'>
-						Edit fields locally and save instantly.
+						Edit your recipe and save your changes.
 					</p>
 				</section>
 
@@ -112,29 +120,64 @@ const RecipeDetailPage = () => {
 					</section>
 				) : (
 					<section className='rounded-xl border border-border bg-card p-4'>
-						<form className='flex flex-col gap-3' onSubmit={onSave}>
+						<form className='flex flex-col gap-4' onSubmit={onSave}>
+							{imageUrl && (
+								<div className='relative'>
+									<img
+										src={imageUrl}
+										alt='Recipe'
+										className='max-h-64 rounded-md w-full object-cover'
+									/>
+									<button
+										type='button'
+										onClick={() => setImageUrl('')}
+										className='absolute right-2 top-2 rounded-full bg-red-600 p-2 text-white hover:bg-red-700'
+									>
+										✕
+									</button>
+								</div>
+							)}
+
 							<input
 								value={title}
 								onChange={(event) => setTitle(event.target.value)}
 								placeholder='Recipe title (required)'
-								className='rounded-md border border-border bg-background px-3 py-2 text-foreground'
+								className='rounded-md border border-border bg-background px-3 py-2 text-foreground font-semibold text-lg'
+								required
 							/>
+
 							<input
 								value={sourceUrl}
 								onChange={(event) => setSourceUrl(event.target.value)}
 								placeholder='Source URL (optional)'
 								className='rounded-md border border-border bg-background px-3 py-2 text-foreground'
 							/>
+
 							<textarea
 								value={note}
 								onChange={(event) => setNote(event.target.value)}
-								placeholder='Note (optional)'
-								className='min-h-[88px] rounded-md border border-border bg-background px-3 py-2 text-foreground'
+								placeholder='Instructions & notes (optional)'
+								className='min-h-[120px] rounded-md border border-border bg-background px-3 py-2 text-foreground'
 							/>
-							<div className='flex flex-wrap gap-2'>
+
+							<TagInput
+								label='Tags'
+								placeholder='e.g., Breakfast, Quick, Vegetarian'
+								value={tags}
+								onChange={setTags}
+							/>
+
+							<TagInput
+								label='Ingredients'
+								placeholder='e.g., Eggs, Cheese, Bread'
+								value={ingredients}
+								onChange={setIngredients}
+							/>
+
+							<div className='flex flex-wrap gap-2 pt-2'>
 								<button
 									type='submit'
-									className='rounded-md bg-orange-600 px-4 py-2 font-medium text-white hover:bg-orange-700'
+									className='flex-1 rounded-md bg-orange-600 px-4 py-2 font-medium text-white hover:bg-orange-700'
 								>
 									Save Changes
 								</button>
@@ -143,15 +186,21 @@ const RecipeDetailPage = () => {
 									onClick={() => {
 										void onDelete()
 									}}
-									className='rounded-md bg-destructive px-4 py-2 font-medium text-destructive-foreground hover:opacity-90'
+									className='flex-1 rounded-md bg-destructive px-4 py-2 font-medium text-destructive-foreground hover:opacity-90'
 								>
 									Delete Recipe
 								</button>
 							</div>
 						</form>
-						<p className='mt-3 text-xs text-muted-foreground'>
-							Created {new Date(recipe.createdAt).toLocaleString()}
-						</p>
+
+						<div className='mt-4 pt-4 border-t border-border'>
+							<p className='text-xs text-muted-foreground'>
+								Created {new Date(recipe.createdAt).toLocaleString()}
+							</p>
+							<p className='text-xs text-muted-foreground'>
+								Last updated {new Date(recipe.updatedAt).toLocaleString()}
+							</p>
+						</div>
 					</section>
 				)}
 

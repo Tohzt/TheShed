@@ -28,6 +28,12 @@ const normalizeOptionalText = (value: unknown): string | undefined => {
 	return trimmed.length > 0 ? trimmed : undefined
 }
 
+const normalizeStringArray = (value: unknown): string[] | undefined => {
+	if (!Array.isArray(value)) return undefined
+	const filtered = value.filter((item) => typeof item === 'string' && item.trim().length > 0).map((item) => (item as string).trim())
+	return filtered.length > 0 ? filtered : undefined
+}
+
 const parseRequiredTitle = (value: unknown): string => {
 	if (typeof value !== 'string' || value.trim().length === 0) {
 		throw new Error('Recipe title is required.')
@@ -67,6 +73,9 @@ const ensureCurrentRecipe = (raw: unknown): Recipe => {
 		title: parseRequiredTitle(raw.title),
 		sourceUrl: parseOptionalUrl(raw.sourceUrl),
 		note: normalizeOptionalText(raw.note),
+		tags: normalizeStringArray(raw.tags),
+		ingredients: normalizeStringArray(raw.ingredients),
+		imageUrl: normalizeOptionalText(raw.imageUrl),
 		createdAt: parseIsoDate(raw.createdAt, now),
 		updatedAt: parseIsoDate(raw.updatedAt, now),
 		schemaVersion: RECIPE_SCHEMA_VERSION,

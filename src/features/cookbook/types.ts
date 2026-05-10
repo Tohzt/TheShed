@@ -1,4 +1,4 @@
-export const RECIPE_SCHEMA_VERSION = 1
+export const RECIPE_SCHEMA_VERSION = 2
 export const COOKBOOK_EXPORT_SCHEMA_VERSION = 1
 export const COOKBOOK_STORAGE_KEY = 'the-shed:cookbook:recipes:v1'
 
@@ -7,6 +7,9 @@ export interface Recipe {
 	title: string
 	sourceUrl?: string
 	note?: string
+	tags?: string[]
+	ingredients?: string[]
+	imageUrl?: string
 	createdAt: string
 	updatedAt: string
 	schemaVersion: number
@@ -22,12 +25,18 @@ export interface CreateRecipeInput {
 	title: string
 	sourceUrl?: string
 	note?: string
+	tags?: string[]
+	ingredients?: string[]
+	imageUrl?: string
 }
 
 export interface UpdateRecipeInput {
 	title?: string
 	sourceUrl?: string
 	note?: string
+	tags?: string[]
+	ingredients?: string[]
+	imageUrl?: string
 }
 
 export interface CookbookRepository {
