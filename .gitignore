@@ -49,3 +49,5 @@ scripts/mqtt/mqtt-subscriber.js
 
 # Other Documents
 _Documents/*
+CLAUDE.md
+agents/
