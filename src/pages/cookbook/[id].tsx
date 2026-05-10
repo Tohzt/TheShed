@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Link from 'next/link'
 import {useRouter} from 'next/router'
 import Footer from '../../components/Footer'
 import {cookbookRepository} from '../../features/cookbook/repository'
@@ -85,6 +86,12 @@ const RecipeDetailPage = () => {
 		<main className='min-h-screen overflow-x-hidden bg-background'>
 			<div className='mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 pb-28 pt-28'>
 				<section className='rounded-xl border border-border bg-card p-4'>
+					<Link
+						href='/cookbook'
+						className='text-sm font-medium text-orange-600 hover:text-orange-700'
+					>
+						← Back to Cookbook
+					</Link>
 					<h1 className='text-xl font-semibold text-foreground'>
 						Recipe Detail
 					</h1>

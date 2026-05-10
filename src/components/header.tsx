@@ -5,6 +5,7 @@ import {useStore} from '@root-store/store'
 import {Switch} from '@store/components/ui/switch'
 import {useRouter} from 'next/router'
 import {useHeaderDrawer} from '../contexts/HeaderDrawerContext'
+import {cookbookRepository} from '../features/cookbook/repository'
 
 interface HeaderProps {
 	colorClass?: string
@@ -21,12 +22,33 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 	const [isBackButtonPressed, setIsBackButtonPressed] = useState(false)
 	const [isTransitioning, setIsTransitioning] = useState(false)
+	const [recipeSubtitle, setRecipeSubtitle] = useState('')
 	const {drawerContent} = useHeaderDrawer()
 	const headerTitle = React.useMemo(() => {
 		if (path === '/') return 'THE SHED'
 		if (path === '/cookbook/[id]') return 'THE COOKBOOK'
 		return `THE ${path.slice(1).toUpperCase()}`
 	}, [path])
+
+	React.useEffect(() => {
+		if (path !== '/cookbook/[id]') {
+			setRecipeSubtitle('')
+			return
+		}
+
+		const recipeId = router.query.id
+		if (typeof recipeId !== 'string') {
+			setRecipeSubtitle('')
+			return
+		}
+
+		try {
+			const recipe = cookbookRepository.getById(recipeId)
+			setRecipeSubtitle(recipe?.title ?? '')
+		} catch {
+			setRecipeSubtitle('')
+		}
+	}, [path, router.query.id])
 
 	const handleToggle = (checked: boolean) => {
 		toggleDarkMode(checked)
@@ -140,7 +162,12 @@ const Header: React.FC<HeaderProps> = ({colorHex}) => {
 					transition={transition}
 					onClick={handleTextClick}
 				>
-					<span className='header-text'>{headerTitle}</span>
+					<div className='header-text'>
+						<span className='header-title'>{headerTitle}</span>
+						{recipeSubtitle && (
+							<span className='header-subtitle'>{recipeSubtitle}</span>
+						)}
+					</div>
 				</motion.div>
 			</div>
 		</div>

@@ -33,9 +33,18 @@
 }
 .header-text {
 	@apply m-auto
-    whitespace-nowrap
+    flex flex-col items-center
+    py-1
     font-heading text-[2em] font-bold
     text-white;
+}
+
+.header-title {
+	@apply leading-none;
+}
+
+.header-subtitle {
+	@apply mt-1 max-w-[70vw] truncate text-sm font-semibold tracking-wide text-white/90;
 }
 
 .header-icon {
