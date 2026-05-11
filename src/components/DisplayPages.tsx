@@ -29,6 +29,11 @@ const pages: pagesType = {
     style: "",
     social: false
   },
+  "watchlist": {
+    pagePath: "/watchlist",
+    style: "",
+    social: false
+  },
   "about": {
     pagePath: "/about",
     style: "",

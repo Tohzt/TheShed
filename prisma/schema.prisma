@@ -71,6 +71,7 @@ model user {
   budgetCategories budgetcategory[]
   statements    statement[]
   automatedItems automateditem[]
+  watchlistShows watchlistshow[]
 }
 
 model verificationtoken {
@@ -125,4 +126,21 @@ model automateditem {
   user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, month, year, label], map: "AutomatedItem_userId_month_year_label_key")
+}
+
+model watchlistshow {
+  id                String   @id @default(cuid())
+  userId            String
+  title             String
+  status            String   @default("watching") // 'watching', 'completed', 'dropped'
+  currentSeason     Int?
+  nextSeasonNumber  Int?
+  nextSeasonDate    DateTime?
+  notes             String?  @db.Text
+  posterUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, title], map: "WatchlistShow_userId_title_key")
 }

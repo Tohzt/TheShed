@@ -141,6 +141,16 @@ export const colorRubric: Record<string, ColorRubricEntry> = {
 		mutedBg: 'bg-emerald-950/30',
 		shouldAnimatePageTransition: true,
 	},
+	watchlist: {
+		primary: 'bg-rose-600',
+		primaryHex: '#e11d48',
+		secondary: 'bg-rose-700',
+		background: 'bg-gradient-to-t from-primary-light to-primary-dark',
+		borderColor: 'border-rose-500',
+		textColor: 'text-rose-500',
+		mutedBg: 'bg-rose-950/30',
+		shouldAnimatePageTransition: true,
+	},
 }
 
 export const getRubricColor = (key: string): ColorRubricEntry => {

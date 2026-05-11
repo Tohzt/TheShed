@@ -26,6 +26,11 @@ const getHomeButtons = (isLoggedIn: boolean): ButtonItem[] => [
 		type: 'internal',
 	},
 	{
+		label: 'Watch List',
+		path: '/watchlist',
+		type: 'internal',
+	},
+	{
 		label: 'Socials',
 		path: '/socials',
 		type: 'internal',
