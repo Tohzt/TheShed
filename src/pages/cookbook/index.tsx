@@ -6,6 +6,7 @@ import { RecipeCard } from '../../store/components/cookbook/RecipeCard'
 import { FoodScanner } from '../../store/components/cookbook/FoodScanner'
 import { RecipeSearch } from '../../store/components/cookbook/RecipeSearch'
 import { TagInput } from '../../store/components/cookbook/TagInput'
+import { IngredientFinder } from '../../store/components/cookbook/IngredientFinder'
 
 const getExportFilename = () => {
 	const stamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -20,6 +21,7 @@ const CookbookPage = () => {
 	const [formError, setFormError] = React.useState<string | null>(null)
 	const [showScanner, setShowScanner] = React.useState(false)
 	const [showForm, setShowForm] = React.useState(false)
+	const [showIngredientFinder, setShowIngredientFinder] = React.useState(false)
 	const [title, setTitle] = React.useState('')
 	const [sourceUrl, setSourceUrl] = React.useState('')
 	const [note, setNote] = React.useState('')
@@ -142,7 +144,6 @@ const CookbookPage = () => {
 			<div className='mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pb-28 pt-28'>
 				{/* Header */}
 				<section className='rounded-xl border-2 border-orange-600 bg-gradient-to-r from-orange-50 to-orange-100 p-4 dark:from-orange-950 dark:to-orange-900'>
-					<h1 className='text-3xl font-bold text-foreground'>🍱 Pokédex</h1>
 					<p className='mt-1 text-sm text-muted-foreground'>
 						Your personal recipe encyclopedia. Scan, search, and collect recipes.
 					</p>
@@ -163,6 +164,13 @@ const CookbookPage = () => {
 						className='rounded-md bg-orange-600 px-4 py-2 font-medium text-white hover:bg-orange-700'
 					>
 						➕ Add Recipe
+					</button>
+					<button
+						type='button'
+						onClick={() => setShowIngredientFinder(true)}
+						className='rounded-md bg-orange-600 px-4 py-2 font-medium text-white hover:bg-orange-700'
+					>
+						🔍 Find by Ingredient
 					</button>
 					<button
 						type='button'
@@ -317,6 +325,13 @@ const CookbookPage = () => {
 				<FoodScanner
 					onCapture={onCapture}
 					onClose={() => setShowScanner(false)}
+				/>
+			)}
+
+			{showIngredientFinder && (
+				<IngredientFinder
+					recipes={recipes}
+					onClose={() => setShowIngredientFinder(false)}
 				/>
 			)}
 
