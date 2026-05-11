@@ -172,6 +172,9 @@ export class LocalCookbookRepository implements CookbookRepository {
 			title: input.title,
 			sourceUrl: input.sourceUrl,
 			note: input.note,
+			tags: input.tags,
+			ingredients: input.ingredients,
+			imageUrl: input.imageUrl,
 			createdAt: now,
 			updatedAt: now,
 			schemaVersion: RECIPE_SCHEMA_VERSION,
@@ -196,6 +199,9 @@ export class LocalCookbookRepository implements CookbookRepository {
 			title: input.title ?? current.title,
 			sourceUrl: input.sourceUrl ?? current.sourceUrl,
 			note: input.note ?? current.note,
+			tags: input.tags ?? current.tags,
+			ingredients: input.ingredients ?? current.ingredients,
+			imageUrl: input.imageUrl ?? current.imageUrl,
 			updatedAt: new Date().toISOString(),
 		})
 
