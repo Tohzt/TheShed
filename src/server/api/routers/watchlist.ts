@@ -6,7 +6,7 @@ export const watchlistRouter = createTRPCRouter({
 	getShows: protectedProcedure
 		.input(
 			z.object({
-				status: z.enum(['watching', 'completed', 'dropped']).optional(),
+				status: z.enum(['not-started', 'watching', 'caught-up', 'completed', 'dropped']).optional(),
 			})
 		)
 		.query(async ({ctx, input}) => {
@@ -25,9 +25,15 @@ export const watchlistRouter = createTRPCRouter({
 				title: show.title,
 				status: show.status,
 				currentSeason: show.currentSeason,
+				currentEpisode: show.currentEpisode,
+				totalSeasonsTracked: show.totalSeasonsTracked,
+				episodesPerSeason: show.episodesPerSeason,
 				nextSeasonNumber: show.nextSeasonNumber,
-				nextSeasonDate: show.nextSeasonDate
-					? show.nextSeasonDate.toISOString().split('T')[0]
+				nextSeasonReleaseDate: show.nextSeasonReleaseDate
+					? show.nextSeasonReleaseDate.toISOString().split('T')[0]
+					: null,
+				nextEpisodeReleaseDate: show.nextEpisodeReleaseDate
+					? show.nextEpisodeReleaseDate.toISOString().split('T')[0]
 					: null,
 				notes: show.notes,
 				posterUrl: show.posterUrl,
@@ -56,9 +62,15 @@ export const watchlistRouter = createTRPCRouter({
 				title: show.title,
 				status: show.status,
 				currentSeason: show.currentSeason,
+				currentEpisode: show.currentEpisode,
+				totalSeasonsTracked: show.totalSeasonsTracked,
+				episodesPerSeason: show.episodesPerSeason,
 				nextSeasonNumber: show.nextSeasonNumber,
-				nextSeasonDate: show.nextSeasonDate
-					? show.nextSeasonDate.toISOString().split('T')[0]
+				nextSeasonReleaseDate: show.nextSeasonReleaseDate
+					? show.nextSeasonReleaseDate.toISOString().split('T')[0]
+					: null,
+				nextEpisodeReleaseDate: show.nextEpisodeReleaseDate
+					? show.nextEpisodeReleaseDate.toISOString().split('T')[0]
 					: null,
 				notes: show.notes,
 				posterUrl: show.posterUrl,
@@ -70,10 +82,14 @@ export const watchlistRouter = createTRPCRouter({
 		.input(
 			z.object({
 				title: z.string().min(1),
-				status: z.enum(['watching', 'completed', 'dropped']).default('watching'),
+				status: z.enum(['not-started', 'watching', 'caught-up', 'completed', 'dropped']).default('not-started'),
 				currentSeason: z.number().int().positive().optional(),
+				currentEpisode: z.number().int().nonnegative().optional(),
+				totalSeasonsTracked: z.number().int().positive().optional(),
+				episodesPerSeason: z.number().int().positive().optional(),
 				nextSeasonNumber: z.number().int().positive().optional(),
-				nextSeasonDate: z.string().optional(), // YYYY-MM-DD format
+				nextSeasonReleaseDate: z.string().optional(), // YYYY-MM-DD format
+				nextEpisodeReleaseDate: z.string().optional(), // YYYY-MM-DD format
 				notes: z.string().optional(),
 				posterUrl: z.string().optional(),
 			})
@@ -81,11 +97,17 @@ export const watchlistRouter = createTRPCRouter({
 		.mutation(async ({ctx, input}) => {
 			const userId = ctx.session.user.id
 
-			// Parse date if provided
-			let nextSeasonDate: Date | null = null
-			if (input.nextSeasonDate) {
-				const [year, month, day] = input.nextSeasonDate.split('-').map(Number)
-				nextSeasonDate = new Date(year, month - 1, day)
+			// Parse dates if provided
+			let nextSeasonReleaseDate: Date | null = null
+			if (input.nextSeasonReleaseDate) {
+				const [year, month, day] = input.nextSeasonReleaseDate.split('-').map(Number)
+				nextSeasonReleaseDate = new Date(year, month - 1, day)
+			}
+
+			let nextEpisodeReleaseDate: Date | null = null
+			if (input.nextEpisodeReleaseDate) {
+				const [year, month, day] = input.nextEpisodeReleaseDate.split('-').map(Number)
+				nextEpisodeReleaseDate = new Date(year, month - 1, day)
 			}
 
 			const show = await ctx.prisma.watchlistshow.create({
@@ -94,8 +116,12 @@ export const watchlistRouter = createTRPCRouter({
 					title: input.title,
 					status: input.status,
 					currentSeason: input.currentSeason,
+					currentEpisode: input.currentEpisode,
+					totalSeasonsTracked: input.totalSeasonsTracked,
+					episodesPerSeason: input.episodesPerSeason,
 					nextSeasonNumber: input.nextSeasonNumber,
-					nextSeasonDate,
+					nextSeasonReleaseDate,
+					nextEpisodeReleaseDate,
 					notes: input.notes,
 					posterUrl: input.posterUrl,
 				},
@@ -106,9 +132,15 @@ export const watchlistRouter = createTRPCRouter({
 				title: show.title,
 				status: show.status,
 				currentSeason: show.currentSeason,
+				currentEpisode: show.currentEpisode,
+				totalSeasonsTracked: show.totalSeasonsTracked,
+				episodesPerSeason: show.episodesPerSeason,
 				nextSeasonNumber: show.nextSeasonNumber,
-				nextSeasonDate: show.nextSeasonDate
-					? show.nextSeasonDate.toISOString().split('T')[0]
+				nextSeasonReleaseDate: show.nextSeasonReleaseDate
+					? show.nextSeasonReleaseDate.toISOString().split('T')[0]
+					: null,
+				nextEpisodeReleaseDate: show.nextEpisodeReleaseDate
+					? show.nextEpisodeReleaseDate.toISOString().split('T')[0]
 					: null,
 				notes: show.notes,
 				posterUrl: show.posterUrl,
@@ -121,10 +153,14 @@ export const watchlistRouter = createTRPCRouter({
 			z.object({
 				showId: z.string(),
 				title: z.string().min(1).optional(),
-				status: z.enum(['watching', 'completed', 'dropped']).optional(),
+				status: z.enum(['not-started', 'watching', 'caught-up', 'completed', 'dropped']).optional(),
 				currentSeason: z.number().int().positive().optional(),
+				currentEpisode: z.number().int().nonnegative().optional(),
+				totalSeasonsTracked: z.number().int().positive().optional(),
+				episodesPerSeason: z.number().int().positive().optional(),
 				nextSeasonNumber: z.number().int().positive().optional(),
-				nextSeasonDate: z.string().optional(), // YYYY-MM-DD format
+				nextSeasonReleaseDate: z.string().optional(), // YYYY-MM-DD format
+				nextEpisodeReleaseDate: z.string().optional(), // YYYY-MM-DD format
 				notes: z.string().optional(),
 				posterUrl: z.string().optional(),
 			})
@@ -145,14 +181,24 @@ export const watchlistRouter = createTRPCRouter({
 				throw new Error('Show not found')
 			}
 
-			// Parse date if provided
-			let nextSeasonDate: Date | null | undefined = undefined
-			if (updateData.nextSeasonDate !== undefined) {
-				if (updateData.nextSeasonDate === '') {
-					nextSeasonDate = null
+			// Parse dates if provided
+			let nextSeasonReleaseDate: Date | null | undefined = undefined
+			if (updateData.nextSeasonReleaseDate !== undefined) {
+				if (updateData.nextSeasonReleaseDate === '') {
+					nextSeasonReleaseDate = null
 				} else {
-					const [year, month, day] = updateData.nextSeasonDate.split('-').map(Number)
-					nextSeasonDate = new Date(year, month - 1, day)
+					const [year, month, day] = updateData.nextSeasonReleaseDate.split('-').map(Number)
+					nextSeasonReleaseDate = new Date(year, month - 1, day)
+				}
+			}
+
+			let nextEpisodeReleaseDate: Date | null | undefined = undefined
+			if (updateData.nextEpisodeReleaseDate !== undefined) {
+				if (updateData.nextEpisodeReleaseDate === '') {
+					nextEpisodeReleaseDate = null
+				} else {
+					const [year, month, day] = updateData.nextEpisodeReleaseDate.split('-').map(Number)
+					nextEpisodeReleaseDate = new Date(year, month - 1, day)
 				}
 			}
 
@@ -164,10 +210,20 @@ export const watchlistRouter = createTRPCRouter({
 					...(updateData.currentSeason !== undefined && {
 						currentSeason: updateData.currentSeason,
 					}),
+					...(updateData.currentEpisode !== undefined && {
+						currentEpisode: updateData.currentEpisode,
+					}),
+					...(updateData.totalSeasonsTracked !== undefined && {
+						totalSeasonsTracked: updateData.totalSeasonsTracked,
+					}),
+					...(updateData.episodesPerSeason !== undefined && {
+						episodesPerSeason: updateData.episodesPerSeason,
+					}),
 					...(updateData.nextSeasonNumber !== undefined && {
 						nextSeasonNumber: updateData.nextSeasonNumber,
 					}),
-					...(nextSeasonDate !== undefined && {nextSeasonDate}),
+					...(nextSeasonReleaseDate !== undefined && {nextSeasonReleaseDate}),
+					...(nextEpisodeReleaseDate !== undefined && {nextEpisodeReleaseDate}),
 					...(updateData.notes !== undefined && {notes: updateData.notes}),
 					...(updateData.posterUrl !== undefined && {
 						posterUrl: updateData.posterUrl,
@@ -180,9 +236,15 @@ export const watchlistRouter = createTRPCRouter({
 				title: updatedShow.title,
 				status: updatedShow.status,
 				currentSeason: updatedShow.currentSeason,
+				currentEpisode: updatedShow.currentEpisode,
+				totalSeasonsTracked: updatedShow.totalSeasonsTracked,
+				episodesPerSeason: updatedShow.episodesPerSeason,
 				nextSeasonNumber: updatedShow.nextSeasonNumber,
-				nextSeasonDate: updatedShow.nextSeasonDate
-					? updatedShow.nextSeasonDate.toISOString().split('T')[0]
+				nextSeasonReleaseDate: updatedShow.nextSeasonReleaseDate
+					? updatedShow.nextSeasonReleaseDate.toISOString().split('T')[0]
+					: null,
+				nextEpisodeReleaseDate: updatedShow.nextEpisodeReleaseDate
+					? updatedShow.nextEpisodeReleaseDate.toISOString().split('T')[0]
 					: null,
 				notes: updatedShow.notes,
 				posterUrl: updatedShow.posterUrl,

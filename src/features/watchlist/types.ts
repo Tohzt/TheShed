@@ -1,15 +1,22 @@
-export const SHOW_SCHEMA_VERSION = 1
-export const WATCHLIST_EXPORT_SCHEMA_VERSION = 1
-export const WATCHLIST_STORAGE_KEY = 'the-shed:watchlist:shows:v1'
+export const SHOW_SCHEMA_VERSION = 2
+export const WATCHLIST_EXPORT_SCHEMA_VERSION = 2
+export const WATCHLIST_STORAGE_KEY = 'the-shed:watchlist:shows:v2'
+
+export type ShowStatus = 'not-started' | 'watching' | 'caught-up' | 'completed' | 'dropped'
 
 export interface Show {
 	id: string
 	title: string
+	status: ShowStatus
+	currentSeason?: number
+	currentEpisode?: number
+	totalSeasonsTracked?: number
+	episodesPerSeason?: number
 	nextSeasonNumber?: number
-	nextSeasonReleaseDate?: string
+	nextSeasonReleaseDate?: string // YYYY-MM-DD: when next season releases
+	nextEpisodeReleaseDate?: string // YYYY-MM-DD: when next episode releases
 	notes?: string
-	imageUrl?: string
-	status?: 'watching' | 'completed' | 'on-hold'
+	posterUrl?: string
 	createdAt: string
 	updatedAt: string
 	schemaVersion: number
@@ -23,20 +30,30 @@ export interface WatchListExport {
 
 export interface CreateShowInput {
 	title: string
+	status?: ShowStatus
+	currentSeason?: number
+	currentEpisode?: number
+	totalSeasonsTracked?: number
+	episodesPerSeason?: number
 	nextSeasonNumber?: number
 	nextSeasonReleaseDate?: string
+	nextEpisodeReleaseDate?: string
 	notes?: string
-	imageUrl?: string
-	status?: 'watching' | 'completed' | 'on-hold'
+	posterUrl?: string
 }
 
 export interface UpdateShowInput {
 	title?: string
+	status?: ShowStatus
+	currentSeason?: number
+	currentEpisode?: number
+	totalSeasonsTracked?: number
+	episodesPerSeason?: number
 	nextSeasonNumber?: number
 	nextSeasonReleaseDate?: string
+	nextEpisodeReleaseDate?: string
 	notes?: string
-	imageUrl?: string
-	status?: 'watching' | 'completed' | 'on-hold'
+	posterUrl?: string
 }
 
 export interface WatchListRepository {

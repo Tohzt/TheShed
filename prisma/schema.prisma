@@ -129,18 +129,22 @@ model automateditem {
 }
 
 model watchlistshow {
-  id                String   @id @default(cuid())
-  userId            String
-  title             String
-  status            String   @default("watching") // 'watching', 'completed', 'dropped'
-  currentSeason     Int?
-  nextSeasonNumber  Int?
-  nextSeasonDate    DateTime?
-  notes             String?  @db.Text
-  posterUrl         String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                      String   @id @default(cuid())
+  userId                  String
+  title                   String
+  status                  String   @default("watching") // 'not-started', 'watching', 'caught-up', 'completed', 'dropped'
+  currentSeason           Int?
+  currentEpisode          Int?
+  totalSeasonsTracked     Int?     // Number of seasons in the show
+  episodesPerSeason       Int?     // Average/typical episodes per season
+  nextSeasonNumber        Int?
+  nextSeasonReleaseDate   DateTime?
+  nextEpisodeReleaseDate  DateTime?
+  notes                   String?  @db.Text
+  posterUrl               String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  user                    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, title], map: "WatchlistShow_userId_title_key")
 }

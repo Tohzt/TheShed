@@ -10,9 +10,14 @@ const getStatusBadgeColor = (status: string) => {
 	switch (status) {
 		case 'completed':
 			return 'bg-green-500/20 text-green-700 dark:text-green-400'
-		case 'on-hold':
-			return 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
+		case 'caught-up':
+			return 'bg-blue-500/20 text-blue-700 dark:text-blue-400'
 		case 'watching':
+			return 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
+		case 'not-started':
+			return 'bg-gray-500/20 text-gray-700 dark:text-gray-400'
+		case 'dropped':
+			return 'bg-red-500/20 text-red-700 dark:text-red-400'
 		default:
 			return 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
 	}
@@ -28,12 +33,33 @@ const formatReleaseDate = (dateString?: string) => {
 	})
 }
 
+const getStatusLabel = (status: string): string => {
+	switch (status) {
+		case 'not-started':
+			return 'Not Started'
+		case 'watching':
+			return 'Watching'
+		case 'caught-up':
+			return 'Caught Up'
+		case 'completed':
+			return 'Completed'
+		case 'dropped':
+			return 'Dropped'
+		default:
+			return 'Unknown'
+	}
+}
+
 export const ShowCard = ({ show, onEdit, onDelete }: ShowCardProps) => {
+	const episodeProgress = show.currentSeason && show.currentEpisode
+		? `S${show.currentSeason}E${show.currentEpisode}`
+		: null
+
 	return (
 		<div className='rounded-lg border border-rose-300 bg-card p-4 dark:border-rose-700'>
-			{show.imageUrl && (
+			{show.posterUrl && (
 				<img
-					src={show.imageUrl}
+					src={show.posterUrl}
 					alt={show.title}
 					className='mb-3 h-48 w-full rounded-md object-cover'
 				/>
@@ -46,21 +72,46 @@ export const ShowCard = ({ show, onEdit, onDelete }: ShowCardProps) => {
 						show.status ?? 'watching'
 					)}`}
 				>
-					{show.status ?? 'watching'}
+					{getStatusLabel(show.status ?? 'watching')}
 				</span>
-				{show.nextSeasonNumber && (
-					<span className='inline-block rounded-full bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-700 dark:text-rose-400'>
-						Season {show.nextSeasonNumber}
+				{episodeProgress && (
+					<span className='inline-block rounded-full bg-purple-500/10 px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400'>
+						{episodeProgress}
 					</span>
 				)}
 			</div>
 
-			{show.nextSeasonReleaseDate && (
+			{/* Progress Info */}
+			{show.totalSeasonsTracked && show.episodesPerSeason && (
 				<div className='mb-3 rounded bg-muted p-2 text-sm'>
-					<p className='text-muted-foreground'>Next Release:</p>
+					<p className='text-muted-foreground'>Series Structure</p>
 					<p className='font-medium text-foreground'>
-						{formatReleaseDate(show.nextSeasonReleaseDate)}
+						{show.totalSeasonsTracked} seasons × {show.episodesPerSeason} episodes
 					</p>
+				</div>
+			)}
+
+			{/* Next Release Info */}
+			{(show.nextEpisodeReleaseDate || show.nextSeasonReleaseDate) && (
+				<div className='mb-3 space-y-2'>
+					{show.nextEpisodeReleaseDate && (
+						<div className='rounded bg-muted p-2 text-sm'>
+							<p className='text-muted-foreground'>Next Episode</p>
+							<p className='font-medium text-foreground'>
+								{formatReleaseDate(show.nextEpisodeReleaseDate)}
+							</p>
+						</div>
+					)}
+					{show.nextSeasonReleaseDate && (
+						<div className='rounded bg-muted p-2 text-sm'>
+							<p className='text-muted-foreground'>
+								Season {show.nextSeasonNumber || '?'} Release
+							</p>
+							<p className='font-medium text-foreground'>
+								{formatReleaseDate(show.nextSeasonReleaseDate)}
+							</p>
+						</div>
+					)}
 				</div>
 			)}
 

@@ -40,8 +40,12 @@ const normalizeOptionalDate = (value: unknown): string | undefined => {
 	return date.toISOString()
 }
 
-const normalizeStatus = (value: unknown): 'watching' | 'completed' | 'on-hold' => {
-	if (value === 'completed' || value === 'on-hold') return value
+const normalizeStatus = (value: unknown): 'not-started' | 'watching' | 'caught-up' | 'completed' | 'dropped' => {
+	if (typeof value === 'string' && ['not-started', 'watching', 'caught-up', 'completed', 'dropped'].includes(value)) {
+		return value as any
+	}
+	// Migrate old status values
+	if (value === 'on-hold') return 'caught-up'
 	return 'watching'
 }
 
@@ -66,11 +70,16 @@ const ensureCurrentShow = (raw: unknown): Show => {
 	const show: Show = {
 		id: idValue,
 		title: parseRequiredTitle(raw.title),
+		status: normalizeStatus(raw.status),
+		currentSeason: normalizeOptionalNumber(raw.currentSeason ?? raw.currentSeasonNumber),
+		currentEpisode: normalizeOptionalNumber(raw.currentEpisode ?? raw.currentEpisodeNumber),
+		totalSeasonsTracked: normalizeOptionalNumber(raw.totalSeasonsTracked),
+		episodesPerSeason: normalizeOptionalNumber(raw.episodesPerSeason),
 		nextSeasonNumber: normalizeOptionalNumber(raw.nextSeasonNumber),
 		nextSeasonReleaseDate: normalizeOptionalDate(raw.nextSeasonReleaseDate),
+		nextEpisodeReleaseDate: normalizeOptionalDate(raw.nextEpisodeReleaseDate),
 		notes: normalizeOptionalText(raw.notes),
-		imageUrl: normalizeOptionalText(raw.imageUrl),
-		status: normalizeStatus(raw.status),
+		posterUrl: normalizeOptionalText(raw.posterUrl ?? raw.imageUrl),
 		createdAt: parseIsoDate(raw.createdAt, now),
 		updatedAt: parseIsoDate(raw.updatedAt, now),
 		schemaVersion: SHOW_SCHEMA_VERSION,
@@ -151,8 +160,8 @@ const readShows = (): Show[] => {
 export class LocalWatchListRepository implements WatchListRepository {
 	list(): Show[] {
 		return readShows().sort((a, b) => {
-			const aDate = a.nextSeasonReleaseDate ? new Date(a.nextSeasonReleaseDate).getTime() : Infinity
-			const bDate = b.nextSeasonReleaseDate ? new Date(b.nextSeasonReleaseDate).getTime() : Infinity
+			const aDate = a.nextEpisodeReleaseDate ? new Date(a.nextEpisodeReleaseDate).getTime() : Infinity
+			const bDate = b.nextEpisodeReleaseDate ? new Date(b.nextEpisodeReleaseDate).getTime() : Infinity
 			return aDate - bDate
 		})
 	}
@@ -167,11 +176,16 @@ export class LocalWatchListRepository implements WatchListRepository {
 		const show = ensureCurrentShow({
 			id: crypto.randomUUID(),
 			title: input.title,
+			status: input.status ?? 'not-started',
+			currentSeason: input.currentSeason,
+			currentEpisode: input.currentEpisode,
+			totalSeasonsTracked: input.totalSeasonsTracked,
+			episodesPerSeason: input.episodesPerSeason,
 			nextSeasonNumber: input.nextSeasonNumber,
 			nextSeasonReleaseDate: input.nextSeasonReleaseDate,
+			nextEpisodeReleaseDate: input.nextEpisodeReleaseDate,
 			notes: input.notes,
-			imageUrl: input.imageUrl,
-			status: input.status ?? 'watching',
+			posterUrl: input.posterUrl,
 			createdAt: now,
 			updatedAt: now,
 			schemaVersion: SHOW_SCHEMA_VERSION,
@@ -194,11 +208,16 @@ export class LocalWatchListRepository implements WatchListRepository {
 		const updated = ensureCurrentShow({
 			...current,
 			title: input.title ?? current.title,
+			status: input.status ?? current.status,
+			currentSeason: input.currentSeason ?? current.currentSeason,
+			currentEpisode: input.currentEpisode ?? current.currentEpisode,
+			totalSeasonsTracked: input.totalSeasonsTracked ?? current.totalSeasonsTracked,
+			episodesPerSeason: input.episodesPerSeason ?? current.episodesPerSeason,
 			nextSeasonNumber: input.nextSeasonNumber ?? current.nextSeasonNumber,
 			nextSeasonReleaseDate: input.nextSeasonReleaseDate ?? current.nextSeasonReleaseDate,
+			nextEpisodeReleaseDate: input.nextEpisodeReleaseDate ?? current.nextEpisodeReleaseDate,
 			notes: input.notes ?? current.notes,
-			imageUrl: input.imageUrl ?? current.imageUrl,
-			status: input.status ?? current.status,
+			posterUrl: input.posterUrl ?? current.posterUrl,
 			updatedAt: new Date().toISOString(),
 		})
 
