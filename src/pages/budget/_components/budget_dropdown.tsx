@@ -1,9 +1,7 @@
-import {MoreVertical} from 'lucide-react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuTrigger,
 } from '../../../store/components/ui/dropdown-menu'
 
 interface BudgetDropdownProps {

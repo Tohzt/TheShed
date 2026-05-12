@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Image from 'next/image'
 import type { Recipe } from '../../../features/cookbook/types'
 
 interface IngredientFinderProps {
@@ -116,11 +117,11 @@ export const IngredientFinder: React.FC<IngredientFinderProps> = ({
 									>
 										<div className='flex items-start gap-3'>
 											{recipe.imageUrl && (
-												<img
+												<Image
 													src={recipe.imageUrl}
 													alt={recipe.title}
 													className='h-16 w-16 rounded object-cover'
-												/>
+												 />
 											)}
 											<div className='flex-1'>
 												<h4 className='font-semibold text-foreground'>

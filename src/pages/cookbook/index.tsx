@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Image from 'next/image'
 import Footer from '../../components/Footer'
 import { cookbookRepository } from '../../features/cookbook/repository'
 import type { Recipe } from '../../features/cookbook/types'
@@ -194,7 +195,7 @@ const CookbookPage = () => {
 						onChange={(event) => {
 							void onImport(event)
 						}}
-					/>
+					 />
 				</div>
 
 				{/* Add Recipe Form */}
@@ -218,41 +219,41 @@ const CookbookPage = () => {
 								placeholder='Recipe name (required)'
 								className='rounded-md border border-border bg-background px-3 py-2 text-foreground'
 								required
-							/>
+							 />
 							<input
 								value={sourceUrl}
 								onChange={(event) => setSourceUrl(event.target.value)}
 								placeholder='Source URL (optional)'
 								className='rounded-md border border-border bg-background px-3 py-2 text-foreground'
-							/>
+							 />
 							<textarea
 								value={note}
 								onChange={(event) => setNote(event.target.value)}
 								placeholder='Instructions & notes (optional)'
 								className='min-h-[80px] rounded-md border border-border bg-background px-3 py-2 text-foreground'
-							/>
+							 />
 
 							<TagInput
 								label='Tags'
 								placeholder='e.g., Breakfast, Quick, Vegetarian'
 								value={tags}
 								onChange={setTags}
-							/>
+							 />
 
 							<TagInput
 								label='Ingredients'
 								placeholder='e.g., Eggs, Cheese, Bread'
 								value={ingredients}
 								onChange={setIngredients}
-							/>
+							 />
 
 							{imageUrl && (
 								<div className='relative'>
-									<img
+									<Image
 										src={imageUrl}
 										alt='Preview'
 										className='max-h-48 rounded-md'
-									/>
+									 />
 									<button
 										type='button'
 										onClick={() => setImageUrl('')}
@@ -296,7 +297,7 @@ const CookbookPage = () => {
 
 				{/* Search & Filter */}
 				{!loading && recipes.length > 0 && (
-					<RecipeSearch recipes={recipes} onFilterChange={setFilteredRecipes} />
+					<RecipeSearch recipes={recipes} onFilterChange={setFilteredRecipes}  />
 				)}
 
 				{/* Recipes Grid */}
@@ -315,7 +316,7 @@ const CookbookPage = () => {
 				) : (
 					<div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
 						{filteredRecipes.map((recipe) => (
-							<RecipeCard key={recipe.id} recipe={recipe} />
+							<RecipeCard key={recipe.id} recipe={recipe}  />
 						))}
 					</div>
 				)}
@@ -325,17 +326,17 @@ const CookbookPage = () => {
 				<FoodScanner
 					onCapture={onCapture}
 					onClose={() => setShowScanner(false)}
-				/>
+				 />
 			)}
 
 			{showIngredientFinder && (
 				<IngredientFinder
 					recipes={recipes}
 					onClose={() => setShowIngredientFinder(false)}
-				/>
+				 />
 			)}
 
-			<Footer goBack={false} signIn={false} signOut={false} />
+			<Footer goBack={false} signIn={false} signOut={false}  />
 		</main>
 	)
 }

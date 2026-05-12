@@ -40,7 +40,6 @@ export default function BudgetStatementsComponent({
 	automatedItems,
 	onRefetch,
 	showFutureDates: showFutureDatesProp,
-	onFilterChange,
 }: BudgetStatementsComponentProps) {
 	const [selectedStatement, setSelectedStatement] = useState<Statement | null>(
 		null
@@ -149,7 +148,7 @@ export default function BudgetStatementsComponent({
 		})
 
 		return sorted
-	}, [filteredStatements, sortColumn, sortDirection])
+	}, [filteredStatements, sortColumn, sortDirection, isStatementFromAutomatedItem])
 
 	// Separate sorted statements back into past/present and future for divider
 	const sortedPastPresentStatements: Statement[] = []

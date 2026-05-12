@@ -91,17 +91,17 @@ const Home: React.FC = () => {
 				Default: 'An error occurred during authentication.',
 			}
 			setAuthError(errorMessages[error] || errorMessages.Default)
-			router.replace('/', undefined, {shallow: true})
+			void router.replace('/', undefined, {shallow: true})
 		}
 	}, [router.query.error, router])
 
 	const homeButtons = getHomeButtons(!!sessionData)
 
-	const handleButtonClick = async (button: ButtonItem, index: number) => {
+	const handleButtonClick = (button: ButtonItem, _index: number) => {
 		if (button.skipNavigation && button.label === 'Sign In') {
-			await signIn('discord')
+			void signIn('discord')
 		} else if (button.skipNavigation && button.label === 'Sign Out') {
-			await signOut()
+			void signOut()
 		}
 	}
 

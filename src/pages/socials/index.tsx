@@ -1,5 +1,4 @@
 import * as React from 'react'
-import Footer from '../../components/Footer'
 import AnimatedButtonList from '../../components/AnimatedButtonList'
 
 interface ButtonItem {

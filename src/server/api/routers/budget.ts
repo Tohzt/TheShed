@@ -24,12 +24,6 @@ async function syncAutomatedItemsToStatements(
 		updatedAt: Date
 	}>
 
-	// Helper function to parse YYYY-MM-DD string as local date (not UTC)
-	const parseDateLocal = (dateStr: string): Date => {
-		const [y, m, d] = dateStr.split('-').map(Number)
-		return new Date(y, m - 1, d)
-	}
-
 	// Process each automated item
 	for (const item of automatedItems) {
 		// Parse dates array from JSON

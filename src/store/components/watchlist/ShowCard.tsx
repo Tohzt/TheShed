@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { Show } from '../../../features/watchlist/types'
 
 interface ShowCardProps {
@@ -58,11 +59,14 @@ export const ShowCard = ({ show, onEdit, onDelete }: ShowCardProps) => {
 	return (
 		<div className='rounded-lg border border-rose-300 bg-card p-4 dark:border-rose-700'>
 			{show.posterUrl && (
-				<img
-					src={show.posterUrl}
-					alt={show.title}
-					className='mb-3 h-48 w-full rounded-md object-cover'
-				/>
+				<div className='relative mb-3 h-48 w-full'>
+					<Image
+						src={show.posterUrl}
+						alt={show.title}
+						fill
+						className='rounded-md object-cover'
+					/>
+				</div>
 			)}
 			<h3 className='mb-2 font-semibold text-foreground'>{show.title}</h3>
 
