@@ -5,7 +5,7 @@ import {
 	useMemo,
 	useEffect,
 } from 'react'
-import {Trash2, X, Plus, Minus} from 'lucide-react'
+import {X, Plus, Minus} from 'lucide-react'
 import {api} from '../../../utils/api'
 import {Button} from '../../../store/components/ui/button'
 import {MultiDatePicker} from './multi_date_picker'
@@ -78,7 +78,6 @@ const AutomatedItemsList = forwardRef<
 		'income' | 'expense'
 	>('income')
 	const activeTab = externalActiveTab ?? internalActiveTab
-	const setActiveTab = onActiveTabChange ?? setInternalActiveTab
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [newIncomeItem, setNewIncomeItem] = useState({
 		label: '',

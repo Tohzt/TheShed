@@ -30,7 +30,7 @@ export const FoodScanner: React.FC<FoodScannerProps> = ({ onCapture, onClose }) 
 			}
 		}
 
-		initCamera()
+		void initCamera()
 
 		return () => {
 			if (streamRef.current) {

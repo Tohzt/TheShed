@@ -41,8 +41,9 @@ const normalizeOptionalDate = (value: unknown): string | undefined => {
 }
 
 const normalizeStatus = (value: unknown): 'not-started' | 'watching' | 'caught-up' | 'completed' | 'dropped' => {
-	if (typeof value === 'string' && ['not-started', 'watching', 'caught-up', 'completed', 'dropped'].includes(value)) {
-		return value as any
+	const validStatuses = ['not-started', 'watching', 'caught-up', 'completed', 'dropped'] as const
+	if (typeof value === 'string' && validStatuses.includes(value as never)) {
+		return value as 'not-started' | 'watching' | 'caught-up' | 'completed' | 'dropped'
 	}
 	// Migrate old status values
 	if (value === 'on-hold') return 'caught-up'

@@ -541,7 +541,6 @@ const EMOJI_CATEGORIES = {
 }
 
 export default function EmojiPicker({
-	value,
 	onChange,
 	trigger,
 }: EmojiPickerProps) {

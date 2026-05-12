@@ -1,5 +1,6 @@
 import * as React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Footer from '../../components/Footer'
 import { cookbookRepository } from '../../features/cookbook/repository'
@@ -123,11 +124,11 @@ const RecipeDetailPage = () => {
 						<form className='flex flex-col gap-4' onSubmit={onSave}>
 							{imageUrl && (
 								<div className='relative'>
-									<img
+									<Image
 										src={imageUrl}
 										alt='Recipe'
 										className='max-h-64 rounded-md w-full object-cover'
-									/>
+									 />
 									<button
 										type='button'
 										onClick={() => setImageUrl('')}
@@ -144,35 +145,35 @@ const RecipeDetailPage = () => {
 								placeholder='Recipe title (required)'
 								className='rounded-md border border-border bg-background px-3 py-2 text-foreground font-semibold text-lg'
 								required
-							/>
+							 />
 
 							<input
 								value={sourceUrl}
 								onChange={(event) => setSourceUrl(event.target.value)}
 								placeholder='Source URL (optional)'
 								className='rounded-md border border-border bg-background px-3 py-2 text-foreground'
-							/>
+							 />
 
 							<textarea
 								value={note}
 								onChange={(event) => setNote(event.target.value)}
 								placeholder='Instructions & notes (optional)'
 								className='min-h-[120px] rounded-md border border-border bg-background px-3 py-2 text-foreground'
-							/>
+							 />
 
 							<TagInput
 								label='Tags'
 								placeholder='e.g., Breakfast, Quick, Vegetarian'
 								value={tags}
 								onChange={setTags}
-							/>
+							 />
 
 							<TagInput
 								label='Ingredients'
 								placeholder='e.g., Eggs, Cheese, Bread'
 								value={ingredients}
 								onChange={setIngredients}
-							/>
+							 />
 
 							<div className='flex flex-wrap gap-2 pt-2'>
 								<button
@@ -211,7 +212,7 @@ const RecipeDetailPage = () => {
 				)}
 			</div>
 
-			<Footer goBack={false} signIn={false} signOut={false} />
+			<Footer goBack={false} signIn={false} signOut={false}  />
 		</main>
 	)
 }

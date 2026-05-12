@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Image from 'next/image'
 import Footer from '../../components/Footer'
 import { watchListRepository } from '../../features/watchlist/repository'
 import type { Show, ShowStatus } from '../../features/watchlist/types'
@@ -304,7 +305,7 @@ const WatchListPage = () => {
 									/>
 								</div>
 								<p className='mt-2 text-xs text-muted-foreground'>
-									Track which season and episode you've completed
+									Track which season and episode you&apos;ve completed
 								</p>
 							</div>
 
@@ -353,11 +354,12 @@ const WatchListPage = () => {
 							/>
 
 							{posterUrl && (
-								<div className='relative'>
-									<img
+								<div className='relative h-48 w-48'>
+									<Image
 										src={posterUrl}
 										alt='Preview'
-										className='max-h-48 rounded-md'
+										fill
+										className='rounded-md object-cover'
 										onError={() => setPosterUrl('')}
 									/>
 									<button

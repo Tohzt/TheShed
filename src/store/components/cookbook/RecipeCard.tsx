@@ -1,5 +1,6 @@
 import * as React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Recipe } from '../../../features/cookbook/types'
 
 interface RecipeCardProps {
@@ -11,16 +12,16 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
 		<Link href={`/cookbook/${recipe.id}`}>
 			<div className='group relative overflow-hidden rounded-lg border-2 border-orange-600 bg-gradient-to-br from-orange-50 to-orange-100 shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg dark:from-orange-950 dark:to-orange-900'>
 				{/* Card Inner Border (Pokedex Style) */}
-				<div className='absolute inset-1 rounded-md border-2 border-orange-500/30 pointer-events-none' />
+				<div className='absolute inset-1 rounded-md border-2 border-orange-500/30 pointer-events-none'  />
 
 				{/* Image Section */}
 				{recipe.imageUrl ? (
 					<div className='relative h-40 overflow-hidden bg-gradient-to-b from-orange-200 to-orange-100 dark:from-orange-800 dark:to-orange-700 flex items-center justify-center'>
-						<img
+						<Image
 							src={recipe.imageUrl}
 							alt={recipe.title}
 							className='h-full w-full object-cover'
-						/>
+						 />
 					</div>
 				) : (
 					<div className='relative h-40 bg-gradient-to-b from-orange-200 to-orange-100 dark:from-orange-800 dark:to-orange-700 flex items-center justify-center'>
@@ -29,7 +30,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
 				)}
 
 				{/* Divider Line */}
-				<div className='h-1 bg-orange-600' />
+				<div className='h-1 bg-orange-600'  />
 
 				{/* Content Section */}
 				<div className='p-3 relative z-10'>

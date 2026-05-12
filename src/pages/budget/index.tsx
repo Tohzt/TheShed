@@ -200,12 +200,6 @@ export default function BudgetPage() {
 		return {totalAllocated, totalIncome, totalExpense, remaining, savingsRate}
 	}, [data.categories, filteredStatements])
 
-	// Format selected month/year for display
-	const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleString(
-		'default',
-		{month: 'long'}
-	)
-
 	// Generate month and year options
 	const months = Array.from({length: 12}, (_, i) => {
 		const date = new Date(selectedYear, i, 1)

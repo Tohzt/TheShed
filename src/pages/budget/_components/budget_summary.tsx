@@ -1,7 +1,7 @@
-import {useId, useState, useMemo, useRef, useEffect, useCallback} from 'react'
+import {useState, useMemo, useRef, useEffect, useCallback} from 'react'
 import {PieChart, Pie, Cell} from 'recharts'
 import {Plus, Minus} from 'lucide-react'
-import {api} from '../../../utils/api'
+import type {ChartConfig} from '../../../store/components/ui/chart'
 import BudgetPopup from './budget_popup'
 import AutomatedItemsList, {
 	type AutomatedItem,
@@ -10,7 +10,6 @@ import AutomatedItemsList, {
 import {Card, CardContent} from '../../../store/components/ui/card'
 import {Button} from '../../../store/components/ui/button'
 import {
-	ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
@@ -116,7 +115,7 @@ export default function BudgetSummary({
 	const isLongPressRef = useRef(false)
 
 	const handleChartTouchStart: React.TouchEventHandler<HTMLDivElement> = (
-		e
+		_e
 	) => {
 		isLongPressRef.current = false
 		if (longPressTimerRef.current) {
@@ -477,7 +476,7 @@ export default function BudgetSummary({
 
 					<div className='mt-6 flex gap-3'>
 						<Button
-							onClick={async () => {
+							onClick={() => {
 								// Track if we actually changed anything in this click
 								let didChange = false
 
@@ -490,7 +489,7 @@ export default function BudgetSummary({
 
 								// Save active edit if valid
 								if (hasActiveEdit && hasValidEdit) {
-									await automatedListRef.current?.saveEdits?.()
+									void automatedListRef.current?.saveEdits?.()
 									didChange = true
 								}
 

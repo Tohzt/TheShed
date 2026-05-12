@@ -92,8 +92,8 @@ export function MultiDatePicker({
 	// Format display text for button (when closed)
 	const displayText = React.useMemo(() => {
 		if (value.length === 0) return placeholder
-		if (value.length === 1) {
-			return format(parseDateLocal(value[0]!), 'PPP')
+		if (value.length === 1 && value[0]) {
+			return format(parseDateLocal(value[0]), 'PPP')
 		}
 		return `${value.length} dates selected`
 	}, [value, placeholder])

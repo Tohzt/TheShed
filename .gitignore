@@ -51,3 +51,7 @@ scripts/mqtt/mqtt-subscriber.js
 _Documents/*
 CLAUDE.md
 agents/
+TEMP/
+.vscode
+Logs/
+
